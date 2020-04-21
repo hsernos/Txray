@@ -1,5 +1,5 @@
 # v3ray
-v2rayT是一款v2ray 终端版客户端，使用go编写.
+v3ray是一款v2ray 终端版客户端，使用go编写.
 项目地址：https://github.com/hsernos/v3ray
 
 ## 注意
