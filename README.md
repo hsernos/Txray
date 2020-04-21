@@ -46,7 +46,8 @@ v2rayT是一款v2ray 终端版客户端，使用go编写.
 
 # 特色
 
-多平台支持, 支持 Windows, macOS, linux.
+1. 多平台支持, 支持 Windows, macOS, linux.
+2. Tab键命令补齐
 
 #  编译/交叉编译 说明
 
