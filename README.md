@@ -68,8 +68,7 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
 
    `GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build v3ray.go`
    
-   
-Windows 例子: 编译 Linux 下的 32 位程序
+   Windows 例子: 编译 Linux 下的 32 位程序
    
    `set GOOS=linux`
    `set GOARCH=386`
