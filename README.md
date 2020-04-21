@@ -1,9 +1,13 @@
 # v3ray
-v2rayT是一款v2ray 终端版客户端，使用go编写，基于v2ray项目
+v3ray是一款v2ray终端版客户端，使用go编写.
 项目地址：https://github.com/hsernos/v3ray
 
 ## 注意
 此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
+
+## 目录
+
+[TOC]
 
 # 特色
 
@@ -305,8 +309,6 @@ add Flags
 >>> node export 0-19
 ```
 
-
-
 ## 查看DNS帮助文档
 
 ```
@@ -431,3 +433,15 @@ Commands:
 ```
 >>> service stop
 ```
+
+
+
+# 已知问题
+
+- mac系统下节点不能使用ping
+
+# 交流反馈
+
+提交Issue: [Issues](https://github.com/hsernos/v3ray/issues)
+
+邮箱: hsernos@163.com
