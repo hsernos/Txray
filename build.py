@@ -10,7 +10,7 @@ INFO = {
     'windows': ['386', 'amd64']
 }
 
-Version = 'v1.0'
+Version = 'v1.0.0'
 Name = 'v3ray'
 
 
@@ -32,13 +32,13 @@ def build(goos, goarch, path, cgo=0):
         cmd2 = 'SET GOOS={}'.format(goos)
         cmd3 = 'SET GOARCH={}'.format(goarch)
         e = '.exe' if goos == 'windows' else ''
-        cmd4 = 'go build -o {} {}'.format("-".join([Name, Version, goos, goarch]) + e, path)
+        cmd4 = 'go build -o {} {}'.format("build/"+"-".join([Name, Version, goos, goarch]) + e, path)
         cmd = '\n'.join([cmd1, cmd2, cmd3, cmd4])
         os.system(cmd)
     else:
         e = '.exe' if goos == 'windows' else ''
         cmd = 'CGO_ENABLED={} GOOS={} GOARCH={} go build -o {} {} '.format(cgo, goos, goarch,
-                                                                           "-".join([Name, Version, goos, goarch]) + e,
+                                                                           "build/"+"-".join([Name, Version, goos, goarch]) + e,
                                                                            path)
         os.system(cmd)
 
