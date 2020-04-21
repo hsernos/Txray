@@ -93,7 +93,7 @@ var serviceHelp = `
 service {commands} ...
 
 Commands:
-    start  [节点索引]                   启动v2ray-core服务
+    start  [节点索引]                   启动或重启v2ray-core服务
     stop                                停止v2ray-core服务
 `
 
