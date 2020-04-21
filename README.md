@@ -453,7 +453,7 @@ Commands:
 
 # 已知问题
 
-- mac系统下节点不能使用ping
+- Mac/Linux系统下节点不能使用ping
 
 # 交流反馈
 
