@@ -1,13 +1,19 @@
 # v3ray
-v3ray是一款v2ray终端版客户端，使用go编写.
+v2rayT是一款v2ray 终端版客户端，使用go编写，基于v2ray项目
 项目地址：https://github.com/hsernos/v3ray
 
 ## 注意
 此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
 
+<!-- toc -->
+
 ## 目录
 
-[TOC]
+- [特色](#特色)
+- [编译/交叉编译 说明](#编译/交叉编译-说明)
+- [下载/运行 说明](#下载运行-说明)
+
+<!-- tocstop -->
 
 # 特色
 
@@ -22,28 +28,24 @@ v3ray是一款v2ray终端版客户端，使用go编写.
    Windows下,运行 `set GOPROXY=https://goproxy.cn,direct`
 
 3. 编译常用平台
-
    运行 `go build v3ray.go`, 可编译当前平台的版本
    运行 `python3 build.py`, 可编译常用平台的版本
 
 4. 编译其他平台
-
    运行 `go tool dist list` 查看所有支持的 GOOS/GOARCH
 
-   > Linux/Darwin 例子: 编译 Windows 下的 64 位程序
+   Linux/Darwin 例子: 编译 Windows 下的 64 位程序
 
-   ```
-   GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build v3ray.go
-   ```
+   `GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build v3ray.go`
+   
+   
+Windows 例子: 编译 Linux 下的 32 位程序
+   
+   `set GOOS=linux`
+   `set GOARCH=386`
+   `set CGO_ENABLED=0`
+   `go build v3ray.go`
 
-   > Windows 例子: 编译 Linux 下的 32 位程序
-
-   ```
-   set GOOS=linux
-   set GOARCH=386
-   set CGO_ENABLED=0
-   go build v3ray.go
-   ```
 
 # 下载/运行 说明
 
@@ -358,14 +360,14 @@ Commands:
     show-proxy-domain                  查看代理domain规则
     show-block-ip                      查看禁止ip规则
     show-block-domain                  查看禁止domain规则
-
+    
     add-direct-ip       {路由规则}      添加一条直连ip规则
     add-direct-domain   {路由规则}      添加一条直连domain规则
     add-proxy-ip        {路由规则}      添加一条代理ip规则
     add-proxy-domain    {路由规则}      添加一条代理domain规则
     add-block-ip        {路由规则}      添加一条禁止ip规则
     add-block-domain    {路由规则}      添加一条禁止domain规则
-
+    
     del-direct-ip       {索引范围}      删除索引范围的直连ip路由规则
     del-direct-domain   {索引范围}      删除索引范围的直连domain路由规则
     del-proxy-ip        {索引范围}      删除索引范围的代理ip路由规则
@@ -391,9 +393,9 @@ ip路由规则
 
 - GeoIP: 形如
 
-  ```
+```
   "geoip:cn"
-  ```
+```
 
   ，必须以
 
@@ -411,7 +413,7 @@ ip路由规则
 
 ## 查看服务帮助文档
 
-```
+  ```
 >>> service
 
 service {commands} ...
@@ -419,7 +421,7 @@ service {commands} ...
 Commands:
     start  [节点索引]                   启动或重启v2ray-core服务
     stop                               停止v2ray-core服务
-```
+  ```
 
 ### 启动或重启v2ray-core服务
 
@@ -445,3 +447,7 @@ Commands:
 提交Issue: [Issues](https://github.com/hsernos/v3ray/issues)
 
 邮箱: hsernos@163.com
+
+```
+
+```
