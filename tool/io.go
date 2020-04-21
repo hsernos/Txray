@@ -8,11 +8,9 @@ import (
 	"strings"
 )
 
-
-
 // WriteJSON 将对象写入json文件
 func WriteJSON(v interface{}, path string) {
-	
+
 	file, e := os.Create(path)
 	if e != nil {
 		log.Fatal("文件创建失败", e.Error())
@@ -28,7 +26,7 @@ func WriteJSON(v interface{}, path string) {
 
 // ReadJSON 读取json文件
 func ReadJSON(path string, v interface{}) {
-	
+
 	file, e := os.Open(path)
 	if e != nil {
 		log.Fatal("文件打开失败", e.Error())
@@ -60,9 +58,18 @@ func ReadFile(path string) []string {
 
 // 检查某个程序是否在PATH环境变量下
 func CheckPATH(exec string) bool {
-	for _, x := range strings.Split(Env("PATH"),":") {
-		if PathExists(Join(x,exec)) || PathExists(Join(x,exec+".exe")) {
-			return true
+	path := Env("PATH")
+	if strings.IndexAny(path, ";") >= 0 {
+		for _, x := range strings.Split(path, ";") {
+			if PathExists(Join(x, exec) + ".exe") {
+				return true
+			}
+		}
+	} else {
+		for _, x := range strings.Split(path, ":") {
+			if PathExists(Join(x, exec)) {
+				return true
+			}
 		}
 	}
 	return false
