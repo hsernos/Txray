@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	version = "v1.0.0"
+	version = "v1.0.1"
 	name    = "v3ray"
 )
 
