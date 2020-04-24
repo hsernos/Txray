@@ -468,7 +468,7 @@ Commands:
 
 # 已知问题
 
-- Mac/Linux系统下节点不能使用ping
+- 少数vmss链接导入失败
 
 # 交流反馈
 
