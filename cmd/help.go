@@ -22,10 +22,11 @@ node {commands} [flags] ...
 
 Commands:
     add     [flags]                     添加节点
-    show    [索引范围]                  查看节点信息, 默认索引范围为all
+    show    [索引范围 | tcping]         查看节点信息, 默认索引范围为all, tcping可以按延迟排序查看
     del     {索引范围}                  根据索引参数删除节点
     export  {索引范围}                  导出为vmess链接
-    ping    [索引范围]                  ping指定索引节点, 默认索引范围为all
+    tcping  [索引范围]                  tcping指定索引节点, 默认索引范围为all
+    find    {关键词}                    查找节点，有中文关键词需要用单引号或双引号括起来
 
 add Flags
     -v, --vmess {vmess链接}             导入vmess://数据

@@ -1,29 +1,62 @@
 package config
 
 import (
-	ping "github.com/vearne/go-ping"
-	"time"
+	"fmt"
+	"sort"
+	"strconv"
+	"strings"
 	log "v3ray/logger"
-	"v3ray/tool"
+	. "v3ray/tool"
 )
 
 // GetNodes 获取node数据
 func (c *Config) GetNodes(key string) [][]string {
 	l := len(c.Nodes)
-	indexs := tool.IndexDeal(key, l)
+	var indexs []int
+	if key == "tcping" {
+		list := make(Sorts, 0)
+		for i, node := range c.Nodes {
+			if node.TestResult != "" && node.TestResult != "0ms" {
+				f, _ := strconv.ParseFloat(node.TestResult[:len(node.TestResult)-2], 32)
+				list = append(list, Sort{i, float32(f)})
+			}
+		}
+		sort.Sort(list)
+		for _, x := range list {
+			indexs = append(indexs, x.Index)
+		}
+	} else {
+		indexs = IndexDeal(key, l)
+	}
 	result := make([][]string, 0, len(indexs))
 	for _, x := range indexs {
 		node := c.Nodes[x]
 		result = append(result, []string{
-			tool.IntToStr(x),
+			IntToStr(x),
 			node.Remarks,
 			node.Address,
-			tool.UintToStr(node.Port),
+			UintToStr(node.Port),
 			node.Security,
-			node.Network,
-			node.StreamSecurity,
 			node.TestResult,
 		})
+	}
+	return result
+}
+
+// FindNodes 查找node数据
+func (c *Config) FindNodes(key string) [][]string {
+	result := make([][]string, 0)
+	for i, node := range c.Nodes {
+		if strings.Index(node.Remarks, key) >= 0 {
+			result = append(result, []string{
+				IntToStr(i),
+				node.Remarks,
+				node.Address,
+				UintToStr(node.Port),
+				node.Security,
+				node.TestResult,
+			})
+		}
 	}
 	return result
 }
@@ -36,7 +69,7 @@ func (c *Config) GetNodeIndex() uint {
 // ExportNodes 导出node数据
 func (c *Config) ExportNodes(key string) []string {
 	l := len(c.Nodes)
-	indexs := tool.IndexDeal(key, l)
+	indexs := IndexDeal(key, l)
 	result := make([]string, 0, len(indexs))
 	for _, x := range indexs {
 		node := c.Nodes[x]
@@ -48,36 +81,30 @@ func (c *Config) ExportNodes(key string) []string {
 // PingNodes ping node
 func (c *Config) PingNodes(key string) {
 	l := len(c.Nodes)
-	indexs := tool.IndexDeal(key, l)
+	indexs := IndexDeal(key, l)
 	if indexs == nil || len(indexs) == 0 {
 		return
 	}
-	for _, node := range c.Nodes{
+	for _, node := range c.Nodes {
 		node.TestResult = ""
 	}
-	ipSlice := []string{}
-	for _, x := range indexs {
+	chs := make([]chan float32, len(indexs))
+	for i, x := range indexs {
 		node := c.Nodes[x]
-		ipSlice = append(ipSlice, node.Address)
-	}
-	bp, err := ping.NewBatchPinger(ipSlice, 3, time.Second*1, time.Second*6)
-    if err != nil {
-        log.Error(err)
-	}
-	bp.OnFinish = func(stSlice []*ping.Statistics) {
-        for i, st := range stSlice{
-			node := c.Nodes[indexs[i]]
-			node.TestResult = st.AvgRtt.String()
-        }
+		chs[i] = make(chan float32)
+		go Go_Tcping(node.Address, int(node.Port), 4, chs[i])
 
-    }
-	bp.Run()
+	}
+	for i, ch := range chs {
+		node := c.Nodes[indexs[i]]
+		node.TestResult = fmt.Sprintf("%.4vms", <-ch)
+	}
 }
 
 // AddNodeByFile 根据vmess链接文件批量添加节点
 func (c *Config) AddNodeByFile(path string) {
-	if tool.PathExists(path) {
-		links := tool.ReadFile(path)
+	if PathExists(path) {
+		links := ReadFile(path)
 		c.AddNodeByVmessLinks(links)
 	} else {
 		log.Warn("该文件不存在")
@@ -87,7 +114,7 @@ func (c *Config) AddNodeByFile(path string) {
 // AddNodeByVmessLinks 根据vmess链接添加节点
 func (c *Config) AddNodeByVmessLinks(links []string) {
 	defer c.SaveJSON()
-	objs := tool.VmessListToObj(links)
+	objs := VmessListToObj(links)
 	for _, obj := range objs {
 		c.Nodes = append(c.Nodes, vmessObjToNode(obj, ""))
 	}
@@ -96,11 +123,11 @@ func (c *Config) AddNodeByVmessLinks(links []string) {
 
 // AddNode 添加节点
 func (c *Config) AddNode(remarks, address, port, id, aid, security, network, types, host, path, tls string) {
-	if !tool.IsUint(port) {
+	if !IsUint(port) {
 		log.Warn("端口必须为正整数")
 		return
 	}
-	if !tool.IsInt(aid) {
+	if !IsInt(aid) {
 		log.Warn("aid必须为整数")
 		return
 	}
@@ -108,9 +135,9 @@ func (c *Config) AddNode(remarks, address, port, id, aid, security, network, typ
 	n := node{}
 	n.Remarks = remarks
 	n.Address = address
-	n.Port = tool.StrToUint(port)
+	n.Port = StrToUint(port)
 	n.ID = id
-	n.AlterID = tool.StrToInt(aid)
+	n.AlterID = StrToInt(aid)
 	n.Security = security
 	n.Network = network
 	n.HeaderType = types
@@ -125,7 +152,7 @@ func (c *Config) AddNode(remarks, address, port, id, aid, security, network, typ
 // DelNodes 删除节点信息
 func (c *Config) DelNodes(key string) {
 	l := len(c.Nodes)
-	indexs := tool.IndexDeal(key, l)
+	indexs := IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}

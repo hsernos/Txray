@@ -223,20 +223,20 @@ func InitShell(shell *ishell.Shell) {
 
 	node.AddCmd(
 		&ishell.Cmd{
-			Name: "ping",
+			Name: "tcping",
 			Help: "查看节点",
 			Func: func(c *ishell.Context) {
 				r := FlagsParse(c.Args, nil)
 				d, ok := r["data"]
-				title := []string{"索引", "别名", "地址", "端口", "加密方式", "传输协议", "安全传输", "测试结果"}
+				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
 				if ok {
 					configObj.PingNodes(d)
-					tool.GetTable(title, configObj.GetNodes(d)...)
-					println("当前选定节点索引：",configObj.GetNodeIndex())
+					tool.GetTable(title, configObj.GetNodes("tcping")...)
+					println("当前选定节点索引：", configObj.GetNodeIndex())
 				} else {
 					configObj.PingNodes("all")
 					tool.GetTable(title, configObj.GetNodes("all")...)
-					println("当前选定节点索引：",configObj.GetNodeIndex())
+					println("当前选定节点索引：", configObj.GetNodeIndex())
 				}
 			},
 		},
@@ -249,13 +249,29 @@ func InitShell(shell *ishell.Shell) {
 			Func: func(c *ishell.Context) {
 				r := FlagsParse(c.Args, nil)
 				d, ok := r["data"]
-				title := []string{"索引", "别名", "地址", "端口", "加密方式", "传输协议", "安全传输", "测试结果"}
+				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
 				if ok {
 					tool.GetTable(title, configObj.GetNodes(d)...)
-					println("当前选定节点索引：",configObj.GetNodeIndex())
+					println("当前选定节点索引：", configObj.GetNodeIndex())
 				} else {
 					tool.GetTable(title, configObj.GetNodes("all")...)
-					println("当前选定节点索引：",configObj.GetNodeIndex())
+					println("当前选定节点索引：", configObj.GetNodeIndex())
+				}
+			},
+		},
+	)
+
+	node.AddCmd(
+		&ishell.Cmd{
+			Name: "find",
+			Help: "查找节点",
+			Func: func(c *ishell.Context) {
+				r := FlagsParse(c.Args, nil)
+				d, ok := r["data"]
+				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
+				if ok {
+					tool.GetTable(title, configObj.FindNodes(d)...)
+					println("当前选定节点索引：", configObj.GetNodeIndex())
 				}
 			},
 		},
@@ -366,7 +382,7 @@ func InitShell(shell *ishell.Shell) {
 			} else {
 				configObj.AddNodeBySub(1000000)
 			}
-			
+
 		},
 	},
 	)
@@ -571,7 +587,6 @@ func InitShell(shell *ishell.Shell) {
 	},
 	)
 
-
 	route.AddCmd(&ishell.Cmd{
 		Name: "del-direct-ip",
 		Help: "删除",
@@ -631,7 +646,6 @@ func InitShell(shell *ishell.Shell) {
 	},
 	)
 
-
 	service := &ishell.Cmd{
 		Name: "service",
 		Help: "v2ray服务管理, 使用service查看帮助信息",
@@ -677,5 +691,5 @@ func InitShell(shell *ishell.Shell) {
 		Func: func(c *ishell.Context) {
 			c.Println(help)
 		},
-	},)
+	})
 }
