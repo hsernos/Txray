@@ -447,7 +447,7 @@ Commands:
 service {commands} ...
 
 Commands:
-    start  [节点索引]                   启动或重启v2ray-core服务
+    start  [节点索引]                   启动或重启v2ray-core服务, 可以自动选择索引范围内延迟最小的那个
     stop                               停止v2ray-core服务
   ```
 
@@ -456,6 +456,12 @@ Commands:
 ```
 # 启动或重启索引为3的节点
 >>> service start 3
+
+# 自动选择所有节点中延迟最小的那个节点
+>>> service start all
+
+# 自动选择0-10中延迟最小的那个节点
+>>> service start 0-10
 ```
 
 ### 停止v2ray-core服务

@@ -94,7 +94,7 @@ var serviceHelp = `
 service {commands} ...
 
 Commands:
-    start  [节点索引]                   启动或重启v2ray-core服务
+    start  [索引范围]                   启动或重启v2ray-core服务, 可以自动选择索引范围内延迟最小的那个
     stop                                停止v2ray-core服务
 `
 

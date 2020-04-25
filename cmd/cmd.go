@@ -661,6 +661,9 @@ func InitShell(shell *ishell.Shell) {
 			configObj.Stop()
 			if ok && tool.IsInt(d) {
 				configObj.Start(tool.StrToInt(d))
+			} else if ok && len(tool.IndexDeal(d, len(configObj.Nodes))) >= 1 {
+				configObj.PingNodes(d)
+				configObj.Start(-1)
 			} else {
 				configObj.Start(-1)
 			}
