@@ -21,7 +21,7 @@ func (c *Config) GetNodes(key string) [][]string {
 				list = append(list, Sort{i, float32(f)})
 			}
 		}
-		sort.Sort(list)
+		sort.Sort(sort.Reverse(list))
 		for _, x := range list {
 			indexs = append(indexs, x.Index)
 		}
