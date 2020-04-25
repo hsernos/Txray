@@ -10,7 +10,7 @@ INFO = {
     'windows': ['386', 'amd64']
 }
 
-Version = 'v1.1.0'
+Version = 'v1.1.1'
 Name = 'v3ray'
 
 
