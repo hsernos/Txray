@@ -231,13 +231,11 @@ func InitShell(shell *ishell.Shell) {
 				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
 				if ok {
 					configObj.PingNodes(d)
-					tool.GetTable(title, configObj.GetNodes("tcping")...)
-					println("当前选定节点索引：", configObj.GetNodeIndex())
 				} else {
 					configObj.PingNodes("all")
-					tool.GetTable(title, configObj.GetNodes("all")...)
-					println("当前选定节点索引：", configObj.GetNodeIndex())
 				}
+				tool.GetTable(title, configObj.GetNodes("tcping")...)
+				println("当前选定节点索引：", configObj.GetNodeIndex())
 			},
 		},
 	)
