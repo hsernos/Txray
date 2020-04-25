@@ -95,9 +95,19 @@ func (c *Config) PingNodes(key string) {
 		go Go_Tcping(node.Address, int(node.Port), 4, chs[i])
 
 	}
+	var min float32 = 30000
+	var index int = -1
 	for i, ch := range chs {
 		node := c.Nodes[indexs[i]]
-		node.TestResult = fmt.Sprintf("%.4vms", <-ch)
+		d := <-ch
+		node.TestResult = fmt.Sprintf("%.4vms", d)
+		if d < min && d != 0 {
+			min = d
+			index = indexs[i]
+		}
+	}
+	if index != -1 {
+		c.Index = uint(index)
 	}
 }
 
