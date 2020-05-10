@@ -9,14 +9,16 @@ import (
 )
 
 const (
-	version = "v1.1.2"
+	version = "v1.1.3"
 	name    = "v3ray"
 )
 
 func init() {
 	dir := os.Getenv("V3RAY_HOME")
 	if !tool.PathExists(tool.Join(dir, "v2ray", "v2ray")) {
-		log.Error(tool.Join(dir, "v2ray") + "目录下不存在v2ray可执行文件")
+		log.Error(tool.Join(dir, "v2ray") + " 目录下不存在v2ray可执行文件")
+		log.Error("请在 https://github.com/v2ray/v2ray-core/releases 下载对应版本")
+		log.Error("并将解压后的目录下的所有文件移动到 ", tool.Join(dir, "v2ray"), " 文件夹下")
 		os.Exit(1)
 	}
 }
