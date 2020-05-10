@@ -3,22 +3,26 @@ package main
 import (
 	"github.com/abiosoft/ishell"
 	"os"
+	"runtime"
 	"v3ray/cmd"
 	log "v3ray/logger"
 	"v3ray/tool"
 )
 
 const (
-	version = "v1.1.3"
+	version = "v1.1.4"
 	name    = "v3ray"
 )
 
 func init() {
 	dir := os.Getenv("V3RAY_HOME")
-	if !tool.PathExists(tool.Join(dir, "v2ray", "v2ray")) {
+	if !tool.PathExists(tool.Join(dir, "v2ray", "v2ray")) && !tool.PathExists(tool.Join(dir, "v2ray", "v2ray.exe")) {
 		log.Error(tool.Join(dir, "v2ray") + " 目录下不存在v2ray可执行文件")
 		log.Error("请在 https://github.com/v2ray/v2ray-core/releases 下载对应版本")
 		log.Error("并将解压后的目录下的所有文件移动到 ", tool.Join(dir, "v2ray"), " 文件夹下")
+		if runtime.GOOS == "windows" {
+			log.Error("如果", dir, "不是v3ray.exe所在的目录，请将v3ray.exe所在的目录添加到环境变量V3RAY_HOME中")
+		}
 		os.Exit(1)
 	}
 }

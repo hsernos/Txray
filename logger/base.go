@@ -43,7 +43,9 @@ func CallRecover() {
 
 func init() {
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	_ = os.Setenv("V3RAY_HOME", dir)
+	if os.Getenv("V3RAY_HOME") == "" {
+		_ = os.Setenv("V3RAY_HOME", dir)
+	}
 	fileName := Join(os.Getenv("V3RAY_HOME"), "v3ray.log")
 	level := getLoggerLevel("debug")
 	syncWriter := zapcore.AddSync(&lumberjack.Logger{
