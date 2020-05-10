@@ -41,7 +41,7 @@ func (c *Config) Start(i int) {
 			log.Error(x)
 		}
 	} else {
-		log.Info("开启v2ray服务成功, 监听socks5/http端口：", c.Settings.Port, "/", c.Settings.Port, "，选定节点索引：", c.Index)
+		log.Info("开启v2ray服务成功, 监听socks5/http端口：", c.Settings.Port, "/", c.Settings.Http, "，选定节点索引：", c.Index)
 	}
 }
 
