@@ -5,6 +5,7 @@ import (
 	"strings"
 	log "v3ray/logger"
 	"v3ray/tool"
+	"v3ray/vmess"
 )
 
 // AddSub 添加一条订阅记录
@@ -23,8 +24,14 @@ func (c *Config) AddNodeBySub(port uint) {
 	ids := ""
 	for _, x := range c.Subs {
 		if x.Using {
-			vmessList := tool.SubToVmessList(x.URL, port)
-			Objs := tool.VmessListToObj(vmessList)
+			data := ""
+			if port > 65535 {
+				data = tool.Get(x.URL)
+			} else {
+				data = tool.GetByProxy(x.URL, port)
+			}
+			vmessList := vmess.Sub2links(data)
+			Objs := vmess.Links2vmessObjs(vmessList)
 			for _, obj := range Objs {
 				newNodes = append(newNodes, vmessObjToNode(obj, x.ID))
 			}

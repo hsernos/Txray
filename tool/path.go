@@ -3,7 +3,7 @@ package tool
 import (
 	"os"
 	"os/user"
-	"path"
+	"strings"
 )
 
 // 获取用户家目录
@@ -17,24 +17,25 @@ func Home() (string, error) {
 }
 
 // 拼接目录
-func Join(elem ...string) string  {
-	return path.Join(elem...)
+func Join(elem ...string) string {
+	return strings.Join(elem, string(os.PathSeparator))
 }
 
-// 获取环境变量
-func Env(key string) string  {
-	return os.Getenv(key)
-}
-
-func ConfigPath() string  {
-	p := Env("V3RAY")
-	if p != "" {
-		return p
-	} else {
-		p,_ = Home()
-		if p != "" {
-			return Join(p,"v3ray")
+// 检查某个程序是否在PATH环境变量下
+func CheckPATH(exec string) bool {
+	path := os.Getenv("PATH")
+	if strings.IndexAny(path, ";") >= 0 {
+		for _, x := range strings.Split(path, ";") {
+			if PathExists(Join(x, exec) + ".exe") {
+				return true
+			}
 		}
-		return ""
+	} else {
+		for _, x := range strings.Split(path, ":") {
+			if PathExists(Join(x, exec)) {
+				return true
+			}
+		}
 	}
+	return false
 }

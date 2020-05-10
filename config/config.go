@@ -1,14 +1,17 @@
 package config
 
 import (
+	"os"
 	"os/exec"
 	"v3ray/tool"
+	"v3ray/vmess"
 )
 
 type (
 	// setting 基本设置
 	setting struct {
 		Port                  uint   `json:"port"`
+		Http                  uint   `json:"http"`
 		UDP                   bool   `json:"udp"`
 		Sniffing              bool   `json:"sniffing"`
 		Mux                   bool   `json:"mux"`
@@ -41,10 +44,10 @@ type (
 		RequestHost    string `json:"requestHost"`
 		Path           string `json:"path"`
 		StreamSecurity string `json:"streamSecurity"`
-		AllowInsecure  string `json:"allowInsecure"`
-		ConfigType     int    `json:"configType"`
-		TestResult     string `json:"testResult"`
-		Subid          string `json:"subid"`
+		//AllowInsecure  string `json:"allowInsecure"`
+		//ConfigType     int    `json:"configType"`
+		TestResult string `json:"testResult"`
+		Subid      string `json:"subid"`
 	}
 
 	// sub 订阅
@@ -60,15 +63,9 @@ type (
 		IP     []string `json:"ip"`
 	}
 
-	path struct {
-		Etc   string `json:"etc"`
-		V2ray string `json:"v2ray"`
-	}
-
 	// Config 配置文件
 	Config struct {
 		exeCmd     *exec.Cmd
-		Path       path     `json:"path"`
 		Settings   setting  `json:"setting"`
 		KcpSetting kcp      `json:"kcpSetting"`
 		Index      uint     `json:"index"`
@@ -81,15 +78,14 @@ type (
 	}
 )
 
-
-
 func (c *Config) init() {
-	configPath := tool.Join(c.getConfigPath() , "v3ray.json")
+	configPath := tool.Join(c.getConfigPath(), "v3ray.json")
 	ok := tool.PathExists(configPath)
 	if ok {
 		tool.ReadJSON(configPath, c)
 	} else {
 		c.Settings.Port = 2333
+		c.Settings.Http = 2334
 		c.Settings.UDP = true
 		c.Settings.Sniffing = true
 		c.Settings.Mux = true
@@ -112,11 +108,8 @@ func (c *Config) init() {
 }
 
 func (c *Config) getConfigPath() string {
-	return tool.ConfigPath()
+	return os.Getenv("V3RAY_HOME")
 }
-
-
-
 
 // NewConfig 得到实例
 func NewConfig() Config {
@@ -127,12 +120,12 @@ func NewConfig() Config {
 
 // SaveJSON 将数据保存到json文件
 func (c *Config) SaveJSON() {
-	file := tool.Join(c.getConfigPath() , "v3ray.json")
+	file := tool.Join(c.getConfigPath(), "v3ray.json")
 	tool.WriteJSON(*c, file)
 }
 
-func nodeToVmessobj(n *node) *tool.Vmess {
-	v := tool.Vmess{}
+func nodeToVmessobj(n *node) *vmess.Vmess {
+	v := vmess.Vmess{}
 	v.V = n.ConfigVersion
 	v.Type = n.HeaderType
 	v.ID = n.ID
@@ -147,7 +140,7 @@ func nodeToVmessobj(n *node) *tool.Vmess {
 	return &v
 }
 
-func vmessObjToNode(vmessObj *tool.Vmess, subid string) *node {
+func vmessObjToNode(vmessObj *vmess.Vmess, subid string) *node {
 	n := node{}
 	n.ConfigVersion = vmessObj.V
 	n.HeaderType = vmessObj.Type

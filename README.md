@@ -12,9 +12,10 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
 - [特色](#特色)
 - [编译/交叉编译 说明](#编译交叉编译-说明)
 - [下载/运行 说明](#下载运行-说明)
-  * [注意!!!](#注意---) 
 - [命令列表及说明](#命令列表及说明)
+  
   * [查看基本设置帮助文档](#查看基本设置帮助文档)
+    
     + [查看基本设置](#查看基本设置)
     + [修改基本设置](#修改基本设置)
   * [查看订阅帮助文档](#查看订阅帮助文档)
@@ -37,9 +38,8 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
   * [查看路由帮助文档](#查看路由帮助文档)
     + [domain路由规则](#domain路由规则)
     + [ip路由规则](#ip路由规则)
-  * [查看服务帮助文档](#查看服务帮助文档)
-    + [启动或重启v2ray-core服务](#启动或重启v2ray-core服务)
-    + [停止v2ray-core服务](#停止v2ray-core服务)
+  * [启动或重启v2ray-core服务](#启动或重启v2ray-core服务)
+  * [停止v2ray-core服务](#停止v2ray-core服务)
 - [已知问题](#已知问题)
 - [交流反馈](#交流反馈)
 
@@ -81,14 +81,6 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
 
 Go语言程序, 可直接在[发布页](https://github.com/hsernos/v3ray/releases)下载使用
 
-## 注意！！！
-
-运行前需要下载[v2ray-core](https://github.com/v2ray/v2ray-core/releases), 下载解压后将`v2ray`程序所在的目录添加到`PATH`环境变量中
-
-`v3ray`生成的配置文件以及日志优先放在`V3RAY`环境变量指向的文件夹中
-
-其次放在当前用户家目录下的`v3ray文件夹`下
-
 
 
 # 命令列表及说明
@@ -109,7 +101,8 @@ Commands:
     alter [flags]                      修改基础设置
     
 alter Flags
-    -p, --port       {port}            设置监听端口
+    -p, --port       {port}            设置socks5端口
+    -h, --http       {port}            设置http端口
     -u, --udp        {true|false}      是否启用udp
     -s, --sniffing   {true|false}      是否启用流量监听
     -l, --lanconn    {true|false}      是否启用局域网连接
@@ -132,8 +125,11 @@ alter Flags
 ### 修改基本设置
 
 ```
-# 修改监听端口为3333
+# 修改socks5监听端口为3333
 >>> setting alter -p 3333
+
+# 修改http监听端口为3334
+>>> setting alter -h 3334
 
 # 修改不绕过局域网和大陆
 >>> setting alter -b false
@@ -220,7 +216,7 @@ update-node Flags
 +------+-------+---------------------+----------+
 
 # 查看索引为3以及后面的的订阅
->>> sub show 3-1000
+>>> sub show 3-
 +------+-------+---------------------+----------+
 | 索引  | 别名  |         URL         |  是否启用  |
 +------+-------+---------------------+----------+
@@ -437,37 +433,27 @@ Commands:
 - 特殊值：`geoip:private` (V2Ray 3.5+)，包含所有私有地址，如`127.0.0.1`。
 - 从文件中加载 IP: 形如`ext:file:tag`，必须以`ext:`（小写）开头，后面跟文件名和标签，文件存放在[资源目录](https://www.v2ray.com/chapter_02/env.html#asset-location)中，文件格式与`geoip.dat`相同标签必须在文件中存在。
 
+### 
 
-
-## 查看服务帮助文档
-
-  ```
->>> service
-
-service {commands} ...
-
-Commands:
-    start  [节点索引]                   启动或重启v2ray-core服务, 可以自动选择索引范围内延迟最小的那个
-    stop                               停止v2ray-core服务
-  ```
-
-### 启动或重启v2ray-core服务
+## 启动或重启v2ray-core服务
 
 ```
 # 启动或重启索引为3的节点
->>> service start 3
+>>> run 3
 
 # 自动选择所有节点中延迟最小的那个节点
->>> service start all
+>>> run all
 
 # 自动选择0-10中延迟最小的那个节点
->>> service start 0-10
+>>> run 0-10
 ```
 
-### 停止v2ray-core服务
+
+
+## 停止v2ray-core服务
 
 ```
->>> service stop
+>>>stop
 ```
 
 

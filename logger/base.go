@@ -5,8 +5,9 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
-	"v3ray/tool"
 )
 
 // error logger
@@ -29,8 +30,21 @@ func getLoggerLevel(lvl string) zapcore.Level {
 	return zapcore.InfoLevel
 }
 
+// 拼接目录
+func Join(elem ...string) string {
+	return strings.Join(elem, string(os.PathSeparator))
+}
+
+func CallRecover() {
+	if err := recover(); err != nil {
+		Error(err)
+	}
+}
+
 func init() {
-	fileName := tool.Join(tool.ConfigPath(),"v3ray.log")
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	_ = os.Setenv("V3RAY_HOME", dir)
+	fileName := Join(os.Getenv("V3RAY_HOME"), "v3ray.log")
 	level := getLoggerLevel("debug")
 	syncWriter := zapcore.AddSync(&lumberjack.Logger{
 		Filename:  fileName,
@@ -47,7 +61,7 @@ func init() {
 		enc.AppendString(t.Format("2006-01-02 15:04:05  -"))
 	}
 	encoder2.EncodeLevel = func(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString("["+level.String()+"]")
+		enc.AppendString("[" + level.String() + "]")
 	}
 	encoder2.EncodeCaller = nil
 

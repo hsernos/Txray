@@ -31,9 +31,10 @@ func InitShell(shell *ishell.Shell) {
 		Name: "show",
 		Help: "查看基础设置",
 		Func: func(c *ishell.Context) {
-			title := []string{"监听端口", "udp转发", "启用流量监听", "多路复用", "允许局域网连接", "绕过局域网和大陆", "路由策略"}
+			title := []string{"socks5端口", "http端口", "udp转发", "启用流量监听", "多路复用", "允许局域网连接", "绕过局域网和大陆", "路由策略"}
 			s := configObj.Settings
 			data := []string{tool.UintToStr(s.Port),
+				tool.UintToStr(s.Http),
 				tool.BoolToStr(s.UDP),
 				tool.BoolToStr(s.Sniffing),
 				tool.BoolToStr(s.Mux),
@@ -51,6 +52,7 @@ func InitShell(shell *ishell.Shell) {
 		Func: func(c *ishell.Context) {
 			r := FlagsParse(c.Args, map[string]string{
 				"p": "port",
+				"h": "http",
 				"u": "udp",
 				"s": "sniffing",
 				"l": "lanconn",
@@ -61,6 +63,10 @@ func InitShell(shell *ishell.Shell) {
 			d, ok := r["port"]
 			if ok && tool.IsUint(d) {
 				configObj.SetPort(tool.StrToUint(d))
+			}
+			d, ok = r["http"]
+			if ok && tool.IsUint(d) {
+				configObj.SetHttpPort(tool.StrToUint(d))
 			}
 			d, ok = r["udp"]
 			if ok {
@@ -375,8 +381,12 @@ func InitShell(shell *ishell.Shell) {
 				"p": "proxy",
 			})
 			d, ok := r["proxy"]
-			if ok && tool.IsUint(d) {
-				configObj.AddNodeBySub(tool.StrToUint(d))
+			if ok {
+				if tool.IsUint(d) {
+					configObj.AddNodeBySub(tool.StrToUint(d))
+				} else {
+					configObj.AddNodeBySub(configObj.Settings.Port)
+				}
 			} else {
 				configObj.AddNodeBySub(1000000)
 			}
@@ -644,16 +654,16 @@ func InitShell(shell *ishell.Shell) {
 	},
 	)
 
-	service := &ishell.Cmd{
-		Name: "service",
-		Help: "v2ray服务管理, 使用service查看帮助信息",
-		Func: func(c *ishell.Context) {
-			c.Println(serviceHelp)
-		},
-	}
+	//service := &ishell.Cmd{
+	//	Name: "service",
+	//	Help: "v2ray服务管理, 使用service查看帮助信息",
+	//	Func: func(c *ishell.Context) {
+	//		c.Println(serviceHelp)
+	//	},
+	//}
 
-	service.AddCmd(&ishell.Cmd{
-		Name: "start",
+	shell.AddCmd(&ishell.Cmd{
+		Name: "run",
 		Help: "开始服务",
 		Func: func(c *ishell.Context) {
 			r := FlagsParse(c.Args, nil)
@@ -671,7 +681,7 @@ func InitShell(shell *ishell.Shell) {
 	},
 	)
 
-	service.AddCmd(&ishell.Cmd{
+	shell.AddCmd(&ishell.Cmd{
 		Name: "stop",
 		Help: "停止服务",
 		Func: func(c *ishell.Context) {
@@ -685,7 +695,6 @@ func InitShell(shell *ishell.Shell) {
 	shell.AddCmd(sub)
 	shell.AddCmd(dns)
 	shell.AddCmd(route)
-	shell.AddCmd(service)
 	shell.AddCmd(&ishell.Cmd{
 		Name: "help",
 		Help: "停止服务",

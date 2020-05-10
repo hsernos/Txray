@@ -6,7 +6,14 @@ import log "v3ray/logger"
 func (c *Config) SetPort(port uint) {
 	defer c.SaveJSON()
 	c.Settings.Port = port
-	log.Info("设置本地监听端口为 [", port, "]")
+	log.Info("设置本地socks5监听端口为 [", port, "]")
+}
+
+// SetHttpPort 设置本地监听端口
+func (c *Config) SetHttpPort(port uint) {
+	defer c.SaveJSON()
+	c.Settings.Http = port
+	log.Info("设置本地http监听端口为 [", port, "]")
 }
 
 // SetUDP 设置是否允许udp转发

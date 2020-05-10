@@ -7,6 +7,7 @@ import (
 	"strings"
 	log "v3ray/logger"
 	. "v3ray/tool"
+	"v3ray/vmess"
 )
 
 // GetNodes 获取node数据
@@ -73,7 +74,7 @@ func (c *Config) ExportNodes(key string) []string {
 	result := make([]string, 0, len(indexs))
 	for _, x := range indexs {
 		node := c.Nodes[x]
-		result = append(result, nodeToVmessobj(node).GetVmesslink())
+		result = append(result, nodeToVmessobj(node).ToLink())
 	}
 	return result
 }
@@ -124,7 +125,7 @@ func (c *Config) AddNodeByFile(path string) {
 // AddNodeByVmessLinks 根据vmess链接添加节点
 func (c *Config) AddNodeByVmessLinks(links []string) {
 	defer c.SaveJSON()
-	objs := VmessListToObj(links)
+	objs := vmess.Links2vmessObjs(links)
 	for _, obj := range objs {
 		c.Nodes = append(c.Nodes, vmessObjToNode(obj, ""))
 	}

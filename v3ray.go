@@ -9,17 +9,21 @@ import (
 )
 
 const (
-	version = "v1.1.1"
+	version = "v1.1.2"
 	name    = "v3ray"
 )
+
+func init() {
+	dir := os.Getenv("V3RAY_HOME")
+	if !tool.PathExists(tool.Join(dir, "v2ray", "v2ray")) {
+		log.Error(tool.Join(dir, "v2ray") + "目录下不存在v2ray可执行文件")
+		os.Exit(1)
+	}
+}
 
 func main() {
 	shell := ishell.New()
 	shell.Printf("%s - V2ray Shell Client - %s\n", name, version)
-	if !tool.CheckPATH("v2ray") {
-		log.Error("请将v2ray程序所在目录添加到PATH环境变量中")
-		os.Exit(1)
-	}
 	cmd.InitShell(shell)
 	cmd.InitConfig()
 	// run shell

@@ -3,9 +3,9 @@ package tool
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
+	log "v3ray/logger"
 )
 
 // WriteJSON 将对象写入json文件
@@ -13,14 +13,14 @@ func WriteJSON(v interface{}, path string) {
 
 	file, e := os.Create(path)
 	if e != nil {
-		log.Fatal("文件创建失败", e.Error())
+		log.Error("文件创建失败", e.Error())
 	}
 	defer file.Close()
 	jsonEncode := json.NewEncoder(file)
 	jsonEncode.SetIndent("", "\t")
 	err := jsonEncode.Encode(v)
 	if err != nil {
-		log.Fatal("编码错误", err.Error())
+		log.Error("编码错误", err.Error())
 	}
 }
 
@@ -29,7 +29,7 @@ func ReadJSON(path string, v interface{}) {
 
 	file, e := os.Open(path)
 	if e != nil {
-		log.Fatal("文件打开失败", e.Error())
+		log.Error("文件打开失败", e.Error())
 	}
 	defer file.Close()
 	decode := json.NewDecoder(file)
@@ -54,23 +54,4 @@ func ReadFile(path string) []string {
 	s := strings.ReplaceAll(string(data), "\r\n", "\n")
 	s = strings.ReplaceAll(s, "\r", "\n")
 	return strings.Split(s, "\n")
-}
-
-// 检查某个程序是否在PATH环境变量下
-func CheckPATH(exec string) bool {
-	path := Env("PATH")
-	if strings.IndexAny(path, ";") >= 0 {
-		for _, x := range strings.Split(path, ";") {
-			if PathExists(Join(x, exec) + ".exe") {
-				return true
-			}
-		}
-	} else {
-		for _, x := range strings.Split(path, ":") {
-			if PathExists(Join(x, exec)) {
-				return true
-			}
-		}
-	}
-	return false
 }

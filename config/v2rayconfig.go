@@ -2,14 +2,14 @@ package config
 
 import "v3ray/tool"
 
-
 // GenConfig 生成v2ray-core配置文件
 func (c *Config) GenConfig() {
-	path := tool.Join(c.getConfigPath(),"config.json")
+	path := tool.Join(c.getConfigPath(), "config.json")
 	var conf = map[string]interface{}{
 		"log":       c.getLogConfig(),
 		"inbounds":  c.getInboundsConfig(),
 		"outbounds": c.getOutboundConfig(),
+		"policy":    c.getPolicy(),
 		"dns":       c.getDNSConfig(),
 		"routing":   c.getRoutingConfig(),
 	}
@@ -18,8 +18,6 @@ func (c *Config) GenConfig() {
 
 func (c *Config) getLogConfig() interface{} {
 	return map[string]string{
-		"access":   "",
-		"error":    "",
 		"loglevel": "warning",
 	}
 }
@@ -43,11 +41,19 @@ func (c *Config) getInboundsConfig() interface{} {
 				},
 			},
 			"settings": map[string]interface{}{
-				"auth":    "noauth",
-				"udp":     c.Settings.UDP,
-				"ip":      nil,
-				"address": nil,
-				"clients": nil,
+				"auth":      "noauth",
+				"udp":       c.Settings.UDP,
+				"userLevel": 0,
+			},
+			"streamSettings": nil,
+		},
+		map[string]interface{}{
+			"tag":      "http",
+			"port":     c.Settings.Http,
+			"listen":   listen,
+			"protocol": "http",
+			"settings": map[string]interface{}{
+				"userLevel": 0,
 			},
 			"streamSettings": nil,
 		},
@@ -120,8 +126,8 @@ func (c *Config) getOutboundConfig() interface{} {
 							map[string]interface{}{
 								"id":       n.ID,
 								"alterId":  n.AlterID,
-								"email":    "t@t.tt",
 								"security": n.Security,
+								"level":    0,
 							},
 						},
 					},
@@ -166,6 +172,24 @@ func (c *Config) getOutboundConfig() interface{} {
 			},
 			"streamSettings": nil,
 			"mux":            nil,
+		},
+	}
+}
+
+func (c *Config) getPolicy() interface{} {
+	return map[string]interface{}{
+		"levels": map[string]interface{}{
+			"0": map[string]interface{}{
+				"handshake":    4,
+				"connIdle":     300,
+				"uplinkOnly":   1,
+				"downlinkOnly": 1,
+				"bufferSize":   10240,
+			},
+		},
+		"system": map[string]interface{}{
+			"statsInboundUplink":   true,
+			"statsInboundDownlink": true,
 		},
 	}
 }

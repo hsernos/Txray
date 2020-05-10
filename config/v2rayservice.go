@@ -24,7 +24,7 @@ func (c *Config) Start(i int) {
 	c.SaveJSON()
 	c.GenConfig()
 	if c.exeCmd == nil {
-		c.exeCmd = exec.Command("v2ray", "--config", tool.Join(c.getConfigPath(), "config.json"))
+		c.exeCmd = exec.Command(tool.Join(c.getConfigPath(), "v2ray", "v2ray"), "--config", tool.Join(c.getConfigPath(), "config.json"))
 	}
 	stdout, _ := c.exeCmd.StdoutPipe()
 	c.exeCmd.Start()
@@ -33,7 +33,7 @@ func (c *Config) Start(i int) {
 	go readInfo(r, lines)
 	code := new(int)
 	go checkProc(c.exeCmd, code)
-	time.Sleep(time.Duration(1) * time.Second)
+	time.Sleep(time.Duration(500) * time.Millisecond)
 
 	if *code > 0 {
 		log.Error("开启v2ray服务失败,查看下面报错信息来检查出错问题")
@@ -41,7 +41,7 @@ func (c *Config) Start(i int) {
 			log.Error(x)
 		}
 	} else {
-		log.Info("开启v2ray服务成功, 监听端口：", c.Settings.Port, "，选定节点索引：", c.Index)
+		log.Info("开启v2ray服务成功, 监听socks5/http端口：", c.Settings.Port, "/", c.Settings.Port, "，选定节点索引：", c.Index)
 	}
 }
 

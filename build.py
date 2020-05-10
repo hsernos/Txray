@@ -5,12 +5,12 @@ import os
 
 INFO = {
     'linux': ['386', 'amd64', 'arm'],
-    'darwin': ['386', 'amd64'],
+    'darwin': ['amd64'],
     'freebsd': ['386', 'amd64'],
     'windows': ['386', 'amd64']
 }
 
-Version = 'v1.1.1'
+Version = 'v1.1.2'
 Name = 'v3ray'
 
 

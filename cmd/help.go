@@ -8,7 +8,8 @@ Commands:
     alter [flags]                      修改基础设置
     
 alter Flags
-    -p, --port       {port}            设置监听端口
+    -p, --port       {port}            设置socks5端口
+    -h, --http       {port}            设置http端口
     -u, --udp        {true|false}      是否启用udp
     -s, --sniffing   {true|false}      是否启用流量监听
     -l, --lanconn    {true|false}      是否启用局域网连接
@@ -51,7 +52,7 @@ alter Flags
     --using       {true|false}           是否使用此订阅
 
 update-node Flags
-    -p, --proxy {本地socks5端口}         从socks5代理更新节点
+    -p, --proxy [本地socks5端口]         从socks5代理更新节点,默认基本设置中socks5监听端口
 `
 
 var dnsHelp = `
@@ -90,13 +91,13 @@ Commands:
     del-block-domain    {索引范围}      删除索引范围的禁止domain路由规则
 `
 
-var serviceHelp = `
-service {commands} ...
-
-Commands:
-    start  [索引范围]                   启动或重启v2ray-core服务, 可以自动选择索引范围内延迟最小的那个
-    stop                                停止v2ray-core服务
-`
+//var serviceHelp = `
+//service {commands} ...
+//
+//Commands:
+//    start  [索引范围]                   启动或重启v2ray-core服务, 可以自动选择索引范围内延迟最小的那个
+//    stop                                停止v2ray-core服务
+//`
 
 var help = `
 Commands:
@@ -105,7 +106,8 @@ Commands:
 	sub          订阅管理 		使用 sub 查看帮助信息
 	dns          DNS管理 		使用 dns 查看帮助信息
 	route        路由管理		使用 route 查看帮助信息
-	service      v2ray服务管理 	使用 service 查看帮助信息
+	run          [索引范围]         启动或重启v2ray-core服务, 可以自动选择索引范围内延迟最小的那个
+	stop                            停止v2ray-core服务
 	help         查看帮助信息
 	clear        清屏
 	exit         退出程序
