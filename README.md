@@ -81,7 +81,6 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
 
 需要先下载[v2ray-core](https://github.com/v2ray/v2ray-core/releases)，解压后重命名文件夹为v2ray
 Go语言程序, 可直接在[发布页](https://github.com/hsernos/v3ray/releases)下载, 将上一步的v2ray文件夹移动到解压后的文件夹下
-windows 使用需要将v3ray.exe所在的文件夹添加到环境变量V3RAY_HOME中
 
 
 

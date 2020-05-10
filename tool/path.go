@@ -3,6 +3,7 @@ package tool
 import (
 	"os"
 	"os/user"
+	"runtime"
 	"strings"
 )
 
@@ -22,20 +23,20 @@ func Join(elem ...string) string {
 }
 
 // 检查某个程序是否在PATH环境变量下
-func CheckPATH(exec string) bool {
+func CheckPATH(exec string) string {
 	path := os.Getenv("PATH")
-	if strings.IndexAny(path, ";") >= 0 {
+	if runtime.GOOS == "windows" {
 		for _, x := range strings.Split(path, ";") {
 			if PathExists(Join(x, exec) + ".exe") {
-				return true
+				return x
 			}
 		}
 	} else {
 		for _, x := range strings.Split(path, ":") {
 			if PathExists(Join(x, exec)) {
-				return true
+				return x
 			}
 		}
 	}
-	return false
+	return ""
 }
