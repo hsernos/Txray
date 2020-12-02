@@ -1,22 +1,9 @@
-package tool
+package tools
 
 import (
-	"github.com/olekukonko/tablewriter"
-	"os"
 	"sort"
 	"strings"
 )
-
-// GetTable 将数据转换成表格形式
-func GetTable(headers []string, datas ...[]string) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(headers)
-	table.SetAlignment(1)
-	for _, v := range datas {
-		table.Append(v)
-	}
-	table.Render()
-}
 
 // IndexDeal 类似切片，返回索引列表
 func IndexDeal(key string, max int) []int {

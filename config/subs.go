@@ -1,14 +1,14 @@
 package config
 
 import (
+	log "Tv2ray/logger"
+	"Tv2ray/tools"
+	"Tv2ray/vmess"
 	uuid "github.com/satori/go.uuid"
 	"strings"
-	log "v3ray/logger"
-	"v3ray/tool"
-	"v3ray/vmess"
 )
 
-// AddSub 添加一条订阅记录
+// 添加一条订阅记录
 func (c *Config) AddSub(url, remarks string) {
 	defer c.SaveJSON()
 	u1 := uuid.NewV4()
@@ -17,7 +17,7 @@ func (c *Config) AddSub(url, remarks string) {
 	log.Info("添加订阅: ", url)
 }
 
-// AddNodeBySub 通过订阅添加节点
+// 通过订阅添加节点
 func (c *Config) AddNodeBySub(port uint) {
 	defer c.SaveJSON()
 	newNodes := make([]*node, 0, len(c.Nodes))
@@ -26,17 +26,31 @@ func (c *Config) AddNodeBySub(port uint) {
 		if x.Using {
 			data := ""
 			if port > 65535 {
-				data = tool.Get(x.URL)
+				res, e := tools.GetNoProxy(x.URL, 10)
+				if e != nil {
+					log.Warn(e)
+					break
+				}
+				data = tools.ReadDate(res)
+				log.Info("访问 [", x.URL, "] -- ", res.Status)
 			} else {
-				data = tool.GetByProxy(x.URL, port)
+				res, e := tools.GetBySocks5Proxy(x.URL, "127.0.0.1", c.Settings.Port, 10)
+				if e != nil {
+					log.Warn(e)
+					break
+				}
+				data = tools.ReadDate(res)
+				log.Info("访问 [", x.URL, "] -- ", res.Status)
 			}
 			vmessList := vmess.Sub2links(data)
 			Objs := vmess.Links2vmessObjs(vmessList)
 			for _, obj := range Objs {
 				newNodes = append(newNodes, vmessObjToNode(obj, x.ID))
 			}
-			ids += x.ID + ","
-			log.Info("从订阅 [", x.URL, "] 更新了 [", len(Objs), "] 个节点")
+			if len(Objs) != 0 {
+				ids += x.ID + ","
+			}
+			log.Info("从订阅 [", x.URL, "] 获取了 [", len(Objs), "] 个节点")
 		}
 	}
 	log.Info("订阅更新完成，共更新 [", len(newNodes), "] 个节点")
@@ -49,27 +63,27 @@ func (c *Config) AddNodeBySub(port uint) {
 	c.Index = 0
 }
 
-// GetSubs 获取订阅信息
+// 获取订阅信息
 func (c *Config) GetSubs(key string) [][]string {
 	l := len(c.Subs)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	result := make([][]string, 0, len(indexs))
 	for _, x := range indexs {
 		sub := c.Subs[x]
 		result = append(result, []string{
-			tool.IntToStr(x),
+			tools.IntToStr(x),
 			sub.Remarks,
 			sub.URL,
-			tool.BoolToStr(sub.Using),
+			tools.BoolToStr(sub.Using),
 		})
 	}
 	return result
 }
 
-// SetSubs 修改订阅信息
+// 修改订阅信息
 func (c *Config) SetSubs(key, using, url, remarks string) {
 	l := len(c.Subs)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}
@@ -89,10 +103,10 @@ func (c *Config) SetSubs(key, using, url, remarks string) {
 
 }
 
-// DelSubs 删除订阅信息
+// 删除订阅信息
 func (c *Config) DelSubs(key string) {
 	l := len(c.Subs)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}

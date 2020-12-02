@@ -23,15 +23,17 @@ node {commands} [flags] ...
 
 Commands:
     add     [flags]                     添加节点
-    show    [索引范围 | tcping]         查看节点信息, 默认索引范围为all, tcping可以按延迟排序查看
+    show    [索引范围 | test]           查看节点信息, 默认索引范围为all, test可以按延迟排序查看
+    info    {索引}                      查看某个节点详细信息
     del     {索引范围}                  根据索引参数删除节点
     export  {索引范围}                  导出为vmess链接
     tcping  [索引范围]                  tcping指定索引节点, 默认索引范围为all
     find    {关键词}                    查找节点，有中文关键词需要用单引号或双引号括起来
 
 add Flags
-    -v, --vmess {vmess链接}             导入vmess://数据
-    -f, --file  {文件绝对路径}          从文件批量导入vmess://数据
+    -v, --vmess   {vmess链接}             导入vmess://数据
+    -f, --file    {文件绝对路径}          从文件批量导入vmess://数据
+    -s, --subfile {文件绝对路径}          从订阅文件解析导入vmess://数据
 `
 var subHelp = `
 sub {commands} [flags] ...

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Vmess vmess链接信息
+// vmess链接信息
 type Vmess struct {
 	Add  string `json:"add"`
 	Aid  int    `json:"aid,string"`
@@ -21,13 +21,13 @@ type Vmess struct {
 	V    string `json:"v"`
 }
 
-// ToLink vmess对象转化成vmess链接
+// vmess对象转化成vmess链接
 func (v *Vmess) ToLink() string {
 	b, _ := json.Marshal(v)
 	return "vmess://" + base64.StdEncoding.EncodeToString(b)
 }
 
-// Link2vmessobj 链接转化成vmess对象
+// 链接转化成vmess对象
 func Link2vmessobj(link string) *Vmess {
 	if len(link) > 8 && link[:8] == "vmess://" {
 		decodeData, _ := base64.StdEncoding.DecodeString(link[8:])
@@ -41,14 +41,14 @@ func Link2vmessobj(link string) *Vmess {
 	return nil
 }
 
-// Sub2links 解析订阅文本转化成vmess链接
+// 解析订阅文本转化成vmess链接
 func Sub2links(subtext string) []string {
 	decodeData, _ := base64.URLEncoding.DecodeString(subtext)
-	list := strings.Split(string(decodeData), "\n")
+	list := strings.Split(strings.TrimRight(string(decodeData), "\n"), "\n")
 	return list
 }
 
-// Links2vmessObjs 解析vmessList链接
+// 解析vmessList链接
 func Links2vmessObjs(list []string) []*Vmess {
 	result := make([]*Vmess, 0, len(list))
 	for _, x := range list {

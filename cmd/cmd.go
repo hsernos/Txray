@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"Tv2ray/config"
+	log "Tv2ray/logger"
+	"Tv2ray/tools"
 	"github.com/abiosoft/ishell"
-	"v3ray/config"
-	"v3ray/tool"
+	"os"
+	"strings"
 )
 
 var configObj config.Config
@@ -31,18 +34,17 @@ func InitShell(shell *ishell.Shell) {
 		Name: "show",
 		Help: "查看基础设置",
 		Func: func(c *ishell.Context) {
-			title := []string{"socks5端口", "http端口", "udp转发", "启用流量监听", "多路复用", "允许局域网连接", "绕过局域网和大陆", "路由策略"}
 			s := configObj.Settings
-			data := []string{tool.UintToStr(s.Port),
-				tool.UintToStr(s.Http),
-				tool.BoolToStr(s.UDP),
-				tool.BoolToStr(s.Sniffing),
-				tool.BoolToStr(s.Mux),
-				tool.BoolToStr(s.AllowLANConn),
-				tool.BoolToStr(s.BypassLanAndContinent),
+			data := []string{tools.UintToStr(s.Port),
+				tools.UintToStr(s.Http),
+				tools.BoolToStr(s.UDP),
+				tools.BoolToStr(s.Sniffing),
+				tools.BoolToStr(s.Mux),
+				tools.BoolToStr(s.AllowLANConn),
+				tools.BoolToStr(s.BypassLanAndContinent),
 				s.DomainStrategy,
 			}
-			tool.GetTable(title, data)
+			ShowSetting(os.Stdout, data)
 		},
 	})
 
@@ -61,12 +63,12 @@ func InitShell(shell *ishell.Shell) {
 				"r": "route",
 			})
 			d, ok := r["port"]
-			if ok && tool.IsUint(d) {
-				configObj.SetPort(tool.StrToUint(d))
+			if ok && tools.IsUint(d) {
+				configObj.SetPort(tools.StrToUint(d))
 			}
 			d, ok = r["http"]
-			if ok && tool.IsUint(d) {
-				configObj.SetHttpPort(tool.StrToUint(d))
+			if ok && tools.IsUint(d) {
+				configObj.SetHttpPort(tools.StrToUint(d))
 			}
 			d, ok = r["udp"]
 			if ok {
@@ -148,7 +150,7 @@ func InitShell(shell *ishell.Shell) {
 		Func: func(c *ishell.Context) {
 			r := FlagsParse(c.Args, nil)
 			d, ok := r["data"]
-			l := []string{}
+			var l []string
 			if ok {
 				l = configObj.ExportNodes(d)
 			} else {
@@ -168,13 +170,17 @@ func InitShell(shell *ishell.Shell) {
 			r := FlagsParse(c.Args, map[string]string{
 				"v": "vmess",
 				"f": "file",
+				"s": "subfile",
 			})
-			d1, ok1 := r["vmess"]
-			d2, ok2 := r["file"]
+			vmess, ok1 := r["vmess"]
+			file, ok2 := r["file"]
+			subfile, ok3 := r["subfile"]
 			if ok1 {
-				configObj.AddNodeByVmessLinks([]string{d1})
+				configObj.AddNodeByVmessLinks([]string{vmess})
 			} else if ok2 {
-				configObj.AddNodeByFile(d2)
+				configObj.AddNodeByFile(file)
+			} else if ok3 {
+				configObj.AddNodeBySubFile(subfile)
 			} else {
 				c.ShowPrompt(false)
 				defer c.ShowPrompt(true)
@@ -230,18 +236,55 @@ func InitShell(shell *ishell.Shell) {
 	node.AddCmd(
 		&ishell.Cmd{
 			Name: "tcping",
-			Help: "查看节点",
+			Help: "tcping节点",
 			Func: func(c *ishell.Context) {
 				r := FlagsParse(c.Args, nil)
 				d, ok := r["data"]
-				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
 				if ok {
 					configObj.PingNodes(d)
 				} else {
 					configObj.PingNodes("all")
 				}
-				tool.GetTable(title, configObj.GetNodes("tcping")...)
-				println("当前选定节点索引：", configObj.GetNodeIndex())
+				ShowSimpleNode(os.Stdout, configObj.GetNodes("test")...)
+				c.Println("当前选定节点索引：", configObj.GetNodeIndex())
+			},
+		},
+	)
+
+	node.AddCmd(
+		&ishell.Cmd{
+			Name: "info",
+			Help: "查看节点的详细信息",
+			Func: func(c *ishell.Context) {
+				r := FlagsParse(c.Args, nil)
+				d, ok := r["data"]
+				if ok {
+					if tools.IsUint(d) {
+						node := configObj.GetNode(tools.StrToUint(d))
+						if node == nil {
+							log.Warn(d, "超出了索引范围")
+						} else {
+							c.Println()
+							c.Printf("%7s: %s\n", "索引", d)
+							c.Printf("%7s: %s\n", "别名", node.Remarks)
+							c.Printf("%7s: %s\n", "地址", node.Address)
+							c.Printf("%7s: %d\n", "端口", node.Port)
+							c.Printf("%7s: %s\n", "用户ID", node.ID)
+							c.Printf("%7s: %d\n", "额外ID", node.AlterID)
+							c.Printf("%5s: %s\n", "加密方式", node.Security)
+							c.Printf("%5s: %s\n", "伪装类型", node.HeaderType)
+							c.Printf("%5s: %s\n", "伪装域名", node.RequestHost)
+							c.Printf("%9s: %s\n", "path", node.Path)
+							c.Printf("%5s: %s\n", "安全传输", node.StreamSecurity)
+							c.Println()
+						}
+					} else {
+						log.Warn(d, "不是一个非负整数")
+					}
+				} else {
+					log.Info("还需要输入一个索引")
+				}
+
 			},
 		},
 	)
@@ -253,13 +296,12 @@ func InitShell(shell *ishell.Shell) {
 			Func: func(c *ishell.Context) {
 				r := FlagsParse(c.Args, nil)
 				d, ok := r["data"]
-				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
 				if ok {
-					tool.GetTable(title, configObj.GetNodes(d)...)
-					println("当前选定节点索引：", configObj.GetNodeIndex())
+					ShowSimpleNode(os.Stdout, configObj.GetNodes(d)...)
+					c.Println("当前选定节点索引：", configObj.GetNodeIndex())
 				} else {
-					tool.GetTable(title, configObj.GetNodes("all")...)
-					println("当前选定节点索引：", configObj.GetNodeIndex())
+					ShowSimpleNode(os.Stdout, configObj.GetNodes("all")...)
+					c.Println("当前选定节点索引：", configObj.GetNodeIndex())
 				}
 			},
 		},
@@ -272,10 +314,9 @@ func InitShell(shell *ishell.Shell) {
 			Func: func(c *ishell.Context) {
 				r := FlagsParse(c.Args, nil)
 				d, ok := r["data"]
-				title := []string{"索引", "别名", "地址", "端口", "加密方式", "测试结果"}
 				if ok {
-					tool.GetTable(title, configObj.FindNodes(d)...)
-					println("当前选定节点索引：", configObj.GetNodeIndex())
+					ShowSimpleNode(os.Stdout, configObj.FindNodes(d)...)
+					c.Println("当前选定节点索引：", configObj.GetNodeIndex())
 				}
 			},
 		},
@@ -363,11 +404,10 @@ func InitShell(shell *ishell.Shell) {
 		Func: func(c *ishell.Context) {
 			r := FlagsParse(c.Args, nil)
 			d, ok := r["data"]
-			title := []string{"索引", "别名", "url", "是否启用"}
 			if ok {
-				tool.GetTable(title, configObj.GetSubs(d)...)
+				ShowSub(os.Stdout, configObj.GetSubs(d)...)
 			} else {
-				tool.GetTable(title, configObj.GetSubs("all")...)
+				ShowSub(os.Stdout, configObj.GetSubs("all")...)
 			}
 		},
 	},
@@ -382,8 +422,8 @@ func InitShell(shell *ishell.Shell) {
 			})
 			d, ok := r["proxy"]
 			if ok {
-				if tool.IsUint(d) {
-					configObj.AddNodeBySub(tool.StrToUint(d))
+				if tools.IsUint(d) {
+					configObj.AddNodeBySub(tools.StrToUint(d))
 				} else {
 					configObj.AddNodeBySub(configObj.Settings.Port)
 				}
@@ -418,8 +458,7 @@ func InitShell(shell *ishell.Shell) {
 		Name: "show",
 		Help: "查看DNS",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "DNS"}
-			tool.GetTable(title, configObj.GetDNS()...)
+			ShowDNS(os.Stdout, configObj.GetDNS()...)
 		},
 	})
 
@@ -520,48 +559,42 @@ func InitShell(shell *ishell.Shell) {
 		Name: "show-proxy-ip",
 		Help: "查看代理IP规则",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "规则"}
-			tool.GetTable(title, configObj.GetProxyIP()...)
+			ShowRouter(os.Stdout, configObj.GetProxyIP()...)
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
 		Name: "show-proxy-domain",
 		Help: "查看代理Domain规则",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "规则"}
-			tool.GetTable(title, configObj.GetProxyDomain()...)
+			ShowRouter(os.Stdout, configObj.GetProxyDomain()...)
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
 		Name: "show-direct-ip",
 		Help: "查看直连IP规则",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "规则"}
-			tool.GetTable(title, configObj.GetDirectIP()...)
+			ShowRouter(os.Stdout, configObj.GetDirectIP()...)
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
 		Name: "show-direct-domain",
 		Help: "查看直连Domain规则",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "规则"}
-			tool.GetTable(title, configObj.GetDirectDomain()...)
+			ShowRouter(os.Stdout, configObj.GetDirectDomain()...)
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
 		Name: "show-block-ip",
 		Help: "查看禁止IP规则",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "规则"}
-			tool.GetTable(title, configObj.GetBlockIP()...)
+			ShowRouter(os.Stdout, configObj.GetBlockIP()...)
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
 		Name: "show-block-domain",
 		Help: "查看禁止Domain规则",
 		Func: func(c *ishell.Context) {
-			title := []string{"索引", "规则"}
-			tool.GetTable(title, configObj.GetBlockDomain()...)
+			ShowRouter(os.Stdout, configObj.GetBlockDomain()...)
 		},
 	})
 
@@ -654,14 +687,6 @@ func InitShell(shell *ishell.Shell) {
 	},
 	)
 
-	//service := &ishell.Cmd{
-	//	Name: "service",
-	//	Help: "v2ray服务管理, 使用service查看帮助信息",
-	//	Func: func(c *ishell.Context) {
-	//		c.Println(serviceHelp)
-	//	},
-	//}
-
 	shell.AddCmd(&ishell.Cmd{
 		Name: "run",
 		Help: "开始服务",
@@ -669,13 +694,50 @@ func InitShell(shell *ishell.Shell) {
 			r := FlagsParse(c.Args, nil)
 			d, ok := r["data"]
 			configObj.Stop()
-			if ok && tool.IsInt(d) {
-				configObj.Start(tool.StrToInt(d))
-			} else if ok && len(tool.IndexDeal(d, len(configObj.Nodes))) >= 1 {
-				configObj.PingNodes(d)
-				configObj.Start(-1)
+			if ok && tools.IsInt(d) {
+				if configObj.Start(tools.StrToInt(d)) {
+					t, status := configObj.TestNode("https://www.youtube.com")
+					log.Info(status, " [ https://www.youtube.com ] 延迟：", strings.Trim(t, " "))
+				}
+
+			} else if ok && (len(tools.IndexDeal(d, len(configObj.Nodes))) >= 1 || (len(d) > 1 && d[0] == 't' && tools.IsUint(d[1:]))) {
+				min := 100000
+				index := -1
+				var indexs []int
+				if d[0] == 't' {
+					num := tools.StrToInt(d[1:])
+					if num != 0 {
+						indexs = configObj.GetNodeTestSort(num)
+					}
+				} else {
+					l := len(configObj.Nodes)
+					indexs = tools.IndexDeal(d, l)
+				}
+				log.Info("================================================================")
+				for _, x := range indexs {
+					if configObj.Start(x) {
+						t, status := configObj.TestNode("https://www.youtube.com")
+						t = strings.Trim(t, " ")
+						if t != "-1ms" && min > tools.StrToInt(strings.TrimRight(t, "ms")) {
+							index = x
+							min = tools.StrToInt(strings.TrimRight(t, "ms"))
+						}
+						log.Info(status, " [ https://www.youtube.com ] 延迟：", t)
+					}
+					configObj.Stop()
+				}
+				log.Info("================================================================")
+				if index != -1 {
+					log.Info("延迟最小的节点索引为：", index, "，延迟：", min, "ms")
+					configObj.Start(index)
+				} else {
+					log.Info("所选节点全部不能访问外网")
+				}
 			} else {
-				configObj.Start(-1)
+				if configObj.Start(-1) {
+					t, status := configObj.TestNode("https://www.youtube.com")
+					log.Info(status, " [ https://www.youtube.com ] 延迟：", strings.Trim(t, " "))
+				}
 			}
 		},
 	},
@@ -697,7 +759,7 @@ func InitShell(shell *ishell.Shell) {
 	shell.AddCmd(route)
 	shell.AddCmd(&ishell.Cmd{
 		Name: "help",
-		Help: "停止服务",
+		Help: "帮助",
 		Func: func(c *ishell.Context) {
 			c.Println(help)
 		},

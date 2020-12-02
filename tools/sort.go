@@ -1,4 +1,4 @@
-package tool
+package tools
 
 type Sort struct {
 	Index int

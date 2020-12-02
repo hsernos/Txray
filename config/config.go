@@ -1,10 +1,10 @@
 package config
 
 import (
-	"os"
+	log "Tv2ray/logger"
+	"Tv2ray/tools"
+	"Tv2ray/vmess"
 	"os/exec"
-	"v3ray/tool"
-	"v3ray/vmess"
 )
 
 type (
@@ -44,10 +44,8 @@ type (
 		RequestHost    string `json:"requestHost"`
 		Path           string `json:"path"`
 		StreamSecurity string `json:"streamSecurity"`
-		//AllowInsecure  string `json:"allowInsecure"`
-		//ConfigType     int    `json:"configType"`
-		TestResult string `json:"testResult"`
-		Subid      string `json:"subid"`
+		TestResult     string `json:"testResult"`
+		Subid          string `json:"subid"`
 	}
 
 	// sub 订阅
@@ -79,10 +77,13 @@ type (
 )
 
 func (c *Config) init() {
-	configPath := tool.Join(c.getConfigPath(), "v3ray.json")
-	ok := tool.PathExists(configPath)
+	configPath := tools.PathJoin(tools.GetRunPath(), "Tv2ray.json")
+	ok := tools.IsFile(configPath)
 	if ok {
-		tool.ReadJSON(configPath, c)
+		err := tools.ReadJSON(configPath, c)
+		if err != nil {
+			log.Error(err)
+		}
 	} else {
 		c.Settings.Port = 2333
 		c.Settings.Http = 2334
@@ -102,13 +103,9 @@ func (c *Config) init() {
 		c.KcpSetting.WriteBufferSize = 2
 		c.Index = 0
 
-		c.DNS = []string{"8.8.4.4", "114.114.114.114", "localhost"}
+		c.DNS = []string{"223.5.5.5", "223.6.6.6"}
 	}
 
-}
-
-func (c *Config) getConfigPath() string {
-	return os.Getenv("V3RAY_HOME")
 }
 
 // NewConfig 得到实例
@@ -120,8 +117,11 @@ func NewConfig() Config {
 
 // SaveJSON 将数据保存到json文件
 func (c *Config) SaveJSON() {
-	file := tool.Join(c.getConfigPath(), "v3ray.json")
-	tool.WriteJSON(*c, file)
+	file := tools.PathJoin(tools.GetRunPath(), "Tv2ray.json")
+	err := tools.WriteJSON(*c, file)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 func nodeToVmessobj(n *node) *vmess.Vmess {

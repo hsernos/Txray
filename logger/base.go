@@ -1,13 +1,11 @@
 package logger
 
 import (
+	"Tv2ray/tools"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 	"time"
 )
 
@@ -31,58 +29,8 @@ func getLoggerLevel(lvl string) zapcore.Level {
 	return zapcore.InfoLevel
 }
 
-// 拼接目录
-func Join(elem ...string) string {
-	return strings.Join(elem, string(os.PathSeparator))
-}
-
-func CallRecover() {
-	if err := recover(); err != nil {
-		Error(err)
-	}
-}
-
-// PathExists 判断文件或文件夹是否存在
-func PathExists(path string) bool {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	return false
-}
-
-// 检查某个程序是否在PATH环境变量下
-func CheckPATH(exec string) string {
-	path := os.Getenv("PATH")
-	if runtime.GOOS == "windows" {
-		for _, x := range strings.Split(path, ";") {
-			if PathExists(Join(x, exec) + ".exe") {
-				return x
-			}
-		}
-	} else {
-		for _, x := range strings.Split(path, ":") {
-			if PathExists(Join(x, exec)) {
-				return x
-			}
-		}
-	}
-	return ""
-}
-
 func init() {
-	if os.Getenv("V3RAY_HOME") == "" {
-		if CheckPATH("v3ray") == "" {
-			dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-			_ = os.Setenv("V3RAY_HOME", dir)
-		} else {
-			_ = os.Setenv("V3RAY_HOME", CheckPATH("v3ray"))
-		}
-	}
-	fileName := Join(os.Getenv("V3RAY_HOME"), "v3ray.log")
+	fileName := tools.PathJoin(tools.GetRunPath(), "Tv2ray.log")
 	level := getLoggerLevel("debug")
 	syncWriter := zapcore.AddSync(&lumberjack.Logger{
 		Filename:  fileName,

@@ -1,60 +1,76 @@
 package config
 
 import (
+	log "Tv2ray/logger"
+	"Tv2ray/tools"
+	"Tv2ray/vmess"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
-	log "v3ray/logger"
-	. "v3ray/tool"
-	"v3ray/vmess"
+	"time"
 )
 
-// GetNodes 获取node数据
+func (c *Config) GetNodeTestSort(num int) []int {
+	var indexs []int
+	list := make(tools.Sorts, 0)
+	for i, node := range c.Nodes {
+		if node.TestResult != "" && node.TestResult != "-1ms" {
+			f, _ := strconv.ParseFloat(node.TestResult[:len(node.TestResult)-2], 32)
+			list = append(list, tools.Sort{i, float32(f)})
+		}
+	}
+	sort.Sort(sort.Reverse(list))
+	for _, x := range list {
+		indexs = append(indexs, x.Index)
+	}
+	if num > 0 && num <= len(indexs) {
+		return indexs[len(indexs)-num:]
+	}
+	return indexs
+}
+
+// 获取node数据
 func (c *Config) GetNodes(key string) [][]string {
 	l := len(c.Nodes)
 	var indexs []int
-	if key == "tcping" {
-		list := make(Sorts, 0)
-		for i, node := range c.Nodes {
-			if node.TestResult != "" && node.TestResult != "0ms" {
-				f, _ := strconv.ParseFloat(node.TestResult[:len(node.TestResult)-2], 32)
-				list = append(list, Sort{i, float32(f)})
-			}
-		}
-		sort.Sort(sort.Reverse(list))
-		for _, x := range list {
-			indexs = append(indexs, x.Index)
-		}
+	if key == "test" || key == "t" || key == "tcping" {
+		indexs = c.GetNodeTestSort(-1)
 	} else {
-		indexs = IndexDeal(key, l)
+		indexs = tools.IndexDeal(key, l)
 	}
 	result := make([][]string, 0, len(indexs))
 	for _, x := range indexs {
 		node := c.Nodes[x]
 		result = append(result, []string{
-			IntToStr(x),
+			tools.IntToStr(x),
 			node.Remarks,
 			node.Address,
-			UintToStr(node.Port),
-			node.Security,
+			tools.UintToStr(node.Port),
 			node.TestResult,
 		})
 	}
 	return result
 }
 
-// FindNodes 查找node数据
+func (c *Config) GetNode(index uint) *node {
+	if int(index) >= len(c.Nodes) {
+		return nil
+	} else {
+		return c.Nodes[index]
+	}
+}
+
+// 查找node数据
 func (c *Config) FindNodes(key string) [][]string {
 	result := make([][]string, 0)
 	for i, node := range c.Nodes {
 		if strings.Index(node.Remarks, key) >= 0 {
 			result = append(result, []string{
-				IntToStr(i),
+				tools.IntToStr(i),
 				node.Remarks,
 				node.Address,
-				UintToStr(node.Port),
-				node.Security,
+				tools.UintToStr(node.Port),
 				node.TestResult,
 			})
 		}
@@ -62,15 +78,15 @@ func (c *Config) FindNodes(key string) [][]string {
 	return result
 }
 
-// GetNodeIndex 获取选定节点索引
+// 获取选定节点索引
 func (c *Config) GetNodeIndex() uint {
 	return c.Index
 }
 
-// ExportNodes 导出node数据
+// 导出node数据
 func (c *Config) ExportNodes(key string) []string {
 	l := len(c.Nodes)
-	indexs := IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	result := make([]string, 0, len(indexs))
 	for _, x := range indexs {
 		node := c.Nodes[x]
@@ -79,10 +95,21 @@ func (c *Config) ExportNodes(key string) []string {
 	return result
 }
 
-// PingNodes ping node
+func (c *Config) TestNode(url string) (string, string) {
+	start := time.Now()
+	res, e := tools.GetBySocks5Proxy(url, "127.0.0.1", c.Settings.Port, 10)
+	elapsed := time.Since(start)
+	if e != nil {
+		log.Warn(e)
+		return "-1ms", "Error"
+	}
+	return fmt.Sprintf("%4.0fms", float32(elapsed.Nanoseconds())/1e6), res.Status
+}
+
+// ping node
 func (c *Config) PingNodes(key string) {
 	l := len(c.Nodes)
-	indexs := IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if indexs == nil || len(indexs) == 0 {
 		return
 	}
@@ -93,16 +120,15 @@ func (c *Config) PingNodes(key string) {
 	for i, x := range indexs {
 		node := c.Nodes[x]
 		chs[i] = make(chan float32)
-		go Go_Tcping(node.Address, int(node.Port), 4, chs[i])
-
+		go tools.Go_Tcping(node.Address, int(node.Port), 4, chs[i])
 	}
 	var min float32 = 30000
-	var index int = -1
+	index := -1
 	for i, ch := range chs {
 		node := c.Nodes[indexs[i]]
 		d := <-ch
 		node.TestResult = fmt.Sprintf("%.4vms", d)
-		if d < min && d != 0 {
+		if d < min && d != -1 {
 			min = d
 			index = indexs[i]
 		}
@@ -112,17 +138,40 @@ func (c *Config) PingNodes(key string) {
 	}
 }
 
-// AddNodeByFile 根据vmess链接文件批量添加节点
+// 根据vmess链接文件批量添加节点
 func (c *Config) AddNodeByFile(path string) {
-	if PathExists(path) {
-		links := ReadFile(path)
+	if tools.IsFile(path) {
+		log.Info("读取文件中...")
+		links := tools.ReadFile(path)
+		log.Info("读取文件完成，解析vmess链接如下")
+		for index, x := range links {
+			log.Info(fmt.Sprintf("%3d ", index), x)
+		}
 		c.AddNodeByVmessLinks(links)
 	} else {
 		log.Warn("该文件不存在")
 	}
 }
 
-// AddNodeByVmessLinks 根据vmess链接添加节点
+// 根据订阅文件批量添加节点
+func (c *Config) AddNodeBySubFile(path string) {
+	if tools.IsFile(path) {
+		subText := tools.ReadFile(path)[0]
+		log.Info("解析文件中...")
+		links := vmess.Sub2links(subText)
+		log.Info("解析文件完成，解析vmess链接如下: ")
+		log.Info("=======================================================================")
+		for _, x := range links {
+			fmt.Println(x)
+		}
+		log.Info("=======================================================================")
+		c.AddNodeByVmessLinks(links)
+	} else {
+		log.Warn("该文件不存在")
+	}
+}
+
+// 根据vmess链接添加节点
 func (c *Config) AddNodeByVmessLinks(links []string) {
 	defer c.SaveJSON()
 	objs := vmess.Links2vmessObjs(links)
@@ -132,13 +181,13 @@ func (c *Config) AddNodeByVmessLinks(links []string) {
 	log.Info("更新了 [", len(objs), "] 个节点")
 }
 
-// AddNode 添加节点
+// 添加节点
 func (c *Config) AddNode(remarks, address, port, id, aid, security, network, types, host, path, tls string) {
-	if !IsUint(port) {
+	if !tools.IsUint(port) {
 		log.Warn("端口必须为正整数")
 		return
 	}
-	if !IsInt(aid) {
+	if !tools.IsInt(aid) {
 		log.Warn("aid必须为整数")
 		return
 	}
@@ -146,9 +195,9 @@ func (c *Config) AddNode(remarks, address, port, id, aid, security, network, typ
 	n := node{}
 	n.Remarks = remarks
 	n.Address = address
-	n.Port = StrToUint(port)
+	n.Port = tools.StrToUint(port)
 	n.ID = id
-	n.AlterID = StrToInt(aid)
+	n.AlterID = tools.StrToInt(aid)
 	n.Security = security
 	n.Network = network
 	n.HeaderType = types
@@ -160,10 +209,10 @@ func (c *Config) AddNode(remarks, address, port, id, aid, security, network, typ
 	log.Info("添加节点成功")
 }
 
-// DelNodes 删除节点信息
+// 删除节点信息
 func (c *Config) DelNodes(key string) {
 	l := len(c.Nodes)
-	indexs := IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}

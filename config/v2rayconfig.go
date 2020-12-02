@@ -1,10 +1,13 @@
 package config
 
-import "v3ray/tool"
+import (
+	log "Tv2ray/logger"
+	"Tv2ray/tools"
+)
 
 // GenConfig 生成v2ray-core配置文件
 func (c *Config) GenConfig() {
-	path := tool.Join(c.getConfigPath(), "config.json")
+	path := tools.PathJoin(tools.GetRunPath(), "config.json")
 	var conf = map[string]interface{}{
 		"log":       c.getLogConfig(),
 		"inbounds":  c.getInboundsConfig(),
@@ -13,7 +16,10 @@ func (c *Config) GenConfig() {
 		"dns":       c.getDNSConfig(),
 		"routing":   c.getRoutingConfig(),
 	}
-	tool.WriteJSON(conf, path)
+	err := tools.WriteJSON(conf, path)
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 func (c *Config) getLogConfig() interface{} {

@@ -12,9 +12,7 @@ INFO = {
     'windows': ['386', 'amd64']
 }
 
-Name = 'v3ray'
-
-
+Name = 'Tv2ray'
 
 
 #打包目录为zip文件（未压缩）
@@ -45,24 +43,18 @@ def build(goos, goarch, path, cgo=0):
     syst = 'macos' if goos == 'darwin' else goos
     arch = '64' if goarch == 'amd64' else goarch
     arch = '32' if goarch == '386' else arch
-    if get_os() == 'win':
-        cmd1 = 'SET CGO_ENABLED={}'.format(cgo)
-        cmd2 = 'SET GOOS={}'.format(goos)
-        cmd3 = 'SET GOARCH={}'.format(goarch)
-        cmd4 = 'go build -o {} {}'.format("build/"+"-".join([Name, syst, arch]) + e, path)
-        cmd = '  '.join([cmd1, cmd2, cmd3, cmd4])
-        os.system(cmd)
-    else:
-        cmd = 'CGO_ENABLED={} GOOS={} GOARCH={} go build -o {} {} '.format(cgo, goos, goarch,
-                                                                           "build/"+"-".join([Name, syst, arch]) + "/v3ray" + e,
+    cmd = 'CGO_ENABLED={} GOOS={} GOARCH={} go build -o {} {} '.format(cgo, goos, goarch,
+                                                                           "build/"+"-".join([Name, syst, arch]) + "/Tv2ray" + e,
                                                                            path)
-        os.system(cmd)
+    os.system(cmd)
     shutil.copy("README.md", "build/"+"-".join([Name, syst, arch]))
     make_zip("build/"+"-".join([Name, syst, arch]),"build/"+"-".join([Name, syst, arch])+".zip")
 
 if __name__ == '__main__':
-
-    for goos in INFO.keys():
-        for goarch in INFO[goos]:
-            print("正在编译", goos, '系统的', goarch, '架构版本中...')
-            build(goos, goarch, 'v3ray.go')
+    if get_os() == 'win':
+        print("该脚本暂不支持在Windows环境下运行")
+    else:
+        for goos in INFO.keys():
+            for goarch in INFO[goos]:
+                print("正在编译", goos, '系统的', goarch, '架构版本中...')
+                build(goos, goarch, 'Tv2ray.go')

@@ -1,6 +1,6 @@
 package config
 
-import log "v3ray/logger"
+import log "Tv2ray/logger"
 
 // SetPort 设置本地监听端口
 func (c *Config) SetPort(port uint) {

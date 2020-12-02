@@ -1,13 +1,13 @@
 package config
 
-
 import (
-	log "v3ray/logger"
-	"v3ray/tool"
+	log "Tv2ray/logger"
+	"Tv2ray/tools"
 )
+
 // AddDNS 添加一条dns记录
 func (c *Config) AddDNS(dns string) {
-	
+
 	defer c.SaveJSON()
 	c.DNS = append(c.DNS, dns)
 	log.Info("添加一条DNS [", dns, "]")
@@ -17,7 +17,7 @@ func (c *Config) AddDNS(dns string) {
 func (c *Config) GetDNS() [][]string {
 	result := make([][]string, 0, len(c.DNS))
 	for i, x := range c.DNS {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
@@ -25,7 +25,7 @@ func (c *Config) GetDNS() [][]string {
 // DelDNS 删除DNS
 func (c *Config) DelDNS(key string) {
 	l := len(c.DNS)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}

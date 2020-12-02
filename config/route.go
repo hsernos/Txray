@@ -1,9 +1,7 @@
 package config
 
-
-import "v3ray/tool"
-import log "v3ray/logger"
-
+import "Tv2ray/tools"
+import log "Tv2ray/logger"
 
 // AddDirectIP 添加一条直连IP规则
 func (c *Config) AddDirectIP(data string) {
@@ -35,7 +33,7 @@ func (c *Config) AddProxyDomain(data string) {
 
 // AddBlockIP 添加一条禁止IP规则
 func (c *Config) AddBlockIP(data string) {
-	
+
 	defer c.SaveJSON()
 	c.Block.IP = append(c.Block.IP, data)
 	log.Info("添加一条禁止规则 [", data, "]")
@@ -48,12 +46,11 @@ func (c *Config) AddBlockDomain(data string) {
 	log.Info("添加一条禁止规则 [", data, "]")
 }
 
-
 // GetDirectIP 获取直连IP规则
 func (c *Config) GetDirectIP() [][]string {
 	result := make([][]string, 0, len(c.Direct.IP))
 	for i, x := range c.Direct.IP {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
@@ -62,7 +59,7 @@ func (c *Config) GetDirectIP() [][]string {
 func (c *Config) GetDirectDomain() [][]string {
 	result := make([][]string, 0, len(c.Direct.Domain))
 	for i, x := range c.Direct.Domain {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
@@ -71,7 +68,7 @@ func (c *Config) GetDirectDomain() [][]string {
 func (c *Config) GetProxyIP() [][]string {
 	result := make([][]string, 0, len(c.Proxy.IP))
 	for i, x := range c.Proxy.IP {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
@@ -80,7 +77,7 @@ func (c *Config) GetProxyIP() [][]string {
 func (c *Config) GetProxyDomain() [][]string {
 	result := make([][]string, 0, len(c.Proxy.Domain))
 	for i, x := range c.Proxy.Domain {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
@@ -89,7 +86,7 @@ func (c *Config) GetProxyDomain() [][]string {
 func (c *Config) GetBlockIP() [][]string {
 	result := make([][]string, 0, len(c.Block.IP))
 	for i, x := range c.Block.IP {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
@@ -98,16 +95,16 @@ func (c *Config) GetBlockIP() [][]string {
 func (c *Config) GetBlockDomain() [][]string {
 	result := make([][]string, 0, len(c.Block.Domain))
 	for i, x := range c.Block.Domain {
-		result = append(result,[]string{tool.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i), x})
 	}
 	return result
 }
 
 // DelDirectIP 删除直连IP规则
 func (c *Config) DelDirectIP(key string) {
-	
+
 	l := len(c.Direct.IP)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}
@@ -132,7 +129,7 @@ func (c *Config) DelDirectIP(key string) {
 // DelDirectDomain 删除直连Domain规则
 func (c *Config) DelDirectDomain(key string) {
 	l := len(c.Direct.Domain)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}
@@ -157,7 +154,7 @@ func (c *Config) DelDirectDomain(key string) {
 // DelProxyIP 删除代理IP规则
 func (c *Config) DelProxyIP(key string) {
 	l := len(c.Proxy.IP)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}
@@ -182,7 +179,7 @@ func (c *Config) DelProxyIP(key string) {
 // DelProxyDomain 删除代理Domain规则
 func (c *Config) DelProxyDomain(key string) {
 	l := len(c.Proxy.Domain)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}
@@ -207,7 +204,7 @@ func (c *Config) DelProxyDomain(key string) {
 // DelBlockIP 删除禁止IP规则
 func (c *Config) DelBlockIP(key string) {
 	l := len(c.Block.IP)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}
@@ -232,7 +229,7 @@ func (c *Config) DelBlockIP(key string) {
 // DelBlockDomain 删除禁止Domain规则
 func (c *Config) DelBlockDomain(key string) {
 	l := len(c.Block.Domain)
-	indexs := tool.IndexDeal(key, l)
+	indexs := tools.IndexDeal(key, l)
 	if len(indexs) == 0 {
 		return
 	}

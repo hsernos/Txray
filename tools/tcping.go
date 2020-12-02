@@ -1,4 +1,4 @@
-package tool
+package tools
 
 import (
 	"net"
@@ -21,7 +21,6 @@ func Dial(address string, timeout time.Duration) error {
 }
 
 func tcping(host string, port int) (t float32, ok bool) {
-
 	start := time.Now()
 	err := Dial(host+":"+strconv.Itoa(port), 3*time.Second)
 	elapsed := time.Since(start)
@@ -52,7 +51,7 @@ func Tcping(host string, port int, count int) (max float32, min float32, avg flo
 	}
 	wg.Wait()
 	if len(*times) == 0 {
-		return 0, 0, 0, count
+		return -1, -1, -1, count
 	}
 	MIN := (*times)[0]
 	MAX := (*times)[0]

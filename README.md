@@ -1,6 +1,7 @@
-# v3ray
-v3ray是一款v2ray 终端版客户端，使用go编写.
-项目地址：https://github.com/hsernos/v3ray
+# Tv2ray
+Tv2ray是一款 v2ray 终端版客户端，使用go编写.
+项目地址：https://github.com/hsernos/Tv2ray
+Project V core https://github.com/v2fly/v2ray-core/releases
 
 ## 注意
 此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
@@ -15,7 +16,6 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
 - [命令列表及说明](#命令列表及说明)
   
   * [查看基本设置帮助文档](#查看基本设置帮助文档)
-    
     + [查看基本设置](#查看基本设置)
     + [修改基本设置](#修改基本设置)
   * [查看订阅帮助文档](#查看订阅帮助文档)
@@ -59,7 +59,7 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
    Windows下,运行 `set GOPROXY=https://goproxy.cn,direct`
 
 3. 编译常用平台
-   运行 `go build v3ray.go`, 可编译当前平台的版本
+   运行 `go build Tv2ray.go`, 可编译当前平台的版本
    运行 `python3 build.py`, 可编译常用平台的版本
 
 4. 编译其他平台
@@ -67,26 +67,25 @@ v3ray是一款v2ray 终端版客户端，使用go编写.
 
    Linux/Darwin 例子: 编译 Windows 下的 64 位程序
 
-   `GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build v3ray.go`
+   `GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build Tv2ray.go`
    
    Windows 例子: 编译 Linux 下的 32 位程序
    
    `set GOOS=linux`
    `set GOARCH=386`
    `set CGO_ENABLED=0`
-   `go build v3ray.go`
+   `go build Tv2ray.go`
 
 
 # 下载/运行 说明
 
-- 需要先下载[v2ray-core](https://github.com/v2ray/v2ray-core/releases)，解压后重命名文件夹为`v2ray`
-- Go语言程序, 可直接在[发布页](https://github.com/hsernos/v3ray/releases)下载, 将上一步的v2ray文件夹移动到解压后的文件夹下
+需要先下载解压[v2ray-core](https://github.com/v2fly/v2ray-core/releases)，然后在[发布页](https://github.com/hsernos/Tv2ray/releases)下载解压Tv2ray, 将上一步的v2ray文件夹移动到解压后的文件夹下
 
 
 
 # 命令列表及说明
 
-> 在终端中运行v3ray进入shell交互 (可以将v3ray放在v2ray所在目录下，就可以在终端直接运行进入)
+> 在终端中运行Tv2ray进入shell交互 (可以将Tv2ray放在v2ray所在目录下，就可以在终端直接运行进入)
 
 
 
@@ -281,21 +280,23 @@ update-node Flags
 ## 查看节点帮助文档
 
 ```
->>> node
+>>> node 
 
 node {commands} [flags] ...
 
 Commands:
     add     [flags]                    添加节点
-    show    [索引范围 | tcping]         查看节点信息, 默认索引范围为all, tcping可以按延迟排序查看
+    show    [索引范围 | test]           查看节点信息, 默认索引范围为all, test可以按延迟排序查看
+    info    {索引}                     查看某个节点详细信息
     del     {索引范围}                  根据索引参数删除节点
     export  {索引范围}                  导出为vmess链接
     tcping  [索引范围]                  tcping指定索引节点, 默认索引范围为all
     find    {关键词}                    查找节点，有中文关键词需要用单引号或双引号括起来
 
 add Flags
-    -v, --vmess {vmess链接}             导入vmess://数据
-    -f, --file  {文件绝对路径}           从文件批量导入vmess://数据
+    -v, --vmess   {vmess链接}            导入vmess://数据
+    -f, --file    {文件绝对路径}          从文件批量导入vmess://数据
+    -s, --subfile {文件绝对路径}          从订阅文件解析导入vmess://数据
 ```
 
 ### 添加节点
@@ -307,6 +308,9 @@ add Flags
 # 由vmess链接文件批量添加节点
 >>> node add -f /home/vmess.txt
 
+# 由订阅文件解析添加节点，可以将订阅文件下载下来然后从本地导入
+>>> node add -s /home/subtext.txt
+
 # 手动添加一个节点
 >>> node add
 ```
@@ -317,8 +321,16 @@ add Flags
 # 查看前20个节点
 >>> node show 0-19
 
+# 查看某个节点的全部信息
+>>> node info 0
+
 # 查看按tcp延迟排序的节点
->>> node show tcping
+>>> node show test
+
+# 或者
+>>> node show t
+
+
 ```
 
 ### 删除节点
@@ -442,11 +454,14 @@ Commands:
 # 启动或重启索引为3的节点
 >>> run 3
 
-# 自动选择所有节点中延迟最小的那个节点
+# 自动选择所有节点中访问YouTube延迟最小的那个节点
 >>> run all
 
-# 自动选择0-10中延迟最小的那个节点
+# 自动选择0-10中访问YouTube延迟最小的那个节点
 >>> run 0-10
+
+# 自动选择tcp延迟最小的10个中访问YouTube延迟最小的那个节点
+>>> run t10
 ```
 
 
