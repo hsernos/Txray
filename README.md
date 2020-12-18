@@ -106,7 +106,7 @@ alter Flags
     -u, --udp        {true|false}      是否启用udp
     -s, --sniffing   {true|false}      是否启用流量监听
     -l, --lanconn    {true|false}      是否启用局域网连接
-    -m, --mux        {true|false}      是否启用局域网连接
+    -m, --mux        {true|false}      是否启用多路复用
     -b, --bypass     {true|false}      是否启用绕过局域网及大陆
     -r, --route      {1|2|3}           设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}
 ```

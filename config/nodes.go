@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// 获取tcp延迟最小的num个节点
 func (c *Config) GetNodeTestSort(num int) []int {
 	var indexs []int
 	list := make(tools.Sorts, 0)
@@ -95,6 +96,7 @@ func (c *Config) ExportNodes(key string) []string {
 	return result
 }
 
+// 获取节点代理访问外网的延迟
 func (c *Config) TestNode(url string) (string, string) {
 	start := time.Now()
 	res, e := tools.GetBySocks5Proxy(url, "127.0.0.1", c.Settings.Port, 10)
@@ -106,7 +108,7 @@ func (c *Config) TestNode(url string) (string, string) {
 	return fmt.Sprintf("%4.0fms", float32(elapsed.Nanoseconds())/1e6), res.Status
 }
 
-// ping node
+// 测试节点的tcp延迟（多线程）
 func (c *Config) PingNodes(key string) {
 	l := len(c.Nodes)
 	indexs := tools.IndexDeal(key, l)
@@ -222,6 +224,11 @@ func (c *Config) DelNodes(key string) {
 	for i, y := range c.Nodes {
 		if j < len(indexs) {
 			if i == indexs[j] {
+				if indexs[j] == int(c.Index) {
+					c.Index = 0
+				} else if indexs[j] < int(c.Index) {
+					c.Index -= 1
+				}
 				j++
 			} else {
 				result = append(result, y)
