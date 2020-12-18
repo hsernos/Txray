@@ -40,7 +40,7 @@ func GetV2rayPath() string {
 	return files[0]
 }
 
-// Start 开启v2ray服务
+// 开启v2ray服务
 func (c *Config) Start(i int) bool {
 	if i >= len(c.Nodes) {
 		log.Warn("没有该节点")
@@ -79,7 +79,7 @@ func (c *Config) Start(i int) bool {
 	return true
 }
 
-// Stop 停止v2ray服务
+// 停止v2ray服务
 func (c *Config) Stop() {
 	if c.exeCmd != nil {
 		err := c.exeCmd.Process.Kill()

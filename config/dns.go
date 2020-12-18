@@ -5,7 +5,7 @@ import (
 	"Tv2ray/tools"
 )
 
-// AddDNS 添加一条dns记录
+// 添加一条dns记录
 func (c *Config) AddDNS(dns string) {
 
 	defer c.SaveJSON()
@@ -13,7 +13,7 @@ func (c *Config) AddDNS(dns string) {
 	log.Info("添加一条DNS [", dns, "]")
 }
 
-// GetDNS 获取dns记录
+// 获取dns记录
 func (c *Config) GetDNS() [][]string {
 	result := make([][]string, 0, len(c.DNS))
 	for i, x := range c.DNS {
@@ -22,7 +22,7 @@ func (c *Config) GetDNS() [][]string {
 	return result
 }
 
-// DelDNS 删除DNS
+// 删除DNS
 func (c *Config) DelDNS(key string) {
 	l := len(c.DNS)
 	indexs := tools.IndexDeal(key, l)

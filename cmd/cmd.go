@@ -11,17 +11,17 @@ import (
 
 var configObj config.Config
 
-// InitConfig 初始化配置
+// 初始化配置
 func InitConfig() {
 	configObj = config.NewConfig()
 }
 
-// Kill 关闭v2ray进程
+// 关闭v2ray进程
 func Kill() {
 	configObj.Stop()
 }
 
-// InitShell 初始化
+// 初始化
 func InitShell(shell *ishell.Shell) {
 	setting := &ishell.Cmd{
 		Name: "setting",

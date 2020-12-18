@@ -108,14 +108,14 @@ func (c *Config) init() {
 
 }
 
-// NewConfig 得到实例
+// 获取实例
 func NewConfig() Config {
 	c := Config{}
 	c.init()
 	return c
 }
 
-// SaveJSON 将数据保存到json文件
+// 将数据保存到json文件
 func (c *Config) SaveJSON() {
 	file := tools.PathJoin(tools.GetRunPath(), "Tv2ray.json")
 	err := tools.WriteJSON(*c, file)
@@ -124,6 +124,7 @@ func (c *Config) SaveJSON() {
 	}
 }
 
+// 节点数据转化
 func nodeToVmessobj(n *node) *vmess.Vmess {
 	v := vmess.Vmess{}
 	v.V = n.ConfigVersion

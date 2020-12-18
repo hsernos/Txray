@@ -105,7 +105,9 @@ func (c *Config) TestNode(url string) (string, string) {
 		log.Warn(e)
 		return "-1ms", "Error"
 	}
-	return fmt.Sprintf("%4.0fms", float32(elapsed.Nanoseconds())/1e6), res.Status
+	result, status := fmt.Sprintf("%4.0fms", float32(elapsed.Nanoseconds())/1e6), res.Status
+	res.Body.Close()
+	return result, status
 }
 
 // 测试节点的tcp延迟（多线程）

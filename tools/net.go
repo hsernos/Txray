@@ -9,7 +9,7 @@ import (
 )
 
 // 通过http代理访问网站
-func GetByHTTPProxy(objUrl, proxyAddress string, proxyPort, timeOut uint) (resp *http.Response, err error) {
+func GetByHTTPProxy(objUrl, proxyAddress string, proxyPort, timeOut uint) (*http.Response, error) {
 	proxy := func(_ *http.Request) (*url.URL, error) {
 		return url.Parse(fmt.Sprintf("http://%s:%d", proxyAddress, proxyPort))
 	}
@@ -22,7 +22,7 @@ func GetByHTTPProxy(objUrl, proxyAddress string, proxyPort, timeOut uint) (resp 
 }
 
 // 通过Socks5代理访问网站
-func GetBySocks5Proxy(objUrl, proxyAddress string, proxyPort, timeOut uint) (resp *http.Response, err error) {
+func GetBySocks5Proxy(objUrl, proxyAddress string, proxyPort, timeOut uint) (*http.Response, error) {
 
 	proxy := func(_ *http.Request) (*url.URL, error) {
 		return url.Parse(fmt.Sprintf("socks5://%s:%d", proxyAddress, proxyPort))
@@ -36,7 +36,7 @@ func GetBySocks5Proxy(objUrl, proxyAddress string, proxyPort, timeOut uint) (res
 }
 
 // 不通过代理访问网站
-func GetNoProxy(url string, timeOut uint) (resp *http.Response, err error) {
+func GetNoProxy(url string, timeOut uint) (*http.Response, error) {
 	client := &http.Client{
 		Timeout: time.Duration(timeOut) * time.Second,
 	}

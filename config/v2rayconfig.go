@@ -5,7 +5,7 @@ import (
 	"Tv2ray/tools"
 )
 
-// GenConfig 生成v2ray-core配置文件
+// 生成v2ray-core配置文件
 func (c *Config) GenConfig() {
 	path := tools.PathJoin(tools.GetRunPath(), "config.json")
 	var conf = map[string]interface{}{

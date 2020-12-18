@@ -2,21 +2,21 @@ package config
 
 import log "Tv2ray/logger"
 
-// SetPort 设置本地监听端口
+// 设置本地监听端口
 func (c *Config) SetPort(port uint) {
 	defer c.SaveJSON()
 	c.Settings.Port = port
 	log.Info("设置本地socks5监听端口为 [", port, "]")
 }
 
-// SetHttpPort 设置本地监听端口
+// 设置本地监听端口
 func (c *Config) SetHttpPort(port uint) {
 	defer c.SaveJSON()
 	c.Settings.Http = port
 	log.Info("设置本地http监听端口为 [", port, "]")
 }
 
-// SetUDP 设置是否允许udp转发
+// 设置是否允许udp转发
 func (c *Config) SetUDP(udp bool) {
 	defer c.SaveJSON()
 	c.Settings.UDP = udp
@@ -28,7 +28,7 @@ func (c *Config) SetUDP(udp bool) {
 
 }
 
-// SetSniffing 设置是否允许流量监听
+// 设置是否允许流量监听
 func (c *Config) SetSniffing(sniffing bool) {
 	defer c.SaveJSON()
 	c.Settings.Sniffing = sniffing
@@ -39,7 +39,7 @@ func (c *Config) SetSniffing(sniffing bool) {
 	}
 }
 
-// SetMux 设置是否允许多路复用
+// 设置是否允许多路复用
 func (c *Config) SetMux(mux bool) {
 	defer c.SaveJSON()
 	c.Settings.Mux = mux
@@ -50,7 +50,7 @@ func (c *Config) SetMux(mux bool) {
 	}
 }
 
-// SetLANConn 设置是否允许局域网的连接
+// 设置是否允许局域网的连接
 func (c *Config) SetLANConn(conn bool) {
 	defer c.SaveJSON()
 	c.Settings.AllowLANConn = conn
@@ -61,7 +61,7 @@ func (c *Config) SetLANConn(conn bool) {
 	}
 }
 
-// SetBypassLanAndContinent 设置是否绕过局域网和大陆
+// 设置是否绕过局域网和大陆
 func (c *Config) SetBypassLanAndContinent(bypass bool) {
 	defer c.SaveJSON()
 	c.Settings.BypassLanAndContinent = bypass
@@ -73,7 +73,7 @@ func (c *Config) SetBypassLanAndContinent(bypass bool) {
 	}
 }
 
-// SetDomainStrategy 设置路由策略
+// 设置路由策略
 func (c *Config) SetDomainStrategy(mode int) {
 	defer c.SaveJSON()
 	domainStrategy := c.Settings.DomainStrategy

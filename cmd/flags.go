@@ -1,12 +1,11 @@
 package cmd
 
-
-// FlagsParse 参数解析
-func FlagsParse(args []string, keys map[string]string) map[string]string  {
+// 参数解析
+func FlagsParse(args []string, keys map[string]string) map[string]string {
 	resultMap := make(map[string]string)
 	key := "data"
 	for _, x := range args {
-		if len(x) >= 2{
+		if len(x) >= 2 {
 			if x[:2] == "--" {
 				key = x[2:]
 				resultMap[key] = ""

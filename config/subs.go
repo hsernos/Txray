@@ -27,12 +27,14 @@ func (c *Config) AddNodeBySub(port uint) {
 			data := ""
 			if port > 65535 {
 				res, e := tools.GetNoProxy(x.URL, 10)
+
 				if e != nil {
 					log.Warn(e)
 					break
 				}
 				data = tools.ReadDate(res)
 				log.Info("访问 [", x.URL, "] -- ", res.Status)
+				res.Body.Close()
 			} else {
 				res, e := tools.GetBySocks5Proxy(x.URL, "127.0.0.1", c.Settings.Port, 10)
 				if e != nil {
@@ -41,6 +43,7 @@ func (c *Config) AddNodeBySub(port uint) {
 				}
 				data = tools.ReadDate(res)
 				log.Info("访问 [", x.URL, "] -- ", res.Status)
+				res.Body.Close()
 			}
 			vmessList := vmess.Sub2links(data)
 			Objs := vmess.Links2vmessObjs(vmessList)

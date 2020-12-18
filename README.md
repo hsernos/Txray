@@ -1,7 +1,9 @@
 # Tv2ray
-Tv2ray是一款 v2ray 终端版客户端，使用go编写.
+Tv2ray是一款 v2ray 终端版客户端，使用go编写。
+
 项目地址：https://github.com/hsernos/Tv2ray
-Project V core https://github.com/v2fly/v2ray-core/releases
+
+Project V core： https://github.com/v2fly/v2ray-core/releases
 
 ## 注意
 此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
@@ -477,9 +479,8 @@ Commands:
 # 已知问题
 
 - 少数vmss链接导入失败
+- 少数订阅链接更新节点失败，可以下载然后从本地订阅文本导入节点（node add --sub {绝对路径}）, 或者使用本地代理导入（sub update-node -p [端口]）
 
 # 交流反馈
 
 提交Issue: [Issues](https://github.com/hsernos/v3ray/issues)
-
-邮箱: hsernos@163.com
