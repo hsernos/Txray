@@ -1,58 +1,65 @@
 package tools
 
 import (
-	"sort"
 	"strings"
 )
 
-// IndexDeal 类似切片，返回索引列表
-func IndexDeal(key string, max int) []int {
-	if max == 0 {
+// 解析索引参数(关键字从1开始，返回的结果从0开始)
+func IndexDeal(key string, length int) []int {
+	if length == 0 {
 		return []int{}
 	}
+	// 处理关键字 all
 	if key == "all" {
-		result := make([]int, 0, max)
-		for i := 0; i < max; i++ {
-			if i >= 0 {
-				result = append(result, i)
-			}
+		result := make([]int, length, length)
+		for i := 0; i < length; i++ {
+			result[i] = i
 		}
 		return result
-	} else if strings.Contains(key, ",") {
-		result := make([]int, 0, 30)
-		for _, x := range strings.Split(key, ",") {
-			for _, y := range IndexDeal(x, max) {
-				result = append(result, y)
-			}
-		}
-		result = RemoveRep(result)
-		sort.Ints(result)
-		return result
-	} else if strings.Contains(key, "-") {
-		l := strings.Split(key, "-")
-		if len(l) == 2 && IsInt(l[0]) && IsInt(l[1]) {
-			a, b := StrToInt(l[0]), StrToInt(l[1])
-			if a > b {
-				a, b = b, a
-			}
-			result := make([]int, 0, b-a+1)
-			for i := a; i <= b; i++ {
-				if i < max && i >= 0 {
-					result = append(result, i)
+	}
+
+	indexList := make([]bool, length, length)
+	for _, item := range strings.Split(key, ",") {
+		item = strings.Trim(item, " ")
+		if strings.Contains(item, "-") {
+			k := strings.Split(item, "-")
+			if len(k) == 2 {
+				start, end := 1, length
+				if k[0] == "" && IsUint(k[1]) {
+					end = StrToInt(k[1])
+				} else if IsUint(k[0]) && k[1] == "" {
+					start = StrToInt(k[0])
+				} else if IsUint(k[0]) && IsUint(k[1]) {
+					start, end = StrToInt(k[0]), StrToInt(k[1])
+					if start > end {
+						start, end = end, start
+					}
+				}
+				// 处理越界
+				if start < 1 {
+					start = 1
+				}
+				if end > length {
+					end = length
+				}
+				for i := start - 1; i < end; i++ {
+					indexList[i] = true
 				}
 			}
-			return result
-		} else if len(l) == 2 && IsInt(l[0]) && l[1] == "" {
-			return IndexDeal(key+IntToStr(max-1), max)
-
-		} else if len(l) == 2 && IsInt(l[1]) && l[0] == "" {
-			return IndexDeal("0"+key, max)
-		}
-	} else if IsInt(key) {
-		num := StrToInt(key)
-		if num < max && num >= 0 {
-			return []int{int(num)}
+		} else if IsUint(item) {
+			i := StrToInt(item)
+			if i > 0 && i <= length {
+				indexList[i-1] = true
+			}
 		}
 	}
-	return []int{}
+
+	// 生成索引数组（从0开始）
+	result := make([]int, 0, length)
+	for i, isSelect := range indexList {
+		if isSelect {
+			result = append(result, i)
+		}
+	}
+	return result
 }

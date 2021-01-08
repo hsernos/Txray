@@ -62,9 +62,23 @@ func ShowSub(writer io.Writer, datas ...[]string) {
 	table.Render()
 }
 
-func ShowRouter(writer io.Writer, datas ...[]string) {
+func ShowIPRouter(writer io.Writer, datas ...[]string) {
 	table := tablewriter.NewWriter(writer)
-	table.SetHeader([]string{"索引", "规则"})
+	table.SetHeader([]string{"索引", "IP规则"})
+
+	center := tablewriter.ALIGN_CENTER
+	table.SetColumnAlignment([]int{center, center})
+
+	//fgGreen := tablewriter.Color(tablewriter.FgGreenColor)
+	//table.SetHeaderColor(fgGreen, fgGreen)
+
+	table.AppendBulk(datas)
+	table.Render()
+}
+
+func ShowDomainRouter(writer io.Writer, datas ...[]string) {
+	table := tablewriter.NewWriter(writer)
+	table.SetHeader([]string{"索引", "Domain规则"})
 
 	center := tablewriter.ALIGN_CENTER
 	table.SetColumnAlignment([]int{center, center})

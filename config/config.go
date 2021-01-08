@@ -103,7 +103,7 @@ func (c *Config) init() {
 		c.KcpSetting.WriteBufferSize = 2
 		c.Index = 0
 
-		c.DNS = []string{"223.5.5.5", "223.6.6.6"}
+		c.DNS = []string{"223.5.5.5", "8.8.8.8"}
 	}
 
 }

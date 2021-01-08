@@ -17,7 +17,7 @@ func (c *Config) AddDNS(dns string) {
 func (c *Config) GetDNS() [][]string {
 	result := make([][]string, 0, len(c.DNS))
 	for i, x := range c.DNS {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }

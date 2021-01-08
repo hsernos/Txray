@@ -44,7 +44,7 @@ func (c *Config) GetNodes(key string) [][]string {
 	for _, x := range indexs {
 		node := c.Nodes[x]
 		result = append(result, []string{
-			tools.IntToStr(x),
+			tools.IntToStr(x + 1),
 			node.Remarks,
 			node.Address,
 			tools.UintToStr(node.Port),
@@ -68,7 +68,7 @@ func (c *Config) FindNodes(key string) [][]string {
 	for i, node := range c.Nodes {
 		if strings.Index(node.Remarks, key) >= 0 {
 			result = append(result, []string{
-				tools.IntToStr(i),
+				tools.IntToStr(i + 1),
 				node.Remarks,
 				node.Address,
 				tools.UintToStr(node.Port),
@@ -81,7 +81,7 @@ func (c *Config) FindNodes(key string) [][]string {
 
 // 获取选定节点索引
 func (c *Config) GetNodeIndex() uint {
-	return c.Index
+	return c.Index + 1
 }
 
 // 导出node数据
@@ -149,7 +149,7 @@ func (c *Config) AddNodeByFile(path string) {
 		links := tools.ReadFile(path)
 		log.Info("读取文件完成，解析vmess链接如下")
 		for index, x := range links {
-			log.Info(fmt.Sprintf("%3d ", index), x)
+			log.Info(fmt.Sprintf("%3d ", index+1), x)
 		}
 		c.AddNodeByVmessLinks(links)
 	} else {

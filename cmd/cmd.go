@@ -4,6 +4,7 @@ import (
 	"Tv2ray/config"
 	log "Tv2ray/logger"
 	"Tv2ray/tools"
+	"fmt"
 	"github.com/abiosoft/ishell"
 	"os"
 	"strings"
@@ -72,41 +73,41 @@ func InitShell(shell *ishell.Shell) {
 			}
 			d, ok = r["udp"]
 			if ok {
-				if d == "true" {
+				if d == "y" {
 					configObj.SetUDP(true)
-				} else if d == "false" {
+				} else if d == "n" {
 					configObj.SetUDP(false)
 				}
 			}
 			d, ok = r["sniffing"]
 			if ok {
-				if d == "true" {
+				if d == "y" {
 					configObj.SetSniffing(true)
-				} else if d == "false" {
+				} else if d == "n" {
 					configObj.SetSniffing(false)
 				}
 			}
 			d, ok = r["lanconn"]
 			if ok {
-				if d == "true" {
+				if d == "y" {
 					configObj.SetLANConn(true)
-				} else if d == "false" {
+				} else if d == "n" {
 					configObj.SetLANConn(false)
 				}
 			}
 			d, ok = r["mux"]
 			if ok {
-				if d == "true" {
+				if d == "y" {
 					configObj.SetMux(true)
-				} else if d == "false" {
+				} else if d == "n" {
 					configObj.SetMux(false)
 				}
 			}
 			d, ok = r["bypass"]
 			if ok {
-				if d == "true" {
+				if d == "y" {
 					configObj.SetBypassLanAndContinent(true)
-				} else if d == "false" {
+				} else if d == "n" {
 					configObj.SetBypassLanAndContinent(false)
 				}
 			}
@@ -259,27 +260,28 @@ func InitShell(shell *ishell.Shell) {
 				r := FlagsParse(c.Args, nil)
 				d, ok := r["data"]
 				if ok {
-					if tools.IsUint(d) {
-						node := configObj.GetNode(tools.StrToUint(d))
-						if node == nil {
+					if tools.IsUint(d) && tools.StrToUint(d) > 0 {
+
+						n := configObj.GetNode(tools.StrToUint(d) - 1)
+						if n == nil {
 							log.Warn(d, "超出了索引范围")
 						} else {
 							c.Println()
 							c.Printf("%7s: %s\n", "索引", d)
-							c.Printf("%7s: %s\n", "别名", node.Remarks)
-							c.Printf("%7s: %s\n", "地址", node.Address)
-							c.Printf("%7s: %d\n", "端口", node.Port)
-							c.Printf("%7s: %s\n", "用户ID", node.ID)
-							c.Printf("%7s: %d\n", "额外ID", node.AlterID)
-							c.Printf("%5s: %s\n", "加密方式", node.Security)
-							c.Printf("%5s: %s\n", "伪装类型", node.HeaderType)
-							c.Printf("%5s: %s\n", "伪装域名", node.RequestHost)
-							c.Printf("%9s: %s\n", "path", node.Path)
-							c.Printf("%5s: %s\n", "安全传输", node.StreamSecurity)
+							c.Printf("%7s: %s\n", "别名", n.Remarks)
+							c.Printf("%7s: %s\n", "地址", n.Address)
+							c.Printf("%7s: %d\n", "端口", n.Port)
+							c.Printf("%7s: %s\n", "用户ID", n.ID)
+							c.Printf("%7s: %d\n", "额外ID", n.AlterID)
+							c.Printf("%5s: %s\n", "加密方式", n.Security)
+							c.Printf("%5s: %s\n", "伪装类型", n.HeaderType)
+							c.Printf("%5s: %s\n", "伪装域名", n.RequestHost)
+							c.Printf("%9s: %s\n", "path", n.Path)
+							c.Printf("%5s: %s\n", "安全传输", n.StreamSecurity)
 							c.Println()
 						}
 					} else {
-						log.Warn(d, "不是一个非负整数")
+						log.Warn(d, "没有此索引对应的节点")
 					}
 				} else {
 					log.Info("还需要输入一个索引")
@@ -387,9 +389,9 @@ func InitShell(shell *ishell.Shell) {
 				}
 				d, ok = r["using"]
 				if ok {
-					if d == "true" {
+					if d == "y" {
 						using = "true"
-					} else if d == "false" {
+					} else if d == "n" {
 						using = "false"
 					}
 				}
@@ -420,15 +422,16 @@ func InitShell(shell *ishell.Shell) {
 			r := FlagsParse(c.Args, map[string]string{
 				"p": "proxy",
 			})
-			d, ok := r["proxy"]
-			if ok {
-				if tools.IsUint(d) {
-					configObj.AddNodeBySub(tools.StrToUint(d))
+			key, _ := r["data"]
+			proxyPort, isProxy := r["proxy"]
+			if isProxy {
+				if tools.IsUint(proxyPort) {
+					configObj.AddNodeBySub(key, tools.StrToUint(proxyPort))
 				} else {
-					configObj.AddNodeBySub(configObj.Settings.Port)
+					configObj.AddNodeBySub(key, configObj.Settings.Port)
 				}
 			} else {
-				configObj.AddNodeBySub(1000000)
+				configObj.AddNodeBySub(key, 1000000)
 			}
 
 		},
@@ -556,45 +559,69 @@ func InitShell(shell *ishell.Shell) {
 	})
 
 	route.AddCmd(&ishell.Cmd{
-		Name: "show-proxy-ip",
-		Help: "查看代理IP规则",
+		Name: "show",
+		Help: "查看全部规则",
 		Func: func(c *ishell.Context) {
-			ShowRouter(os.Stdout, configObj.GetProxyIP()...)
+			c.Println()
+			c.Println("代理路由规则：")
+			c.Println("==============================================")
+			ShowIPRouter(os.Stdout, configObj.GetProxyIP()...)
+			c.Println()
+			ShowDomainRouter(os.Stdout, configObj.GetProxyDomain()...)
+			c.Println("==============================================\n")
+
+			c.Println("直连路由规则")
+			c.Println("==============================================")
+			ShowIPRouter(os.Stdout, configObj.GetDirectIP()...)
+			c.Println()
+			ShowDomainRouter(os.Stdout, configObj.GetDirectDomain()...)
+			c.Println("==============================================\n")
+
+			c.Println("禁止路由规则")
+			c.Println("==============================================")
+			ShowIPRouter(os.Stdout, configObj.GetBlockIP()...)
+			c.Println()
+			ShowDomainRouter(os.Stdout, configObj.GetBlockDomain()...)
+			c.Println("==============================================\n")
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
-		Name: "show-proxy-domain",
-		Help: "查看代理Domain规则",
+		Name: "show-proxy",
+		Help: "查看代理规则",
 		Func: func(c *ishell.Context) {
-			ShowRouter(os.Stdout, configObj.GetProxyDomain()...)
+			c.Println()
+			c.Println("代理路由规则：")
+			c.Println("==============================================")
+			ShowIPRouter(os.Stdout, configObj.GetProxyIP()...)
+			c.Println()
+			ShowDomainRouter(os.Stdout, configObj.GetProxyDomain()...)
+			c.Println("==============================================\n")
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
-		Name: "show-direct-ip",
-		Help: "查看直连IP规则",
+		Name: "show-direct",
+		Help: "查看直连规则",
 		Func: func(c *ishell.Context) {
-			ShowRouter(os.Stdout, configObj.GetDirectIP()...)
+			c.Println()
+			c.Println("直连路由规则")
+			c.Println("==============================================")
+			ShowIPRouter(os.Stdout, configObj.GetDirectIP()...)
+			c.Println()
+			ShowDomainRouter(os.Stdout, configObj.GetDirectDomain()...)
+			c.Println("==============================================\n")
 		},
 	})
 	route.AddCmd(&ishell.Cmd{
-		Name: "show-direct-domain",
-		Help: "查看直连Domain规则",
+		Name: "show-block",
+		Help: "查看禁止规则",
 		Func: func(c *ishell.Context) {
-			ShowRouter(os.Stdout, configObj.GetDirectDomain()...)
-		},
-	})
-	route.AddCmd(&ishell.Cmd{
-		Name: "show-block-ip",
-		Help: "查看禁止IP规则",
-		Func: func(c *ishell.Context) {
-			ShowRouter(os.Stdout, configObj.GetBlockIP()...)
-		},
-	})
-	route.AddCmd(&ishell.Cmd{
-		Name: "show-block-domain",
-		Help: "查看禁止Domain规则",
-		Func: func(c *ishell.Context) {
-			ShowRouter(os.Stdout, configObj.GetBlockDomain()...)
+			c.Println()
+			c.Println("禁止路由规则")
+			c.Println("==============================================")
+			ShowIPRouter(os.Stdout, configObj.GetBlockIP()...)
+			c.Println()
+			ShowDomainRouter(os.Stdout, configObj.GetBlockDomain()...)
+			c.Println("==============================================\n")
 		},
 	})
 
@@ -694,13 +721,14 @@ func InitShell(shell *ishell.Shell) {
 			r := FlagsParse(c.Args, nil)
 			d, ok := r["data"]
 			configObj.Stop()
-			if ok && tools.IsInt(d) {
-				if configObj.Start(tools.StrToInt(d)) {
+			if ok && tools.IsUint(d) {
+				if configObj.Start(tools.StrToInt(d) - 1) {
 					t, status := configObj.TestNode("https://www.youtube.com")
 					log.Info(status, " [ https://www.youtube.com ] 延迟：", strings.Trim(t, " "))
 				}
 
 			} else if ok && (len(tools.IndexDeal(d, len(configObj.Nodes))) >= 1 || (len(d) > 1 && d[0] == 't' && tools.IsUint(d[1:]))) {
+				fmt.Println(d)
 				min := 100000
 				index := -1
 				var indexs []int
@@ -713,7 +741,8 @@ func InitShell(shell *ishell.Shell) {
 					l := len(configObj.Nodes)
 					indexs = tools.IndexDeal(d, l)
 				}
-				log.Info("================================================================")
+
+				log.Info("=====================================================================")
 				for _, x := range indexs {
 					if configObj.Start(x) {
 						t, status := configObj.TestNode("https://www.youtube.com")
@@ -726,9 +755,9 @@ func InitShell(shell *ishell.Shell) {
 					}
 					configObj.Stop()
 				}
-				log.Info("================================================================")
+				log.Info("=====================================================================")
 				if index != -1 {
-					log.Info("延迟最小的节点索引为：", index, "，延迟：", min, "ms")
+					log.Info("延迟最小的节点索引为：", index+1, "，延迟：", min, "ms")
 					configObj.Start(index)
 				} else {
 					log.Info("所选节点全部不能访问外网")

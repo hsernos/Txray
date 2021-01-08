@@ -46,7 +46,7 @@ func (c *Config) Start(i int) bool {
 		log.Warn("没有该节点")
 		return false
 	} else if i < 0 {
-		if int(c.GetNodeIndex()) >= len(c.Nodes) {
+		if int(c.Index) >= len(c.Nodes) {
 			log.Warn("该节点已删除")
 			return false
 		}
@@ -68,13 +68,13 @@ func (c *Config) Start(i int) bool {
 	time.Sleep(time.Duration(500) * time.Millisecond)
 
 	if *code > 0 {
-		log.Error("开启v2ray服务失败,查看下面报错信息来检查出错问题")
+		log.Error("开启v2ray服务失败, 查看下面报错信息来检查出错问题")
 		for _, x := range *lines {
 			log.Error(x)
 		}
 		return false
 	} else {
-		log.Info("开启v2ray服务成功, 监听socks5/http端口：", c.Settings.Port, "/", c.Settings.Http, "，选定节点索引：", c.Index)
+		log.Info("开启v2ray服务成功, 监听socks5/http端口：", c.Settings.Port, "/", c.Settings.Http, "，选定节点索引：", c.GetNodeIndex())
 	}
 	return true
 }

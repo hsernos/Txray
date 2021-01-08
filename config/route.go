@@ -50,7 +50,7 @@ func (c *Config) AddBlockDomain(data string) {
 func (c *Config) GetDirectIP() [][]string {
 	result := make([][]string, 0, len(c.Direct.IP))
 	for i, x := range c.Direct.IP {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }
@@ -59,7 +59,7 @@ func (c *Config) GetDirectIP() [][]string {
 func (c *Config) GetDirectDomain() [][]string {
 	result := make([][]string, 0, len(c.Direct.Domain))
 	for i, x := range c.Direct.Domain {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }
@@ -68,7 +68,7 @@ func (c *Config) GetDirectDomain() [][]string {
 func (c *Config) GetProxyIP() [][]string {
 	result := make([][]string, 0, len(c.Proxy.IP))
 	for i, x := range c.Proxy.IP {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }
@@ -77,7 +77,7 @@ func (c *Config) GetProxyIP() [][]string {
 func (c *Config) GetProxyDomain() [][]string {
 	result := make([][]string, 0, len(c.Proxy.Domain))
 	for i, x := range c.Proxy.Domain {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }
@@ -86,7 +86,7 @@ func (c *Config) GetProxyDomain() [][]string {
 func (c *Config) GetBlockIP() [][]string {
 	result := make([][]string, 0, len(c.Block.IP))
 	for i, x := range c.Block.IP {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }
@@ -95,7 +95,7 @@ func (c *Config) GetBlockIP() [][]string {
 func (c *Config) GetBlockDomain() [][]string {
 	result := make([][]string, 0, len(c.Block.Domain))
 	for i, x := range c.Block.Domain {
-		result = append(result, []string{tools.IntToStr(i), x})
+		result = append(result, []string{tools.IntToStr(i + 1), x})
 	}
 	return result
 }

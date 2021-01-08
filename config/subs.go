@@ -18,43 +18,53 @@ func (c *Config) AddSub(url, remarks string) {
 }
 
 // 通过订阅添加节点
-func (c *Config) AddNodeBySub(port uint) {
+func (c *Config) AddNodeBySub(key string, port uint) {
 	defer c.SaveJSON()
+	indexs := make([]int, 0, len(c.Subs))
+	if key == "" {
+		for i, x := range c.Subs {
+			if x.Using {
+				indexs = append(indexs, i)
+			}
+		}
+	} else {
+		indexs = tools.IndexDeal(key, len(c.Subs))
+	}
+
 	newNodes := make([]*node, 0, len(c.Nodes))
 	ids := ""
-	for _, x := range c.Subs {
-		if x.Using {
-			data := ""
-			if port > 65535 {
-				res, e := tools.GetNoProxy(x.URL, 10)
+	for _, i := range indexs {
+		x := c.Subs[i]
+		data := ""
+		if port > 65535 {
+			res, e := tools.GetNoProxy(x.URL, 10)
 
-				if e != nil {
-					log.Warn(e)
-					break
-				}
-				data = tools.ReadDate(res)
-				log.Info("访问 [", x.URL, "] -- ", res.Status)
-				res.Body.Close()
-			} else {
-				res, e := tools.GetBySocks5Proxy(x.URL, "127.0.0.1", c.Settings.Port, 10)
-				if e != nil {
-					log.Warn(e)
-					break
-				}
-				data = tools.ReadDate(res)
-				log.Info("访问 [", x.URL, "] -- ", res.Status)
-				res.Body.Close()
+			if e != nil {
+				log.Warn(e)
+				break
 			}
-			vmessList := vmess.Sub2links(data)
-			Objs := vmess.Links2vmessObjs(vmessList)
-			for _, obj := range Objs {
-				newNodes = append(newNodes, vmessObjToNode(obj, x.ID))
+			data = tools.ReadDate(res)
+			log.Info("访问 [", x.URL, "] -- ", res.Status)
+			res.Body.Close()
+		} else {
+			res, e := tools.GetBySocks5Proxy(x.URL, "127.0.0.1", c.Settings.Port, 10)
+			if e != nil {
+				log.Warn(e)
+				break
 			}
-			if len(Objs) != 0 {
-				ids += x.ID + ","
-			}
-			log.Info("从订阅 [", x.URL, "] 获取了 [", len(Objs), "] 个节点")
+			data = tools.ReadDate(res)
+			log.Info("访问 [", x.URL, "] -- ", res.Status)
+			res.Body.Close()
 		}
+		vmessList := vmess.Sub2links(data)
+		Objs := vmess.Links2vmessObjs(vmessList)
+		for _, obj := range Objs {
+			newNodes = append(newNodes, vmessObjToNode(obj, x.ID))
+		}
+		if len(Objs) != 0 {
+			ids += x.ID + ","
+		}
+		log.Info("从订阅 [", x.URL, "] 获取了 [", len(Objs), "] 个节点")
 	}
 	log.Info("订阅更新完成，共更新 [", len(newNodes), "] 个节点")
 	for _, x := range c.Nodes {
@@ -74,7 +84,7 @@ func (c *Config) GetSubs(key string) [][]string {
 	for _, x := range indexs {
 		sub := c.Subs[x]
 		result = append(result, []string{
-			tools.IntToStr(x),
+			tools.IntToStr(x + 1),
 			sub.Remarks,
 			sub.URL,
 			tools.BoolToStr(sub.Using),
