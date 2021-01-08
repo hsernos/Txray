@@ -105,11 +105,11 @@ Commands:
 alter Flags
     -p, --port       {port}            设置socks5端口
     -h, --http       {port}            设置http端口
-    -u, --udp        {true|false}      是否启用udp
-    -s, --sniffing   {true|false}      是否启用流量监听
-    -l, --lanconn    {true|false}      是否启用局域网连接
-    -m, --mux        {true|false}      是否启用多路复用
-    -b, --bypass     {true|false}      是否启用绕过局域网及大陆
+    -u, --udp        {y|n}             是否启用udp
+    -s, --sniffing   {y|n}             是否启用流量监听
+    -l, --lanconn    {y|n}             是否启用局域网连接
+    -m, --mux        {y|n}             是否启用多路复用
+    -b, --bypass     {y|n}             是否启用绕过局域网及大陆
     -r, --route      {1|2|3}           设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}
 ```
 
@@ -134,7 +134,7 @@ alter Flags
 >>> setting alter -h 3334
 
 # 修改不绕过局域网和大陆
->>> setting alter -b false
+>>> setting alter -b n
 
 # 修改路由策略为IPIfNonMatch, {1|2|3}=>{AsIs|IPIfNonMatch|IPOnDemand}
 >>> setting alter -r 2
@@ -154,7 +154,7 @@ Commands:
     alter {索引范围} [flags]             修改订阅
     show  [索引范围]                     查看订阅信息
     del   {索引范围}                     根据索引参数删除订阅
-    update-node     [flags]             从订阅更新节点
+    update-node [索引范围] [flags]       从订阅更新节点,索引范围会忽略是否启用
 
 add Flags
     -r, --remarks {别名}                 自定义别名
@@ -162,10 +162,10 @@ add Flags
 alter Flags
     -u, --url     {订阅链接}             订阅链接
     -r, --remarks {别名}                 自定义别名
-    --using       {true|false}          是否使用此订阅
+    --using       {y|n}                  是否使用此订阅
 
 update-node Flags
-    -p, --proxy {本地socks5端口}         从socks5代理更新节点
+    -p, --proxy [本地socks5端口]         从socks5代理更新节点,默认为设置中socks5监听端口
 ```
 
 ### 添加订阅
@@ -186,7 +186,6 @@ update-node Flags
 +------+-------+---------------------+----------+
 | 索引  | 别名   |       URL          |  是否启用  |
 +------+-------+---------------------+----------+
-|  0   | test  | https://sublink.com |   true   |
 |  1   | test1 | https://sublink.com |   true   |
 |  2   | test2 | https://sublink.com |   true   |
 |  3   | test3 | https://sublink.com |   true   |
@@ -205,12 +204,11 @@ update-node Flags
 |  4   | test4 | https://sublink.com |   true   |
 +------+-------+---------------------+----------+
 
-# 查看索引为0,1,2,3,6的订阅
->>> sub show 0-3,6
+# 查看索引为1,2,3,6的订阅
+>>> sub show 1-3,6
 +------+-------+---------------------+----------+
 | 索引  | 别名  |         URL         |  是否启用 |
 +------+-------+---------------------+----------+
-|  0   | test  | https://sublink.com |   true   |
 |  1   | test1 | https://sublink.com |   true   |
 |  2   | test2 | https://sublink.com |   true   |
 |  3   | test3 | https://sublink.com |   true   |
@@ -232,23 +230,22 @@ update-node Flags
 ### 修改订阅
 
 ```
-# 修改索引为0的订阅链接为https://test.com，别名为test0
->>> sub atler 0 -u https://test.com -r test0
->>> sub show 0
+# 修改索引为1的订阅链接为https://test.com，别名为test8
+>>> sub atler 1 -u https://test.com -r test8
+>>> sub show 1
 +------+-------+------------------+----------+
 | 索引  | 别名  |        URL        |  是否启用 |
 +------+-------+------------------+----------+
-|  0   | test0 | https://test.com |   true   |
+|  1   | test8 | https://test.com |   true   |
 +------+-------+------------------+----------+
 
 # 禁用索引为3和5的订阅链接
->>> sub atler 3,5 --using false
+>>> sub atler 3,5 --using n
 >>> sub show 
 +------+-------+---------------------+----------+
 | 索引 |  别名  |         URL         |  是否启用  |
 +------+-------+---------------------+----------+
-|  0   | test0 |  https://test.com   |   true   |
-|  1   | test1 | https://sublink.com |   true   |
+|  1   | test8 | https://sublink.com |   true   |
 |  2   | test2 | https://sublink.com |   true   |
 |  3   | test3 | https://sublink.com |  false   |
 |  4   | test4 | https://sublink.com |   true   |
@@ -270,8 +267,11 @@ update-node Flags
 ### 从订阅更新节点
 
 ```
-# 不使用代理更新节点
+# 从启用的订阅且不使用代理更新节点
 >>> sub update-node
+
+# 从索引范围更新节点，无论是否启用
+>>> sub update-node 1,3,6
 
 # 使用端口为2333的本地sock5代理更新节点
 >>> sub update-node -p 2333
@@ -287,18 +287,18 @@ update-node Flags
 node {commands} [flags] ...
 
 Commands:
-    add     [flags]                    添加节点
+    add     [flags]                     添加节点
     show    [索引范围 | test]           查看节点信息, 默认索引范围为all, test可以按延迟排序查看
-    info    {索引}                     查看某个节点详细信息
+    info    {索引}                      查看某个节点详细信息
     del     {索引范围}                  根据索引参数删除节点
     export  {索引范围}                  导出为vmess链接
     tcping  [索引范围]                  tcping指定索引节点, 默认索引范围为all
     find    {关键词}                    查找节点，有中文关键词需要用单引号或双引号括起来
 
 add Flags
-    -v, --vmess   {vmess链接}            导入vmess://数据
-    -f, --file    {文件绝对路径}          从文件批量导入vmess://数据
-    -s, --subfile {文件绝对路径}          从订阅文件解析导入vmess://数据
+    -v, --vmess   {vmess链接}           导入vmess://数据
+    -f, --file    {文件绝对路径}        从文件批量导入vmess://数据
+    -s, --subfile {文件绝对路径}        从订阅文件解析导入vmess://数据
 ```
 
 ### 添加节点
@@ -321,17 +321,15 @@ add Flags
 
 ```
 # 查看前20个节点
->>> node show 0-19
+>>> node show 1-20
 
 # 查看某个节点的全部信息
->>> node info 0
+>>> node info 1
 
 # 查看按tcp延迟排序的节点
 >>> node show test
-
 # 或者
 >>> node show t
-
 
 ```
 
@@ -339,14 +337,14 @@ add Flags
 
 ```
 # 删除前20个节点
->>> node del 0-19
+>>> node del 1-20
 ```
 
 ### tcping测试
 
 ```
 # tcping前20个节点
->>> node tcping 0-19
+>>> node tcping 1-20
 ```
 
 ### 节点查找
@@ -363,7 +361,7 @@ add Flags
 
 ```
 # 导出前20个节点到终端
->>> node export 0-19
+>>> node export 1-20
 ```
 
 ## 查看DNS帮助文档
@@ -395,7 +393,7 @@ Commands:
 
 ```
 # 删除前2个dns
->>> node del 0,1
+>>> node del 1,2
 ```
 
 ### 
@@ -409,20 +407,18 @@ route {commands} ...
 
 Commands:
 
-    show-direct-ip                     查看直连ip规则
-    show-direct-domain                 查看直连domain规则
-    show-proxy-ip                      查看代理ip规则
-    show-proxy-domain                  查看代理domain规则
-    show-block-ip                      查看禁止ip规则
-    show-block-domain                  查看禁止domain规则
-    
+    show                                查看全部规则
+    show-direct                         查看直连规则
+    show-proxy                          查看代理规则
+    show-block                          查看禁止规则
+
     add-direct-ip       {路由规则}      添加一条直连ip规则
     add-direct-domain   {路由规则}      添加一条直连domain规则
     add-proxy-ip        {路由规则}      添加一条代理ip规则
     add-proxy-domain    {路由规则}      添加一条代理domain规则
     add-block-ip        {路由规则}      添加一条禁止ip规则
     add-block-domain    {路由规则}      添加一条禁止domain规则
-    
+
     del-direct-ip       {索引范围}      删除索引范围的直连ip路由规则
     del-direct-domain   {索引范围}      删除索引范围的直连domain路由规则
     del-proxy-ip        {索引范围}      删除索引范围的代理ip路由规则
