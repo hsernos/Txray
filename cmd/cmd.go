@@ -4,7 +4,6 @@ import (
 	"Tv2ray/config"
 	log "Tv2ray/logger"
 	"Tv2ray/tools"
-	"fmt"
 	"github.com/abiosoft/ishell"
 	"os"
 	"strings"
@@ -728,7 +727,6 @@ func InitShell(shell *ishell.Shell) {
 				}
 
 			} else if ok && (len(tools.IndexDeal(d, len(configObj.Nodes))) >= 1 || (len(d) > 1 && d[0] == 't' && tools.IsUint(d[1:]))) {
-				fmt.Println(d)
 				min := 100000
 				index := -1
 				var indexs []int
