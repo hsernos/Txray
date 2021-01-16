@@ -37,6 +37,7 @@ Project  core： https://github.com/XTLS/Xray-core
     + [查看DNS设置](#查看DNS设置)
     + [修改DNS设置](#修改DNS设置)
   * [查看路由帮助文档](#查看路由帮助文档)
+    + [添加路由](#添加路由)
     + [domain路由规则](#domain路由规则)
     + [ip路由规则](#ip路由规则)
   * [启动或重启v2ray-core服务](#启动或重启v2ray-core服务)
