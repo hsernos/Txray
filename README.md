@@ -1,5 +1,5 @@
 # Txray
-Txray是一款 v2ray 终端版客户端，使用go编写。
+Txray是一款 xray 终端版客户端，使用go编写。
 
 项目地址：https://github.com/hsernos/Txray
 
