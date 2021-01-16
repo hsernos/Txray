@@ -8,7 +8,6 @@ import zipfile
 INFO = {
     'linux': ['386', 'amd64', 'arm'],
     'darwin': ['amd64'],
-    'freebsd': ['386', 'amd64'],
     'windows': ['386', 'amd64']
 }
 
