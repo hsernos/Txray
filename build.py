@@ -43,7 +43,7 @@ def build(goos, goarch, path, cgo=0):
     arch = '64' if goarch == 'amd64' else goarch
     arch = '32' if goarch == '386' else arch
     cmd = 'CGO_ENABLED={} GOOS={} GOARCH={} go build -o {} {} '.format(cgo, goos, goarch,
-                                                                           "build/"+"-".join([Name, syst, arch]) + "/Tv2ray" + e,
+                                                                           "build/"+"-".join([Name, syst, arch]) + "/"+ Name+ e,
                                                                            path)
     os.system(cmd)
     shutil.copy("README.md", "build/"+"-".join([Name, syst, arch]))
