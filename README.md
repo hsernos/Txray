@@ -40,8 +40,8 @@ Project  core： https://github.com/XTLS/Xray-core
     + [添加路由](#添加路由)
     + [domain路由规则](#domain路由规则)
     + [ip路由规则](#ip路由规则)
-  * [启动或重启v2ray-core服务](#启动或重启v2ray-core服务)
-  * [停止v2ray-core服务](#停止v2ray-core服务)
+  * [启动或重启xray-core服务](#启动或重启xray-core服务)
+  * [停止xray-core服务](#停止xray-core服务)
 - [已知问题](#已知问题)
 - [交流反馈](#交流反馈)
 
@@ -82,7 +82,7 @@ Project  core： https://github.com/XTLS/Xray-core
 
 # 下载/运行 说明
 
-需要先下载解压[xray-core](https://github.com/XTLS/Xray-core/releases)，然后在[发布页](https://github.com/hsernos/Txray/releases)下载解压Txray, 将上一步的v2ray文件夹移动到解压后的文件夹下
+需要先下载解压[xray-core](https://github.com/XTLS/Xray-core/releases)，然后在[发布页](https://github.com/hsernos/Txray/releases)下载解压Txray, 将上一步的xray文件夹移动到解压后的文件夹下
 
 
 
@@ -519,8 +519,8 @@ del Flags
 
 - 纯字符串: 当此字符串匹配目标域名中任意部分，该规则生效。比如`sina.com`可以匹配`sina.com`、sina.com.cn和www.sina.com，但不匹配`sina.cn`。
 - 正则表达式: 由`regexp:`开始，余下部分是一个正则表达式。当此正则表达式匹配目标域名时，该规则生效。例如`regexp:\\.goo.*\\.com$`匹配`www.google.com`、`fonts.googleapis.com`，但不匹配`google.com`。
-- 子域名 (推荐): 由`domain:`开始，余下部分是一个域名。当此域名是目标域名或其子域名时，该规则生效。例如`domain:v2ray.com`匹配`www.v2ray.com`、`v2ray.com`，但不匹配`xv2ray.com`。
-- 完整匹配: 由`full:`开始，余下部分是一个域名。当此域名完整匹配目标域名时，该规则生效。例如`full:v2ray.com`匹配`v2ray.com`但不匹配`www.v2ray.com`。
+- 子域名 (推荐): 由`domain:`开始，余下部分是一个域名。当此域名是目标域名或其子域名时，该规则生效。例如`domain:xray.com`匹配`www.xray.com`、`xray.com`，但不匹配`xxray.com`。
+- 完整匹配: 由`full:`开始，余下部分是一个域名。当此域名完整匹配目标域名时，该规则生效。例如`full:xray.com`匹配`xray.com`但不匹配`www.xray.com`。
 - 预定义域名列表：由`"geosite:"`开头，余下部分是一个名称，如`geosite:google`或者`geosite:cn`。名称及域名列表参考[预定义域名列表](https://www.v2ray.com/chapter_02/03_routing.html#dlc)。
 - 从文件中加载域名: 形如`ext:file:tag`，必须以`ext:`（小写）开头，后面跟文件名和标签，文件存放在[资源目录](https://www.v2ray.com/chapter_02/env.html#asset-location)中，文件格式与`geosite.dat`相同，标签必须在文件中存在。
 
@@ -529,12 +529,12 @@ del Flags
 - IP: 形如`127.0.0.1`。
 - [CIDR](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing): 形如`10.0.0.0/8`.
 - GeoIP: 形如`geoip:cn`，必须以`geoip:`（小写）开头，后面跟双字符国家代码，支持几乎所有可以上网的国家。
-- 特殊值：`geoip:private` (V2Ray 3.5+)，包含所有私有地址，如`127.0.0.1`。
+- 特殊值：`geoip:private` (xray 3.5+)，包含所有私有地址，如`127.0.0.1`。
 - 从文件中加载 IP: 形如`ext:file:tag`，必须以`ext:`（小写）开头，后面跟文件名和标签，文件存放在[资源目录](https://www.v2ray.com/chapter_02/env.html#asset-location)中，文件格式与`geoip.dat`相同标签必须在文件中存在。
 
 ### 
 
-## 启动或重启v2ray-core服务
+## 启动或重启xray-core服务
 
 ```
 # 启动或重启索引为3的节点
@@ -552,7 +552,7 @@ del Flags
 
 
 
-## 停止v2ray-core服务
+## 停止xray-core服务
 
 ```
 >>>stop
