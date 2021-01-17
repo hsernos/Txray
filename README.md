@@ -3,7 +3,7 @@ Txray是一款 xray 终端版客户端，使用go编写。
 
 项目地址：https://github.com/hsernos/Txray
 
-Project  core： https://github.com/XTLS/Xray-core
+Project X core： https://github.com/XTLS/Xray-core
 
 ## 注意
 此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
