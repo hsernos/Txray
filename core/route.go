@@ -148,23 +148,14 @@ func (c *Core) GetBlock(key string) [][]string {
 // 删除直连规则
 func (c *Core) DelDirect(key string) {
 	length := len(c.Direct)
-	indexList := format.IndexDeal(key, length)
-	if len(indexList) == 0 {
+	indexList := format.OtherIndex(key, length)
+	if len(indexList) == length {
 		return
 	}
 	defer c.Save()
-	result := make([]*routing, 0, length-len(indexList))
-	j := 0
-	for i, y := range c.Direct {
-		if j < len(indexList) {
-			if i == indexList[j] {
-				j++
-			} else {
-				result = append(result, y)
-			}
-		} else {
-			result = append(result, y)
-		}
+	result := make([]*routing, 0, len(indexList))
+	for _, index := range indexList {
+		result = append(result, c.Direct[index])
 	}
 	c.Direct = result
 	log.Info("删除了 [", length-len(result), "] 条规则")
@@ -173,23 +164,14 @@ func (c *Core) DelDirect(key string) {
 // 删除代理规则
 func (c *Core) DelProxy(key string) {
 	length := len(c.Proxy)
-	indexList := format.IndexDeal(key, length)
-	if len(indexList) == 0 {
+	indexList := format.OtherIndex(key, length)
+	if len(indexList) == length {
 		return
 	}
 	defer c.Save()
-	result := make([]*routing, 0, length-len(indexList))
-	j := 0
-	for i, y := range c.Proxy {
-		if j < len(indexList) {
-			if i == indexList[j] {
-				j++
-			} else {
-				result = append(result, y)
-			}
-		} else {
-			result = append(result, y)
-		}
+	result := make([]*routing, 0, len(indexList))
+	for _, index := range indexList {
+		result = append(result, c.Proxy[index])
 	}
 	c.Proxy = result
 	log.Info("删除了 [", length-len(result), "] 条规则")
@@ -198,23 +180,14 @@ func (c *Core) DelProxy(key string) {
 // 删除禁止规则
 func (c *Core) DelBlock(key string) {
 	length := len(c.Block)
-	indexList := format.IndexDeal(key, length)
-	if len(indexList) == 0 {
+	indexList := format.OtherIndex(key, length)
+	if len(indexList) == length {
 		return
 	}
 	defer c.Save()
-	result := make([]*routing, 0, length-len(indexList))
-	j := 0
-	for i, y := range c.Block {
-		if j < len(indexList) {
-			if i == indexList[j] {
-				j++
-			} else {
-				result = append(result, y)
-			}
-		} else {
-			result = append(result, y)
-		}
+	result := make([]*routing, 0, len(indexList))
+	for _, index := range indexList {
+		result = append(result, c.Block[index])
 	}
 	c.Block = result
 	log.Info("删除了 [", length-len(result), "] 条规则")

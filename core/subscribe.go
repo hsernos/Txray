@@ -66,6 +66,7 @@ func (c *Core) AddNodeBySub(key string, mode string, address string, port uint) 
 				n := new(node)
 				n.data = data
 				n.Link = link
+				n.Subid = subscribe.ID
 				newNodes = append(newNodes, n)
 				num++
 			}

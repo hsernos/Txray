@@ -18,7 +18,35 @@ func IndexDeal(key string, length int) []int {
 		}
 		return result
 	}
+	indexList := parseKey(key, length)
+	// 生成索引数组（从0开始）
+	result := make([]int, 0, length)
+	for i, isSelect := range indexList {
+		if isSelect {
+			result = append(result, i)
+		}
+	}
+	return result
+}
 
+// 对索引数组取反
+func OtherIndex(key string, length int) []int {
+	if length == 0 || key == "all" {
+		return []int{}
+	}
+	indexList := parseKey(key, length)
+	// 生成索引数组（从0开始）
+	result := make([]int, 0, length)
+	for i, isSelect := range indexList {
+		if !isSelect {
+			result = append(result, i)
+		}
+	}
+	return result
+}
+
+// 解析key
+func parseKey(key string, length int) []bool {
 	indexList := make([]bool, length, length)
 	for _, item := range strings.Split(key, ",") {
 		item = strings.Trim(item, " ")
@@ -54,13 +82,5 @@ func IndexDeal(key string, length int) []int {
 			}
 		}
 	}
-
-	// 生成索引数组（从0开始）
-	result := make([]int, 0, length)
-	for i, isSelect := range indexList {
-		if isSelect {
-			result = append(result, i)
-		}
-	}
-	return result
+	return indexList
 }

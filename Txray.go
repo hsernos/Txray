@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	version = "v2.0.0"
+	version = "v2.0.1"
 	name    = "Txray"
 )
 

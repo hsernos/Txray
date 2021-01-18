@@ -323,29 +323,23 @@ func (c *Core) AddShadowSocksNode(remarks, addr, port, password, method string) 
 // 删除节点信息
 func (c *Core) DelNodes(key string) {
 	length := len(c.Nodes)
-	indexList := format.IndexDeal(key, length)
-	if len(indexList) == 0 {
+	indexList := format.OtherIndex(key, length)
+	if len(indexList) == length {
 		return
 	}
 	defer c.Save()
-	result := make([]*node, 0, length-len(indexList))
-	j := 0
-	for i, y := range c.Nodes {
-		if j < len(indexList) {
-			if i == indexList[j] {
-				if indexList[j] == int(c.Index) {
-					c.Index = 0
-				} else if indexList[j] < int(c.Index) {
-					c.Index -= 1
-				}
-				j++
-			} else {
-				result = append(result, y)
-			}
-		} else {
-			result = append(result, y)
+	isDelete := true // 设置当前选择节点是否被删除标记
+	newNodes := make([]*node, 0, len(indexList))
+	for i, index := range indexList {
+		if index == int(c.Index) {
+			c.Index = uint(i)
+			isDelete = false
 		}
+		newNodes = append(newNodes, c.Nodes[index])
 	}
-	c.Nodes = result
+	c.Nodes = newNodes
+	if isDelete {
+		c.Index = 0
+	}
 	log.Info("删除了 [", length-len(c.Nodes), "] 条")
 }
