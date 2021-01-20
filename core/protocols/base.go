@@ -37,7 +37,7 @@ func base64Encode(str string) string {
 }
 
 func base64EncodeWithEq(str string) string {
-	return base64.RawStdEncoding.EncodeToString([]byte(str))
+	return base64.StdEncoding.EncodeToString([]byte(str))
 }
 
 func base64Decode(str string) string {

@@ -131,5 +131,5 @@ func (v *VMess) GetLink() string {
 		"tls":  v.Tls,
 	}
 	jsonData, _ := json.Marshal(data)
-	return "vmess://" + base64Encode(string(jsonData))
+	return "vmess://" + base64EncodeWithEq(string(jsonData))
 }
