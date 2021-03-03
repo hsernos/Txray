@@ -47,7 +47,7 @@ def build(goos, goarch, path, cgo=0):
                                                                            path)
     os.system(cmd)
     shutil.copy("README.md", "build/"+"-".join([Name, syst, arch]))
-    make_zip("build/"+"-".join([Name, syst, arch]),"build/"+"-".join([Name, syst, arch])+".zip")
+    make_zip("build/"+"-".join([Name, syst, arch]), "build/"+"-".join([Name, syst, arch])+".zip")
 
 if __name__ == '__main__':
     if get_os() == 'win':

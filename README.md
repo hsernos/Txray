@@ -20,6 +20,9 @@ Project X core： https://github.com/XTLS/Xray-core
   * [查看基本设置帮助文档](#查看基本设置帮助文档)
     + [查看基本设置](#查看基本设置)
     + [修改基本设置](#修改基本设置)
+  * [查看测试设置帮助文档](#查看测试设置帮助文档)
+      + [查看测试设置](#查看测试设置)
+      + [修改测试设置](#修改测试设置)    
   * [查看订阅帮助文档](#查看订阅帮助文档)
     + [添加订阅](#添加订阅)
     + [查看订阅](#查看订阅)
@@ -82,8 +85,10 @@ Project X core： https://github.com/XTLS/Xray-core
 
 # 下载/运行 说明
 
-需要先下载解压[xray-core](https://github.com/XTLS/Xray-core/releases)，然后在[发布页](https://github.com/hsernos/Txray/releases)下载解压Txray, 将上一步的xray文件夹移动到解压后的文件夹下
+需要下载[xray-core](https://github.com/XTLS/Xray-core/releases)
 
+1. Txray检测xray-core所在的优先级: 环境变量 `CORE_HOME` > Txray所在目录
+2. 配置文件目录优先级:  环境变量 `TXRAY_HOME` > Txray所在目录
 
 
 # 命令列表及说明
@@ -92,13 +97,13 @@ Project X core： https://github.com/XTLS/Xray-core
 
 ## 命令总览
 ```
->>> help
 Commands:
-    setting                  基础设置             使用 'setting' 查看详细用法
-    node                     节点管理             使用 'node' 查看详细用法
-    sub                      订阅管理             使用 'sub' 查看详细用法
-    dns                      DNS管理             使用 'dns' 查看详细用法
-    route                    路由管理             使用 'route' 查看详细用法
+    base                     基础设置             使用 'base help' 查看详细用法
+    dns                      DNS 设置             使用 'dns help' 查看详细用法
+    test                     测试设置             使用 'test help' 查看详细用法
+    node                     节点管理             使用 'node help' 查看详细用法
+    sub                      订阅管理             使用 'sub help' 查看详细用法
+    routing                  路由管理             使用 'routing help' 查看详细用法
     help, -h                 查看帮助信息
     version, -v              查看版本
     clear                    清屏
@@ -128,29 +133,27 @@ Usage: run [索引式 | -t [索引式]]
 ## 查看基本设置帮助文档
 
 ```
->>> setting
-setting {commands} [flags] ...
+>>> base help
+base {commands}
 
 Commands:
-    show                          查看基本设置
-    alter [flags]                 修改基础设置
-
-alter Flags
-    -p, --port {port}             设置socks端口
-    -h, --http {port}             设置http端口, 0为关闭http监听
-    -u, --udp {y|n}               是否启用udp
-    -s, --sniffing {y|n}          是否启用流量监听
-    -l, --lanconn {y|n}           是否启用局域网连接
-    -m, --mux {y|n}               是否启用多路复用
-    -b, --bypass {y|n}            是否绕过局域网及大陆
-    -r, --route {1|2|3}           设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}
+                                  查看基本设置
+    help                          查看帮助
+    port {port}                   设置socks端口
+    http {port}                   设置http端口, 0为关闭http监听
+    udp {y|n}                     是否启用udp
+    sniffing {y|n}                是否启用流量监听
+    lanconn {y|n}                 是否启用局域网连接
+    mux {y|n}                     是否启用多路复用
+    bypass {y|n}                  是否绕过局域网及大陆
+    routing {1|2|3}               设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}
 ```
 
 ### 查看基本设置
 
 ```
 # 
->>> setting show
+>>> base
 +------------+----------+---------+--------------+----------+----------------+------------------+--------------+
 |  SOCKS端口  | HTTP端口  | UDP转发 |   启用流量监听  |  多路复用  |  允许局域网连接  | 绕过局域网和大陆    |   路由策略     |
 +------------+----------+---------+--------------+----------+----------------+------------------+--------------+
@@ -162,45 +165,79 @@ alter Flags
 
 ```
 # 修改socks监听端口为3333
->>> setting alter -p 3333
+>>> base socks 3333
 
 # 修改http监听端口为3334
->>> setting alter -h 3334
+>>> base http 3334
 
 # 修改不绕过局域网和大陆
->>> setting alter -b n
+>>> base bypass n
 
 # 修改路由策略为IPIfNonMatch, {1|2|3}=>{AsIs|IPIfNonMatch|IPOnDemand}
->>> setting alter -r 2
+>>> base routing 2
 ```
 
 
+## 查看测试设置帮助文档
+
+```
+>>> test help
+test [commands]
+
+Commands:
+                                  查看测试设置
+    help                          查看帮助
+    url {url}                     设置测试网站
+    timeout {time}                设置测试超时时间 (秒)
+```
+
+### 查看测试设置
+
+```
+>>> test
++-------------------------+----------------+
+|         测试URL         | 超时时间（秒）  |
++-------------------------+----------------+
+| https://www.youtube.com |       5        |
++-------------------------+----------------+
+```
+
+### 修改测试设置
+
+```
+# 修改测试URL为google
+>>> test url https://google.com
+
+# 修改超时时间为10秒
+>>> test timeout 10
+```
 
 ## 查看订阅帮助文档
 
 ```
->>> sub 
+>>> sub help
 sub {commands} [flags] ...
 
 Commands:
-    show {索引式}                 查看订阅信息
-    del {索引式}                  删除订阅
+    [索引式]                      查看订阅信息
+    help                          查看帮助
+    rm {索引式}                   删除订阅
     add {订阅url} [flags]         添加订阅
-    alter {索引式} {flags}        修改订阅
+    mv {索引式} {flags}           修改订阅
     update-node [索引式] [flags]  从订阅更新节点, 索引式会忽略是否启用
 
 add Flags
     -r, --remarks {别名}          定义别名
 
-alter Flags
+rm Flags
     -u, --url {订阅url}           修改订阅链接
     -r, --remarks {别名}          定义别名
-    --using {y|n}                是否启用此订阅
+    --using {y|n}                 是否启用此订阅
 
 update-node Flags
-    -s, --socks5 [port]          通过本地的socks5代理更新, 默认为设置中的socks5端口
-    -h, --http [port]            通过本地的http代理更新, 默认为设置中的http端口
-    -a, --addr {address}         对上面两个参数的补充, 修改代理地址
+    -s, --socks5 [port]           通过本地的socks5代理更新, 默认为设置中的socks5端口
+    -h, --http [port]             通过本地的http代理更新, 默认为设置中的http端口
+    -a, --addr {address}          对上面两个参数的补充, 修改代理地址
 ```
 
 ### 添加订阅
@@ -217,7 +254,7 @@ update-node Flags
 
 ```
 # 查看全部订阅
->>> sub show
+>>> sub
 +------+-------+---------------------+----------+
 | 索引  | 别名   |       URL          |  是否启用  |
 +------+-------+---------------------+----------+
@@ -230,35 +267,13 @@ update-node Flags
 +------+-------+---------------------+----------+
 
 # 查看索引为2,3,4的订阅
->>> sub show 2-4
+>>> sub 2-4
 +------+-------+---------------------+----------+
 | 索引  | 别名  |         URL         |  是否启用  |
 +------+-------+---------------------+----------+
 |  2   | test2 | https://sublink.com |   true   |
 |  3   | test3 | https://sublink.com |   true   |
 |  4   | test4 | https://sublink.com |   true   |
-+------+-------+---------------------+----------+
-
-# 查看索引为1,2,3,6的订阅
->>> sub show 1-3,6
-+------+-------+---------------------+----------+
-| 索引  | 别名  |         URL         |  是否启用 |
-+------+-------+---------------------+----------+
-|  1   | test1 | https://sublink.com |   true   |
-|  2   | test2 | https://sublink.com |   true   |
-|  3   | test3 | https://sublink.com |   true   |
-|  6   | test6 | https://sublink.com |   true   |
-+------+-------+---------------------+----------+
-
-# 查看索引为3以及后面的的订阅
->>> sub show 3-
-+------+-------+---------------------+----------+
-| 索引  | 别名  |         URL         |  是否启用  |
-+------+-------+---------------------+----------+
-|  3   | test3 | https://sublink.com |   true   |
-|  4   | test4 | https://sublink.com |   true   |
-|  5   | test5 | https://sublink.com |   true   |
-|  6   | test6 | https://sublink.com |   true   |
 +------+-------+---------------------+----------+
 ```
 
@@ -266,8 +281,8 @@ update-node Flags
 
 ```
 # 修改索引为1的订阅链接为https://test.com，别名为test8
->>> sub atler 1 -u https://test.com -r test8
->>> sub show 1
+>>> sub mv 1 -u https://test.com -r test8
+>>> sub 1
 +------+-------+------------------+----------+
 | 索引  | 别名  |        URL        |  是否启用 |
 +------+-------+------------------+----------+
@@ -275,8 +290,8 @@ update-node Flags
 +------+-------+------------------+----------+
 
 # 禁用索引为3和5的订阅链接
->>> sub atler 3,5 --using n
->>> sub show 
+>>> sub mv 3,5 --using n
+>>> sub 
 +------+-------+---------------------+----------+
 | 索引 |  别名  |         URL         |  是否启用  |
 +------+-------+---------------------+----------+
@@ -293,10 +308,10 @@ update-node Flags
 
 ```
 # 删除索引为3和5的订阅
->>> sub del 3,5
+>>> sub rm 3,5
 
 # 删除所有订阅
->>> sub del all
+>>> sub rm all
 ```
 
 ### 从订阅更新节点
@@ -326,25 +341,26 @@ update-node Flags
 ## 查看节点帮助文档
 
 ```
->>> node
+>>> node help
 node {commands} [flags] ...
 
 Commands:
-    show [索引式|t]               查看节点信息, 默认'all', 't'表示按延迟降序查看
+    [索引式|t]                    查看节点信息, 默认'all', 't'表示按延迟降序查看
+    help                          查看帮助
     info {索引}                   查看单个节点详细信息
-    del {索引式}                  删除节点
+    rm {索引式}                   删除节点
     tcping {索引式}               测试节点tcp延迟
     find {关键词}                 查找节点（按别名）
-    add [flags]                  添加节点
+    add [flags]                   添加节点
     export [索引式] [flags]       导出节点链接, 默认'all'
 
 add Flags
-    -l, --link {link}            从链接导入一条节点
-    -f, --file {path}            从节点链接文件或订阅文件导入节点
-    -c, --clipboard              从剪贴板读取的节点链接或订阅文本导入节点
+    -l, --link {link}             从链接导入一条节点
+    -f, --file {path}             从节点链接文件或订阅文件导入节点
+    -c, --clipboard               从剪贴板读取的节点链接或订阅文本导入节点
 
 export Flags
-    -c, --clipboard              导出节点链接到剪贴板
+    -c, --clipboard               导出节点链接到剪贴板
 ```
 
 ### 添加节点
@@ -373,13 +389,13 @@ export Flags
 
 ```
 # 查看前20个节点
->>> node show 1-20
+>>> node 1-20
 
 # 查看某个节点的全部信息
 >>> node info 1
 
 # 查看按tcp延迟排序的节点
->>> node show t
+>>> node t
 
 ```
 
@@ -387,7 +403,7 @@ export Flags
 
 ```
 # 删除前20个节点
->>> node del 1-20
+>>> node rm 1-20
 ```
 
 ### tcping测试
@@ -420,25 +436,23 @@ export Flags
 ## 查看DNS帮助文档
 
 ```
->>> dns
-dns {commands} [flags] ...
+>>> dns help
+dns {commands}
 
 Commands:
-    show                          查看DNS设置
-    alter {flags}                 修改DNS设置
-
-alter Flags
-    -p, --port {port}             设置dns端口, 0为关闭
-    -i, --inland {dns}            设置一条境内DNS
-    -o, --outland {dns}           设置一条境外DNS
-    -b, --backup {dns}            设置备用DNS，多条以 ',' 分隔
+                                  查看DNS设置
+    help                          查看帮助
+    port {port}                   设置dns端口, 0为关闭
+    inland {dns}                  设置一条境内DNS
+    outland {dns}                 设置一条境外DNS
+    backup {dns}                  设置备用DNS，多条以 ',' 分隔
 ```
 
 ### 查看DNS设置
 
 ```
 # 查看DNS设置
->>> dns show
+>>> dns
 +---------+---------+-----------+---------+
 | DNS端口  | 境外DNS  |  境内DNS   | 备用DNS |
 +---------+---------+-----------+---------+
@@ -450,69 +464,58 @@ alter Flags
 
 ```
 # 修改dns监听端口为23334
->>> node alter -p 23334
+>>> dns port 23334
 
 # 关闭dns监听端口
->>> node alter -p 0
+>>> dns port 0
 
 # 修改境外DNS为8.8.8.8
->>> node alter -o 8.8.8.8
+>>> dns outland 8.8.8.8
 
 # 修改境内DNS为180.76.76.76
->>> node alter -i 180.76.76.76
+>>> dns inland 180.76.76.76
 
 # 修改备用DNS为180.76.76.76
->>> node alter -b 180.76.76.76
+>>> dns backup 180.76.76.76
 
 # 修改备用DNS为180.76.76.76和localhost
->>> node alter -b 180.76.76.76,localhost
+>>> dns backup 180.76.76.76,localhost
 ```
 
 
 ## 查看路由帮助文档
 
 ```
->>> route
-route {commands} [flags] ...
+>>> route help
+routing {commands} [flags] ...
 
 Commands:
-    add {路由规则} {flags}        添加路由规则
-    show {flags}                  查看路由规则
-    del {flags}                   删除路由规则
+    block [索引式] | [flags]      查看或管理禁止路由规则
+    direct [索引式] | [flags]     查看或管理直连路由规则
+    proxy [索引式] | [flags]      查看或管理代理路由规则
 
-add Flags
-    -b, --block                   指定到禁止名单, 同下面2个中选择一个
-    -d, --direct                  指定到直连名单, 同上下2个中选择一个
-    -p, --proxy                   指定到代理名单, 同上面2个中选择一个
-    -f, --file {path}             从文件导入
-    -c, --clipboard               从剪贴板导入
-
-show Flags
-    -b, --block [索引式]          指定到禁止名单, 同下面2个中选择一个, 索引式默认'all'
-    -d, --direct [索引式]         指定到直连名单, 同上下2个中选择一个, 索引式默认'all'
-    -p, --proxy [索引式]          指定到代理名单, 同上面2个中选择一个, 索引式默认'all'
-
-del Flags
-    -b, --block {索引式}          指定到禁止名单, 同下面2个中选择一个
-    -d, --direct {索引式}         指定到直连名单, 同上下2个中选择一个
-    -p, --proxy {索引式}          指定到代理名单, 同上面2个中选择一个
+block, direct, proxy Flags
+    -a, --add {规则}              添加路由规则
+    -r, --rm {索引式}             删除路由规则
+    -f, --file {path}             从文件导入规则
+    -c, --clipboard               从剪贴板导入规则
 ```
 
 ### 添加路由
 
 ```
->>> route add www.baidu.com -d
-2021-01-17 xx:xx:xx [info] 添加一条直连规则 [Domain] www.baidu.com
+# 添加www.baidu.com到黑名单
+>>> routing block -a www.baidu.com
 
->>> route add www.google.com -p
-2021-01-17 xx:xx:xx [info] 添加一条代理规则 [Domain] www.google.com
+# 添加www.google.com到代理名单
+>>> routing proxy -a www.google.com
 
->>> route add 1.2.3.4 -d
-2021-01-17 xx:xx:xx [info] 添加一条直连规则 [IP] 1.2.3.4
+# 从文件批量导入到黑名单
+>>> routing block -f /home/xxx/block.txt
 
-# 添加黑名单
->>> route add www.xxx.com -b
-2021-01-17 xx:xx:xx [info] 添加一条禁止规则 [Domain] www.xxx.com
+# 从剪贴板导入到黑名单
+>>> routing block -c
+
 ```
 
 ### domain路由规则

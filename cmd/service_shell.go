@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	nas "Txray/core/node"
+	"Txray/core/service"
 	"fmt"
 	"github.com/abiosoft/ishell"
 )
@@ -14,7 +16,7 @@ func InitServiceShell(shell *ishell.Shell) {
 			argMap := FlagsParse(c.Args, map[string]string{
 				"t": "tcp",
 			})
-			key := fmt.Sprintf("%d", coreService.GetNodeIndex())
+			key := fmt.Sprintf("%d", nas.GetSelectedIndex())
 			isTcpSort := false
 			if k, ok := argMap["tcp"]; ok {
 				if k == "" {
@@ -28,7 +30,7 @@ func InitServiceShell(shell *ishell.Shell) {
 					key = k
 				}
 			}
-			coreService.Start(key, isTcpSort)
+			service.Start(key, isTcpSort)
 		},
 	})
 	// 停止服务
@@ -36,7 +38,7 @@ func InitServiceShell(shell *ishell.Shell) {
 		Name: "stop",
 		Help: "停止服务",
 		Func: func(c *ishell.Context) {
-			coreService.Stop()
+			service.Stop()
 		},
 	})
 }

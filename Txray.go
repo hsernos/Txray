@@ -2,6 +2,8 @@ package main
 
 import (
 	"Txray/cmd"
+	"Txray/core/config"
+	"Txray/core/service"
 	"Txray/log"
 	"Txray/tools"
 	"github.com/abiosoft/ishell"
@@ -9,13 +11,13 @@ import (
 )
 
 const (
-	version = "v2.0.1"
+	version = "v2.1.0"
 	name    = "Txray"
 )
 
 func init() {
 	// 初始化日志
-	absPath := tools.PathJoin(tools.GetRunPath(), "info.log")
+	absPath := tools.PathJoin(config.GetConfigDir(), "info.log")
 	log.Init(
 		log.GetConsoleZapcore(log.INFO),
 		log.GetFileZapcore(absPath, log.INFO, 5),
@@ -33,5 +35,5 @@ func main() {
 		shell.Printf("%s - Xray Shell Client - %s\n", name, version)
 		shell.Run()
 	}
-	defer cmd.Kill()
+	defer service.Stop()
 }

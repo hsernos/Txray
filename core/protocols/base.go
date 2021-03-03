@@ -10,7 +10,7 @@ type Protocol interface {
 	// 解析链接
 	ParseLink(link string) bool
 	// 获取协议模式
-	GetProtocolMode() string
+	GetProtocolMode() Mode
 	// 获取别名
 	GetName() string
 	// 获取远程地址

@@ -23,6 +23,15 @@ func ShowDNS(writer io.Writer, datas ...[]string) {
 	table.Render()
 }
 
+func ShowTest(writer io.Writer, datas ...[]string) {
+	table := tablewriter.NewWriter(writer)
+	table.SetHeader([]string{"测试URL", "超时时间（秒）"})
+	center := tablewriter.ALIGN_CENTER
+	table.SetAlignment(center)
+	table.AppendBulk(datas)
+	table.Render()
+}
+
 func ShowSimpleNode(writer io.Writer, datas ...[]string) {
 	table := tablewriter.NewWriter(writer)
 	center := tablewriter.ALIGN_CENTER

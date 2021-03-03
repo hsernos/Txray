@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"Txray/core/node"
+	"Txray/core/setting"
 	"Txray/log"
 	"Txray/tools"
 	"Txray/tools/format"
@@ -14,9 +16,22 @@ func InitSubscribeShell(shell *ishell.Shell) {
 		Name: "sub",
 		Help: "订阅管理, 使用sub查看帮助信息",
 		Func: func(c *ishell.Context) {
-			c.Println(HelpSub())
+			var key string
+			if len(c.Args) == 1 {
+				key = c.Args[0]
+			} else {
+				key = "all"
+			}
+			format.ShowSub(os.Stdout, node.GetSubscribe(key)...)
 		},
 	}
+	sub.AddCmd(&ishell.Cmd{
+		Name: "help",
+		Help: "",
+		Func: func(c *ishell.Context) {
+			c.Println(HelpSub())
+		},
+	})
 	// 添加订阅
 	sub.AddCmd(&ishell.Cmd{
 		Name: "add",
@@ -28,9 +43,9 @@ func InitSubscribeShell(shell *ishell.Shell) {
 			if len(c.Args) >= 1 {
 				if sublink, ok := argMap["data"]; ok {
 					if remarksArg, ok := argMap["remarks"]; ok {
-						coreService.AddSub(sublink, remarksArg)
+						node.AddSubscribe(sublink, remarksArg)
 					} else {
-						coreService.AddSub(sublink, "remarks")
+						node.AddSubscribe(sublink, "remarks")
 					}
 				} else {
 					log.Warn("需要输入一个订阅链接")
@@ -42,13 +57,12 @@ func InitSubscribeShell(shell *ishell.Shell) {
 	})
 	// 删除订阅
 	sub.AddCmd(&ishell.Cmd{
-		Name: "del",
+		Name: "rm",
 		Help: "删除订阅",
 		Func: func(c *ishell.Context) {
-
 			if len(c.Args) == 1 {
 				key := c.Args[0]
-				coreService.DelSubs(key)
+				node.DelSubs(key)
 			} else if len(c.Args) == 0 {
 				log.Warn("还需要输入一个索引")
 			} else {
@@ -58,7 +72,7 @@ func InitSubscribeShell(shell *ishell.Shell) {
 	})
 	// 修改订阅
 	sub.AddCmd(&ishell.Cmd{
-		Name: "atler",
+		Name: "mv",
 		Help: "修改订阅",
 		Func: func(c *ishell.Context) {
 			argMap := FlagsParse(c.Args, map[string]string{
@@ -78,22 +92,8 @@ func InitSubscribeShell(shell *ishell.Shell) {
 						using = "false"
 					}
 				}
-				coreService.SetSubs(key, using, url, remarks)
+				node.SetSubs(key, using, url, remarks)
 			}
-		},
-	})
-	// 查看订阅
-	sub.AddCmd(&ishell.Cmd{
-		Name: "show",
-		Help: "查看订阅",
-		Func: func(c *ishell.Context) {
-			var key string
-			if len(c.Args) == 1 {
-				key = c.Args[0]
-			} else {
-				key = "all"
-			}
-			format.ShowSub(os.Stdout, coreService.GetSubs(key)...)
 		},
 	})
 	// 更新节点
@@ -115,20 +115,20 @@ func InitSubscribeShell(shell *ishell.Shell) {
 				if tools.IsNetPort(socks5) {
 					port = tools.StrToUint(socks5)
 				} else {
-					port = coreService.GetSocksPort()
+					port = setting.SocksPort()
 				}
 			} else if http, ok := argMap["http"]; ok {
 				mode = "http"
 				if tools.IsNetPort(http) {
 					port = tools.StrToUint(http)
 				} else {
-					port = coreService.GetHttpPort()
+					port = setting.HttpPort()
 				}
 			}
 			if address, ok := argMap["addr"]; ok {
 				addr = address
 			}
-			coreService.AddNodeBySub(key, mode, addr, port)
+			node.AddNodeBySub(key, mode, addr, port)
 		},
 	})
 	shell.AddCmd(sub)

@@ -1,7 +1,6 @@
 package protocols
 
 import (
-	"Txray/core/protocols/mode"
 	"Txray/tools"
 	"bytes"
 	"fmt"
@@ -47,8 +46,8 @@ func (t *Trojan) ParseLink(link string) bool {
 	return true
 }
 
-func (t *Trojan) GetProtocolMode() string {
-	return mode.Trojan
+func (t *Trojan) GetProtocolMode() Mode {
+	return ModeTrojan
 }
 
 func (t *Trojan) GetName() string {

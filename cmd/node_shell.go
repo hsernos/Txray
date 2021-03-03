@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	nas "Txray/core/node"
 	"Txray/core/protocols"
 	"Txray/log"
 	"Txray/tools"
@@ -16,9 +17,16 @@ func InitNodeShell(shell *ishell.Shell) {
 
 	node := &ishell.Cmd{
 		Name: "node",
-		Help: "节点管理, 使用node查看帮助信息",
+		Help: "查看节点",
 		Func: func(c *ishell.Context) {
-			c.Println(HelpNode())
+			var key string
+			if len(c.Args) == 1 {
+				key = c.Args[0]
+			} else {
+				key = "all"
+			}
+			format.ShowSimpleNode(os.Stdout, nas.GetNodes(key)...)
+			c.Println("当前选定节点索引:", nas.GetSelectedIndex())
 		},
 	}
 	// 添加节点
@@ -50,9 +58,9 @@ func InitNodeShell(shell *ishell.Shell) {
 							links = append(links, link)
 						}
 					}
-					coreService.AddNodeByLinks(links...)
+					nas.AddNodeByLinks(links...)
 				} else {
-					coreService.AddNodeBySubText(content)
+					nas.AddNodeBySubText(content)
 				}
 			} else if fileArg, ok := argMap["file"]; ok {
 				if !tools.IsFile(fileArg) {
@@ -73,13 +81,13 @@ func InitNodeShell(shell *ishell.Shell) {
 							links = append(links, link)
 						}
 					}
-					coreService.AddNodeByLinks(links...)
+					nas.AddNodeByLinks(links...)
 				} else {
-					coreService.AddNodeBySubText(content)
+					nas.AddNodeBySubText(content)
 				}
 			} else if linkArg, ok := argMap["link"]; ok {
 				if protocols.IsSupportLinkFormat(linkArg) {
-					coreService.AddNodeByLinks(linkArg)
+					nas.AddNodeByLinks(linkArg)
 				} else {
 					log.Error("格式错误, 应以 'ss://' 'vmess://' 'trojan://' 或 'vless://' 开头的链接")
 					return
@@ -139,7 +147,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					}
 					tls := c.MultiChoice(tlsList, "底层安全传输 ?")
 					c.Println("========================")
-					coreService.AddVMessNode(remarks, address, port, id, alterID,
+					nas.AddVMessNode(remarks, address, port, id, alterID,
 						networkList[network], typeList[types], host, path, tlsList[tls])
 					c.Println("添加完成")
 				// VLESS
@@ -163,7 +171,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					c.Print("密码（password）: ")
 					password := c.ReadLine()
 					c.Println("========================")
-					coreService.AddTrojanNode(remarks, addr, port, password)
+					nas.AddTrojanNode(remarks, addr, port, password)
 					c.Println("添加完成")
 				// Shadowsocks
 				case 3:
@@ -190,7 +198,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					}
 					sIndex := c.MultiChoice(security, "加密方式（security） ?")
 					c.Println("========================")
-					coreService.AddShadowSocksNode(remarks, addr, port, password, security[sIndex])
+					nas.AddShadowSocksNode(remarks, addr, port, password, security[sIndex])
 					c.Println("添加完成")
 				}
 				c.Println()
@@ -198,19 +206,12 @@ func InitNodeShell(shell *ishell.Shell) {
 
 		},
 	})
-	// 查看节点
+	// 查看帮助
 	node.AddCmd(&ishell.Cmd{
-		Name: "show",
-		Help: "查看节点",
+		Name: "help",
+		Help: "查看帮助",
 		Func: func(c *ishell.Context) {
-			var key string
-			if len(c.Args) == 1 {
-				key = c.Args[0]
-			} else {
-				key = "all"
-			}
-			format.ShowSimpleNode(os.Stdout, coreService.GetNodes(key)...)
-			c.Println("当前选定节点索引:", coreService.GetNodeIndex())
+			c.Println(HelpNode())
 		},
 	})
 	// 节点详情
@@ -221,10 +222,8 @@ func InitNodeShell(shell *ishell.Shell) {
 			if len(c.Args) == 1 {
 				if tools.IsInt(c.Args[0]) {
 					index := tools.StrToInt(c.Args[0])
-					if coreService.HasNode(index) {
-
-						coreService.Show(index)
-
+					if nas.HasNode(index) {
+						nas.Show(index)
 					} else {
 						log.Warn(c.Args[0], ": 没有该索引")
 					}
@@ -240,12 +239,12 @@ func InitNodeShell(shell *ishell.Shell) {
 	})
 	// 删除节点
 	node.AddCmd(&ishell.Cmd{
-		Name: "del",
+		Name: "rm",
 		Help: "删除节点",
 		Func: func(c *ishell.Context) {
 			if len(c.Args) == 1 {
 				key := c.Args[0]
-				coreService.DelNodes(key)
+				nas.DelNodes(key)
 			} else if len(c.Args) == 0 {
 				log.Warn("还需要输入一个索引")
 			} else {
@@ -265,7 +264,7 @@ func InitNodeShell(shell *ishell.Shell) {
 			if _, ok := argMap["data"]; ok {
 				key, _ = argMap["data"]
 			}
-			links := coreService.ExportNodes(key)
+			links := nas.ExportNodes(key)
 			if _, ok := argMap["clipboard"]; ok {
 				err := clipboard.WriteAll(strings.Join(links, "\n"))
 				if err != nil {
@@ -292,8 +291,8 @@ func InitNodeShell(shell *ishell.Shell) {
 			} else {
 				key = "all"
 			}
-			coreService.PingNodes(key)
-			err := shell.Process("node", "show", "t")
+			nas.PingNodes(key)
+			err := shell.Process("node", "t")
 			if err != nil {
 				log.Error(err)
 			}
@@ -306,9 +305,9 @@ func InitNodeShell(shell *ishell.Shell) {
 		Func: func(c *ishell.Context) {
 			if len(c.Args) == 1 {
 				key := c.Args[0]
-				coreService.DelNodes(key)
-				format.ShowSimpleNode(os.Stdout, coreService.FindNodes(key)...)
-				c.Println("当前选定节点索引:", coreService.GetNodeIndex())
+				nas.DelNodes(key)
+				format.ShowSimpleNode(os.Stdout, nas.FindNodes(key)...)
+				c.Println("当前选定节点索引:", nas.GetSelectedIndex())
 			} else if len(c.Args) == 0 {
 				log.Warn("还需要输入一个查找关键字")
 			} else {

@@ -1,7 +1,6 @@
 package protocols
 
 import (
-	"Txray/core/protocols/mode"
 	"Txray/tools"
 	"bytes"
 	"fmt"
@@ -65,8 +64,8 @@ func (s *ShadowSocksR) ParseLink(link string) bool {
 	return true
 }
 
-func (s *ShadowSocksR) GetProtocolMode() string {
-	return mode.ShadowSocksR
+func (s *ShadowSocksR) GetProtocolMode() Mode {
+	return ModeShadowSocksR
 }
 
 func (s *ShadowSocksR) GetName() string {

@@ -3,19 +3,22 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"strings"
 )
 
 func Help() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	format15 := "    %-15s%-s\n"
 	format25 := "    %-25s%-s\n"
 	format25t17 := "    %-25s%-17s%-s\n"
+	format25t19 := "    %-25s%-19s%-s\n"
 	buf.WriteString("Commands:\n")
-	buf.WriteString(fmt.Sprintf(format25t17, "setting", "基础设置", "使用 'setting' 查看详细用法"))
-	buf.WriteString(fmt.Sprintf(format25t17, "node", "节点管理", "使用 'node' 查看详细用法"))
-	buf.WriteString(fmt.Sprintf(format25t17, "sub", "订阅管理", "使用 'sub' 查看详细用法"))
-	buf.WriteString(fmt.Sprintf(format25t17, "dns", "DNS管理", "  使用 'dns' 查看详细用法"))
-	buf.WriteString(fmt.Sprintf(format25t17, "route", "路由管理", "使用 'route' 查看详细用法"))
+	buf.WriteString(fmt.Sprintf(format25t17, "base", "基础设置", "使用 'base help' 查看详细用法"))
+	buf.WriteString(fmt.Sprintf(format25t19, "dns", "DNS 设置", "使用 'dns help' 查看详细用法"))
+	buf.WriteString(fmt.Sprintf(format25t17, "test", "测试设置", "使用 'test help' 查看详细用法"))
+	buf.WriteString(fmt.Sprintf(format25t17, "node", "节点管理", "使用 'node help' 查看详细用法"))
+	buf.WriteString(fmt.Sprintf(format25t17, "sub", "订阅管理", "使用 'sub help' 查看详细用法"))
+	buf.WriteString(fmt.Sprintf(format25t17, "routing", "路由管理", "使用 'routing help' 查看详细用法"))
 	buf.WriteString(fmt.Sprintf(format25, "help, -h", "查看帮助信息"))
 	buf.WriteString(fmt.Sprintf(format25, "version, -v", "查看版本"))
 	buf.WriteString(fmt.Sprintf(format25, "clear", "清屏"))
@@ -39,37 +42,36 @@ func Help() string {
 }
 
 func HelpSetting() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	format30 := "    %-30s%-s\n"
-	buf.WriteString("setting {commands} [flags] ...\n")
+	buf.WriteString("base {commands}\n")
 	buf.WriteString("\n")
 	buf.WriteString("Commands:\n")
-	buf.WriteString(fmt.Sprintf(format30, "show", "查看基本设置"))
-	buf.WriteString(fmt.Sprintf(format30, "alter [flags]", "修改基础设置"))
-	buf.WriteString("\n")
-	buf.WriteString("alter Flags\n")
-	buf.WriteString(fmt.Sprintf(format30, "-p, --port {port}", "设置socks端口"))
-	buf.WriteString(fmt.Sprintf(format30, "-h, --http {port}", "设置http端口, 0为关闭http监听"))
-	buf.WriteString(fmt.Sprintf(format30, "-u, --udp {y|n}", "是否启用udp"))
-	buf.WriteString(fmt.Sprintf(format30, "-s, --sniffing {y|n}", "是否启用流量监听"))
-	buf.WriteString(fmt.Sprintf(format30, "-l, --lanconn {y|n}", "是否启用局域网连接"))
-	buf.WriteString(fmt.Sprintf(format30, "-m, --mux {y|n}", "是否启用多路复用"))
-	buf.WriteString(fmt.Sprintf(format30, "-b, --bypass {y|n}", "是否绕过局域网及大陆"))
-	buf.WriteString(fmt.Sprintf(format30, "-r, --route {1|2|3}", "设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}"))
+	buf.WriteString(fmt.Sprintf(format30, "", "查看基本设置"))
+	buf.WriteString(fmt.Sprintf(format30, "help", "查看帮助"))
+	buf.WriteString(fmt.Sprintf(format30, "port {port}", "设置socks端口"))
+	buf.WriteString(fmt.Sprintf(format30, "http {port}", "设置http端口, 0为关闭http监听"))
+	buf.WriteString(fmt.Sprintf(format30, "udp {y|n}", "是否启用udp"))
+	buf.WriteString(fmt.Sprintf(format30, "sniffing {y|n}", "是否启用流量监听"))
+	buf.WriteString(fmt.Sprintf(format30, "lanconn {y|n}", "是否启用局域网连接"))
+	buf.WriteString(fmt.Sprintf(format30, "mux {y|n}", "是否启用多路复用"))
+	buf.WriteString(fmt.Sprintf(format30, "bypass {y|n}", "是否绕过局域网及大陆"))
+	buf.WriteString(fmt.Sprintf(format30, "routing {1|2|3}", "设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}"))
 	return buf.String()
 }
 
 func HelpNode() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	format30 := "    %-30s%-s\n"
 	format28 := "    %-28s%-s\n"
 	format27 := "    %-27s%-s\n"
 	buf.WriteString("node {commands} [flags] ...\n")
 	buf.WriteString("\n")
 	buf.WriteString("Commands:\n")
-	buf.WriteString(fmt.Sprintf(format27, "show [索引式|t]", "查看节点信息, 默认'all', 't'表示按延迟降序查看"))
+	buf.WriteString(fmt.Sprintf(format27, "[索引式|t]", "查看节点信息, 默认'all', 't'表示按延迟降序查看"))
+	buf.WriteString(fmt.Sprintf(format30, "help", "查看帮助"))
 	buf.WriteString(fmt.Sprintf(format28, "info {索引}", "查看单个节点详细信息"))
-	buf.WriteString(fmt.Sprintf(format27, "del {索引式}", "删除节点"))
+	buf.WriteString(fmt.Sprintf(format27, "rm {索引式}", "删除节点"))
 	buf.WriteString(fmt.Sprintf(format27, "tcping {索引式}", "测试节点tcp延迟"))
 	buf.WriteString(fmt.Sprintf(format27, "find {关键词}", "查找节点（按别名）"))
 	buf.WriteString(fmt.Sprintf(format30, "add [flags]", "添加节点"))
@@ -84,21 +86,22 @@ func HelpNode() string {
 }
 
 func HelpSub() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	format30 := "    %-30s%-s\n"
 	format28 := "    %-28s%-s\n"
 	format27 := "    %-27s%-s\n"
 	buf.WriteString("sub {commands} [flags] ...\n")
 	buf.WriteString("\n")
 	buf.WriteString("Commands:\n")
-	buf.WriteString(fmt.Sprintf(format27, "show {索引式}", "查看订阅信息"))
-	buf.WriteString(fmt.Sprintf(format27, "del {索引式}", "删除订阅"))
+	buf.WriteString(fmt.Sprintf(format27, "[索引式]", "查看订阅信息"))
+	buf.WriteString(fmt.Sprintf(format30, "help", "查看帮助"))
+	buf.WriteString(fmt.Sprintf(format27, "rm {索引式}", "删除订阅"))
 	buf.WriteString(fmt.Sprintf(format28, "add {订阅url} [flags]", "添加订阅"))
-	buf.WriteString(fmt.Sprintf(format27, "alter {索引式} {flags}", "修改订阅"))
+	buf.WriteString(fmt.Sprintf(format27, "mv {索引式} {flags}", "修改订阅"))
 	buf.WriteString(fmt.Sprintf(format27, "update-node [索引式] [flags]", "从订阅更新节点, 索引式会忽略是否启用"))
 	buf.WriteString("\nadd Flags\n")
 	buf.WriteString(fmt.Sprintf(format28, "-r, --remarks {别名} ", "定义别名"))
-	buf.WriteString("\nalter Flags\n")
+	buf.WriteString("\nrm Flags\n")
 	buf.WriteString(fmt.Sprintf(format28, "-u, --url {订阅url}", "修改订阅链接"))
 	buf.WriteString(fmt.Sprintf(format28, "-r, --remarks {别名}", "定义别名"))
 	buf.WriteString(fmt.Sprintf(format30, "--using {y|n}", "是否启用此订阅"))
@@ -110,46 +113,48 @@ func HelpSub() string {
 }
 
 func HelpDNS() string {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	format30 := "    %-30s%-s\n"
-	buf.WriteString("dns {commands} [flags] ...\n")
+	buf.WriteString("dns {commands}\n")
 	buf.WriteString("\n")
 	buf.WriteString("Commands:\n")
-	buf.WriteString(fmt.Sprintf(format30, "show", "查看DNS设置"))
-	buf.WriteString(fmt.Sprintf(format30, "alter {flags}", "修改DNS设置"))
-	buf.WriteString("\n")
-	buf.WriteString("alter Flags\n")
-	buf.WriteString(fmt.Sprintf(format30, "-p, --port {port}", "设置dns端口, 0为关闭"))
-	buf.WriteString(fmt.Sprintf(format30, "-i, --inland {dns}", "设置一条境内DNS"))
-	buf.WriteString(fmt.Sprintf(format30, "-o, --outland {dns}", "设置一条境外DNS"))
-	buf.WriteString(fmt.Sprintf(format30, "-b, --backup {dns}", "设置备用DNS，多条以 ',' 分隔"))
+	buf.WriteString(fmt.Sprintf(format30, "", "查看DNS设置"))
+	buf.WriteString(fmt.Sprintf(format30, "help", "查看帮助"))
+	buf.WriteString(fmt.Sprintf(format30, "port {port}", "设置dns端口, 0为关闭"))
+	buf.WriteString(fmt.Sprintf(format30, "inland {dns}", "设置一条境内DNS"))
+	buf.WriteString(fmt.Sprintf(format30, "outland {dns}", "设置一条境外DNS"))
+	buf.WriteString(fmt.Sprintf(format30, "backup {dns}", "设置备用DNS，多条以 ',' 分隔"))
 	return buf.String()
 }
 
-func HelpRoute() string {
-	var buf bytes.Buffer
+func HelpTest() string {
+	var buf strings.Builder
 	format30 := "    %-30s%-s\n"
-	format27 := "    %-27s%-s\n"
-	format26 := "    %-26s%-s\n"
-	buf.WriteString("route {commands} [flags] ...\n")
+	buf.WriteString("test [commands]\n")
 	buf.WriteString("\n")
 	buf.WriteString("Commands:\n")
-	buf.WriteString(fmt.Sprintf(format26, "add {路由规则} {flags}", "添加路由规则"))
-	buf.WriteString(fmt.Sprintf(format30, "show {flags}", "查看路由规则"))
-	buf.WriteString(fmt.Sprintf(format30, "del {flags}", "删除路由规则"))
-	buf.WriteString("\nadd Flags\n")
-	buf.WriteString(fmt.Sprintf(format30, "-b, --block", "指定到禁止名单, 同下面2个中选择一个"))
-	buf.WriteString(fmt.Sprintf(format30, "-d, --direct", "指定到直连名单, 同上下2个中选择一个"))
-	buf.WriteString(fmt.Sprintf(format30, "-p, --proxy", "指定到代理名单, 同上面2个中选择一个"))
-	buf.WriteString(fmt.Sprintf(format30, "-f, --file {path}", "从文件导入"))
-	buf.WriteString(fmt.Sprintf(format30, "-c, --clipboard", "从剪贴板导入"))
-	buf.WriteString("\nshow Flags\n")
-	buf.WriteString(fmt.Sprintf(format27, "-b, --block [索引式]", "指定到禁止名单, 同下面2个中选择一个, 索引式默认'all'"))
-	buf.WriteString(fmt.Sprintf(format27, "-d, --direct [索引式]", "指定到直连名单, 同上下2个中选择一个, 索引式默认'all'"))
-	buf.WriteString(fmt.Sprintf(format27, "-p, --proxy [索引式]", "指定到代理名单, 同上面2个中选择一个, 索引式默认'all'"))
-	buf.WriteString("\ndel Flags\n")
-	buf.WriteString(fmt.Sprintf(format27, "-b, --block {索引式}", "指定到禁止名单, 同下面2个中选择一个"))
-	buf.WriteString(fmt.Sprintf(format27, "-d, --direct {索引式}", "指定到直连名单, 同上下2个中选择一个"))
-	buf.WriteString(fmt.Sprintf(format27, "-p, --proxy {索引式}", "指定到代理名单, 同上面2个中选择一个"))
+	buf.WriteString(fmt.Sprintf(format30, "", "查看测试设置"))
+	buf.WriteString(fmt.Sprintf(format30, "help", "查看帮助"))
+	buf.WriteString(fmt.Sprintf(format30, "url {url}", "设置测试网站"))
+	buf.WriteString(fmt.Sprintf(format30, "timeout {time}", "设置测试超时时间 (秒)"))
+	return buf.String()
+}
+
+func HelpRouting() string {
+	var buf bytes.Buffer
+	format30 := "    %-30s%-s\n"
+	format28 := "    %-28s%-s\n"
+	format27 := "    %-27s%-s\n"
+	buf.WriteString("routing {commands} [flags] ...\n")
+	buf.WriteString("\n")
+	buf.WriteString("Commands:\n")
+	buf.WriteString(fmt.Sprintf(format27, "block [索引式] | [flags]", "查看或管理禁止路由规则"))
+	buf.WriteString(fmt.Sprintf(format27, "direct [索引式] | [flags]", "查看或管理直连路由规则"))
+	buf.WriteString(fmt.Sprintf(format27, "proxy [索引式] | [flags]", "查看或管理代理路由规则"))
+	buf.WriteString("\nblock, direct, proxy Flags\n")
+	buf.WriteString(fmt.Sprintf(format28, "-a, --add {规则}", "添加路由规则"))
+	buf.WriteString(fmt.Sprintf(format27, "-r, --rm {索引式}", "删除路由规则"))
+	buf.WriteString(fmt.Sprintf(format30, "-f, --file {path}", "从文件导入规则"))
+	buf.WriteString(fmt.Sprintf(format30, "-c, --clipboard", "从剪贴板导入规则"))
 	return buf.String()
 }

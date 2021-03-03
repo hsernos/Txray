@@ -108,6 +108,11 @@ func GetFilesAndDirs(path string) ([]string, []string, error) {
 
 // 路径拼接
 func PathJoin(elem ...string) string {
+	if len(elem) > 0 {
+		if strings.HasSuffix(elem[0], string(os.PathSeparator)) {
+			elem[0] = strings.TrimRight(elem[0], string(os.PathSeparator))
+		}
+	}
 	return strings.Join(elem, string(os.PathSeparator))
 }
 

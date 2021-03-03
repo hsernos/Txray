@@ -1,55 +1,25 @@
-package core
+package xray
 
 import (
+	"Txray/core/config"
+	"Txray/core/node"
 	"Txray/core/protocols"
-	"Txray/core/protocols/mode"
+	"Txray/core/routing"
+	"Txray/core/setting"
 	"Txray/log"
 	"Txray/tools"
-	"path/filepath"
-	"strings"
 )
 
-// 检查xray程序和资源文件 geoip.dat、geosite.dat是否存在且在同一目录
-func CheckXrayFile() bool {
-	xrayPath := GetXrayPath()
-	if xrayPath == "" {
-		log.Error("在", tools.GetRunPath(), " 下没有找到xray程序")
-		log.Error("请在 https://github.com/XTLS/Xray-core/releases 下载最新版本")
-		log.Error("并将解压后的文件夹或所有文件移动到 ", tools.GetRunPath(), " 下")
-		return false
-	} else {
-		path := filepath.Dir(GetXrayPath())
-		if tools.IsFile(tools.PathJoin(path, "geoip.dat")) && tools.IsFile(tools.PathJoin(path, "geosite.dat")) {
-			return true
-		} else {
-			log.Error("在 ", path, " 下没有找到xray程序的资源文件 geoip.dat 和 geosite.dat")
-			log.Error("请在 https://github.com/XTLS/Xray-core/releases 下载最新版本")
-			log.Error("并将缺失的文件移动到 ", path, " 下")
-			return false
-		}
-	}
-}
-
-// 查找xray程序所在绝对路径
-func GetXrayPath() string {
-	path := tools.GetRunPath()
-	files, _ := tools.FindFileByName(path, "xray", ".exe")
-	if len(files) == 0 {
-		return ""
-	}
-	return files[0]
-}
-
 // 生成xray-core配置文件
-func (c *Core) GenXrayConfig() string {
-	path := tools.PathJoin(tools.GetRunPath(), "config.json")
+func GenConfig(index int) string {
+	path := tools.PathJoin(config.GetConfigDir(), "config.json")
 	var conf = map[string]interface{}{
-		"log":       c.getXrayLogConfig(),
-		"inbounds":  c.getXrayInboundsConfig(),
-		"outbounds": c.getXrayOutboundConfig(),
-		"policy":    c.getXrayPolicy(),
-		"dns":       c.getXrayDNSConfig(),
-		"routing":   c.getXrayRoutingConfig(),
+		"log":       logConfig(),
+		"inbounds":  inboundsConfig(),
+		"outbounds": outboundConfig(index),
+		"policy":    policyConfig(),
+		"dns":       dnsConfig(),
+		"routing":   routingConfig(),
 	}
 	err := tools.WriteJSON(conf, path)
 	if err != nil {
@@ -60,8 +30,8 @@ func (c *Core) GenXrayConfig() string {
 }
 
 // 日志
-func (c *Core) getXrayLogConfig() interface{} {
-	path := tools.PathJoin(tools.GetRunPath(), "xray_access.log")
+func logConfig() interface{} {
+	path := tools.PathJoin(config.GetConfigDir(), "xray_access.log")
 	return map[string]string{
 		"access":   path,
 		"loglevel": "warning",
@@ -69,19 +39,20 @@ func (c *Core) getXrayLogConfig() interface{} {
 }
 
 // 入站
-func (c *Core) getXrayInboundsConfig() interface{} {
+func inboundsConfig() interface{} {
 	listen := "127.0.0.1"
-	if c.Settings.AllowLANConn {
+	base := setting.Base()
+	if base.AllowLANConn {
 		listen = "0.0.0.0"
 	}
 	data := []interface{}{
 		map[string]interface{}{
 			"tag":      "proxy",
-			"port":     c.Settings.Socks,
+			"port":     base.Socks,
 			"listen":   listen,
 			"protocol": "socks",
 			"sniffing": map[string]interface{}{
-				"enabled": c.Settings.Sniffing,
+				"enabled": base.Sniffing,
 				"destOverride": []string{
 					"http",
 					"tls",
@@ -89,15 +60,15 @@ func (c *Core) getXrayInboundsConfig() interface{} {
 			},
 			"settings": map[string]interface{}{
 				"auth":      "noauth",
-				"udp":       c.Settings.UDP,
+				"udp":       base.UDP,
 				"userLevel": 0,
 			},
 		},
 	}
-	if c.Settings.Http > 0 {
+	if base.Http > 0 {
 		data = append(data, map[string]interface{}{
 			"tag":      "http",
-			"port":     c.Settings.Http,
+			"port":     base.Http,
 			"listen":   listen,
 			"protocol": "http",
 			"settings": map[string]interface{}{
@@ -105,15 +76,15 @@ func (c *Core) getXrayInboundsConfig() interface{} {
 			},
 		})
 	}
-	if c.DNS.Port > 0 {
+	if setting.DNSPort() > 0 {
 		data = append(data, map[string]interface{}{
 			"tag":      "dns-in",
-			"port":     c.DNS.Port,
+			"port":     setting.DNSPort(),
 			"listen":   listen,
 			"protocol": "dokodemo-door",
 			"settings": map[string]interface{}{
 				"userLevel": 0,
-				"address":   c.DNS.Outland,
+				"address":   setting.OutlandDNS(),
 				"network":   "tcp,udp",
 				"port":      53,
 			},
@@ -123,15 +94,19 @@ func (c *Core) getXrayInboundsConfig() interface{} {
 }
 
 // 出站
-func (c *Core) getXrayOutboundConfig() interface{} {
+func outboundConfig(index int) interface{} {
 	out := make([]interface{}, 0)
-	switch c.GetNodeMode() {
-	case mode.Trojan:
-		out = append(out, c.getXrayTrojanOutbound())
-	case mode.ShadowSocks:
-		out = append(out, c.getXraySSOutbound())
-	case mode.VMess:
-		out = append(out, c.getXrayVMessOutbound())
+	n := node.GetNode(index)
+	switch n.GetProtocolMode() {
+	case protocols.ModeTrojan:
+		t := n.(*protocols.Trojan)
+		out = append(out, trojanOutbound(t))
+	case protocols.ModeShadowSocks:
+		ss := n.(*protocols.ShadowSocks)
+		out = append(out, shadowsocksOutbound(ss))
+	case protocols.ModeVMess:
+		v := n.(*protocols.VMess)
+		out = append(out, vMessOutbound(v))
 	}
 	out = append(out, map[string]interface{}{
 		"tag":      "direct",
@@ -155,9 +130,7 @@ func (c *Core) getXrayOutboundConfig() interface{} {
 }
 
 //Shadowsocks
-func (c *Core) getXraySSOutbound() interface{} {
-	ss := new(protocols.ShadowSocks)
-	ss.ParseLink(c.GetNodeLink())
+func shadowsocksOutbound(ss *protocols.ShadowSocks) interface{} {
 	return map[string]interface{}{
 		"tag":      "proxy",
 		"protocol": "shadowsocks",
@@ -176,15 +149,13 @@ func (c *Core) getXraySSOutbound() interface{} {
 			"network": "tcp",
 		},
 		"mux": map[string]interface{}{
-			"enabled": c.Settings.Mux,
+			"enabled": setting.Base().Mux,
 		},
 	}
 }
 
 // Trojan
-func (c *Core) getXrayTrojanOutbound() interface{} {
-	trojan := new(protocols.Trojan)
-	trojan.ParseLink(c.GetNodeLink())
+func trojanOutbound(trojan *protocols.Trojan) interface{} {
 	return map[string]interface{}{
 		"tag":      "proxy",
 		"protocol": "trojan",
@@ -207,15 +178,13 @@ func (c *Core) getXrayTrojanOutbound() interface{} {
 			},
 		},
 		"mux": map[string]interface{}{
-			"enabled": c.Settings.Mux,
+			"enabled": setting.Base().Mux,
 		},
 	}
 }
 
 // VMess
-func (c *Core) getXrayVMessOutbound() interface{} {
-	vmess := new(protocols.VMess)
-	vmess.ParseLink(c.GetNodeLink())
+func vMessOutbound(vmess *protocols.VMess) interface{} {
 	var tlsSettings interface{}
 	var tcpSettings interface{}
 	var kcpSettings interface{}
@@ -232,14 +201,15 @@ func (c *Core) getXrayVMessOutbound() interface{} {
 	case "tcp":
 		tcpSettings = nil
 	case "kcp":
+		kcp := setting.KCP()
 		kcpSettings = map[string]interface{}{
-			"mtu":              c.KcpSetting.Mtu,
-			"tti":              c.KcpSetting.Tti,
-			"uplinkCapacity":   c.KcpSetting.UplinkCapacity,
-			"downlinkCapacity": c.KcpSetting.DownlinkCapacity,
-			"congestion":       c.KcpSetting.Congestion,
-			"readBufferSize":   c.KcpSetting.ReadBufferSize,
-			"writeBufferSize":  c.KcpSetting.WriteBufferSize,
+			"mtu":              kcp.Mtu,
+			"tti":              kcp.Tti,
+			"uplinkCapacity":   kcp.UplinkCapacity,
+			"downlinkCapacity": kcp.DownlinkCapacity,
+			"congestion":       kcp.Congestion,
+			"readBufferSize":   kcp.ReadBufferSize,
+			"writeBufferSize":  kcp.WriteBufferSize,
 			"header": map[string]interface{}{
 				"type": "none",
 			},
@@ -292,13 +262,13 @@ func (c *Core) getXrayVMessOutbound() interface{} {
 			"quicSettings": quicSettings,
 		},
 		"mux": map[string]interface{}{
-			"enabled": c.Settings.Mux,
+			"enabled": setting.Base().Mux,
 		},
 	}
 }
 
 // 本地策略
-func (c *Core) getXrayPolicy() interface{} {
+func policyConfig() interface{} {
 	return map[string]interface{}{
 		"levels": map[string]interface{}{
 			"0": map[string]interface{}{
@@ -317,11 +287,11 @@ func (c *Core) getXrayPolicy() interface{} {
 }
 
 // DNS
-func (c *Core) getXrayDNSConfig() interface{} {
+func dnsConfig() interface{} {
 	servers := make([]interface{}, 0, 0)
-	if c.DNS.Inland != "" {
+	if setting.InlandDNS() != "" {
 		servers = append(servers, map[string]interface{}{
-			"address": c.DNS.Inland,
+			"address": setting.InlandDNS(),
 			"port":    53,
 			"domains": []interface{}{
 				"geosite:cn",
@@ -331,9 +301,9 @@ func (c *Core) getXrayDNSConfig() interface{} {
 			},
 		})
 	}
-	if c.DNS.Outland != "" {
+	if setting.OutlandDNS() != "" {
 		servers = append(servers, map[string]interface{}{
-			"address": c.DNS.Outland,
+			"address": setting.OutlandDNS(),
 			"port":    53,
 			"domains": []interface{}{
 				"geosite:geolocation-!cn",
@@ -341,8 +311,8 @@ func (c *Core) getXrayDNSConfig() interface{} {
 			},
 		})
 	}
-	if c.DNS.Backup != "" {
-		for _, bk := range strings.Split(c.DNS.Backup, ",") {
+	if len(setting.BackupDNS()) != 0 && setting.BackupDNS()[0] != "" {
+		for _, bk := range setting.BackupDNS() {
 			servers = append(servers, bk)
 		}
 	}
@@ -355,9 +325,9 @@ func (c *Core) getXrayDNSConfig() interface{} {
 }
 
 // 路由
-func (c *Core) getXrayRoutingConfig() interface{} {
+func routingConfig() interface{} {
 	rules := make([]interface{}, 0, 0)
-	if c.DNS.Port != 0 {
+	if setting.DNSPort() != 0 {
 		rules = append(rules, map[string]interface{}{
 			"type": "field",
 			"inboundTag": []interface{}{
@@ -366,27 +336,27 @@ func (c *Core) getXrayRoutingConfig() interface{} {
 			"outboundTag": "dns-out",
 		})
 	}
-	if c.DNS.Outland != "" {
+	if setting.OutlandDNS() != "" {
 		rules = append(rules, map[string]interface{}{
 			"type":        "field",
 			"port":        53,
 			"outboundTag": "proxy",
 			"ip": []string{
-				c.DNS.Outland,
+				setting.OutlandDNS(),
 			},
 		})
 	}
-	if c.DNS.Inland != "" {
+	if setting.InlandDNS() != "" {
 		rules = append(rules, map[string]interface{}{
 			"type":        "field",
 			"port":        53,
 			"outboundTag": "direct",
 			"ip": []string{
-				c.DNS.Inland,
+				setting.InlandDNS(),
 			},
 		})
 	}
-	ips, domains := GetRouteGroupData(&c.Block)
+	ips, domains := routing.GetRulesGroupData(routing.TypeBlock)
 	if len(ips) != 0 {
 		rules = append(rules, map[string]interface{}{
 			"type":        "field",
@@ -401,7 +371,7 @@ func (c *Core) getXrayRoutingConfig() interface{} {
 			"domain":      domains,
 		})
 	}
-	ips, domains = GetRouteGroupData(&c.Proxy)
+	ips, domains = routing.GetRulesGroupData(routing.TypeProxy)
 	if len(ips) != 0 {
 		rules = append(rules, map[string]interface{}{
 			"type":        "field",
@@ -416,7 +386,7 @@ func (c *Core) getXrayRoutingConfig() interface{} {
 			"domain":      domains,
 		})
 	}
-	ips, domains = GetRouteGroupData(&c.Direct)
+	ips, domains = routing.GetRulesGroupData(routing.TypeDirect)
 	if len(ips) != 0 {
 		rules = append(rules, map[string]interface{}{
 			"type":        "field",
@@ -431,7 +401,8 @@ func (c *Core) getXrayRoutingConfig() interface{} {
 			"domain":      domains,
 		})
 	}
-	if c.Settings.BypassLanAndContinent {
+	base := setting.Base()
+	if base.BypassLanAndContinent {
 		rules = append(rules, map[string]interface{}{
 			"type":        "field",
 			"outboundTag": "direct",
@@ -449,7 +420,7 @@ func (c *Core) getXrayRoutingConfig() interface{} {
 		})
 	}
 	return map[string]interface{}{
-		"domainStrategy": c.Settings.DomainStrategy,
+		"domainStrategy": base.DomainStrategy,
 		"rules":          rules,
 	}
 }

@@ -1,7 +1,6 @@
 package protocols
 
 import (
-	"Txray/core/protocols/mode"
 	"Txray/tools"
 	"bytes"
 	"encoding/json"
@@ -79,8 +78,8 @@ func (v *VMess) ParseLink(link string) bool {
 	return true
 }
 
-func (v *VMess) GetProtocolMode() string {
-	return mode.VMess
+func (v *VMess) GetProtocolMode() Mode {
+	return ModeVMess
 }
 
 func (v *VMess) GetName() string {

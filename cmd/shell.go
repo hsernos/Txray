@@ -1,18 +1,10 @@
 package cmd
 
 import (
-	"Txray/core"
 	"github.com/abiosoft/ishell"
 )
 
-var coreService core.Core
-
-func Kill() {
-	coreService.Stop()
-}
-
 func InitShell(shell *ishell.Shell) {
-	coreService = core.New()
 	shell.AddCmd(&ishell.Cmd{
 		Name:    "version",
 		Aliases: []string{"-v", "--version"},
@@ -34,6 +26,7 @@ func InitShell(shell *ishell.Shell) {
 	InitSubscribeShell(shell)
 	InitDNSShell(shell)
 	InitRouteShell(shell)
+	InitTestShell(shell)
 	InitServiceShell(shell)
 }
 
