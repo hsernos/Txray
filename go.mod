@@ -12,7 +12,6 @@ require (
     	github.com/flynn-archive/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
     	github.com/mattn/go-runewidth v0.0.7
     	github.com/olekukonko/tablewriter v0.0.4
-    	github.com/satori/go.uuid v1.2.0
     	go.uber.org/zap v1.16.0
     	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

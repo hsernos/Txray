@@ -139,7 +139,7 @@ base {commands}
 Commands:
                                   查看基本设置
     help                          查看帮助
-    port {port}                   设置socks端口
+    socks {port}                   设置socks端口
     http {port}                   设置http端口, 0为关闭http监听
     udp {y|n}                     是否启用udp
     sniffing {y|n}                是否启用流量监听
@@ -229,7 +229,7 @@ Commands:
 add Flags
     -r, --remarks {别名}          定义别名
 
-rm Flags
+mv Flags
     -u, --url {订阅url}           修改订阅链接
     -r, --remarks {别名}          定义别名
     --using {y|n}                 是否启用此订阅
