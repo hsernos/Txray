@@ -2,7 +2,7 @@ package tools
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -45,6 +45,6 @@ func GetNoProxy(url string, timeOut uint) (*http.Response, error) {
 
 // 读取http响应的内容
 func ReadDate(resp *http.Response) string {
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	return string(body)
 }

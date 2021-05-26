@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -58,11 +57,11 @@ func GetHome() (string, error) {
 // 遍历目录，查找文件
 func FindFileByName(root, name, ext string) ([]string, error) {
 	root = strings.TrimRight(root, string(os.PathSeparator))
-	paths, err := ioutil.ReadDir(root)
+	paths, err := os.ReadDir(root)
 	if err != nil {
 		return nil, err
 	}
-	objList := make([]string, 0, 0)
+	objList := make([]string, 0)
 	for _, p := range paths {
 		absPath := root + string(os.PathSeparator) + p.Name()
 		if p.IsDir() {
@@ -83,12 +82,12 @@ func FindFileByName(root, name, ext string) ([]string, error) {
 // 遍历目录，获取所有的文件和目录
 func GetFilesAndDirs(path string) ([]string, []string, error) {
 	path = strings.TrimRight(path, string(os.PathSeparator))
-	paths, err := ioutil.ReadDir(path)
+	paths, err := os.ReadDir(path)
 	if err != nil {
 		return nil, nil, err
 	}
-	dirs := make([]string, 0, 0)
-	files := make([]string, 0, 0)
+	dirs := make([]string, 0)
+	files := make([]string, 0)
 	for _, p := range paths {
 		absPath := path + string(os.PathSeparator) + p.Name()
 		if p.IsDir() {

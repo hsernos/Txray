@@ -2,7 +2,6 @@ package tools
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -33,7 +32,7 @@ func ReadJSON(path string, v interface{}) error {
 
 // ReadFile 读取文件
 func ReadFile(path string) []string {
-	data, _ := ioutil.ReadFile(path)
+	data, _ := os.ReadFile(path)
 	s := strings.ReplaceAll(string(data), "\r\n", "\n")
 	s = strings.ReplaceAll(s, "\r", "\n")
 	return strings.Split(s, "\n")
