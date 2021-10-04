@@ -42,18 +42,16 @@ def build(goos, goarch, path, cgo=0):
     syst = 'macos' if goos == 'darwin' else goos
     arch = '64' if goarch == 'amd64' else goarch
     arch = '32' if goarch == '386' else arch
-    cmd = 'CGO_ENABLED={} GOOS={} GOARCH={} go build -o {} {} '.format(cgo, goos, goarch,
-                                                                           "build/"+"-".join([Name, syst, arch]) + "/"+ Name+ e,
-                                                                           path)
+    os.environ.setdefault("CGO_ENABLED", str(cgo))
+    os.environ.setdefault("GOOS", goos)
+    os.environ.setdefault("GOARCH", goarch)
+    cmd = 'go build -o {} {} '.format("build/"+"-".join([Name, syst, arch]) + "/"+ Name+ e, path)
     os.system(cmd)
     shutil.copy("README.md", "build/"+"-".join([Name, syst, arch]))
     make_zip("build/"+"-".join([Name, syst, arch]), "build/"+"-".join([Name, syst, arch])+".zip")
 
 if __name__ == '__main__':
-    if get_os() == 'win':
-        print("该脚本暂不支持在Windows环境下运行")
-    else:
-        for goos in INFO.keys():
-            for goarch in INFO[goos]:
-                print("正在编译", goos, '系统的', goarch, '架构版本中...')
-                build(goos, goarch, 'Txray.go')
+     for goos in INFO.keys():
+         for goarch in INFO[goos]:
+             print("正在编译", goos, '系统的', goarch, '架构版本中...')
+             build(goos, goarch, 'Txray.go')
