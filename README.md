@@ -55,7 +55,7 @@ Project X core： https://github.com/XTLS/Xray-core
 
 1. 多平台支持, 支持 Windows, macOS, linux.
 2. Tab键命令补齐
-3. 支持VMess、Shadowsocks、Trojan协议
+3. 支持VMess、Shadowsocks、Trojan、VLESS、VMessAEAD、Socks协议
 
 #  编译/交叉编译 说明
 
