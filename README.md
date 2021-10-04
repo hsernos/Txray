@@ -20,9 +20,6 @@ Project X core： https://github.com/XTLS/Xray-core
   * [查看基本设置帮助文档](#查看基本设置帮助文档)
     + [查看基本设置](#查看基本设置)
     + [修改基本设置](#修改基本设置)
-  * [查看测试设置帮助文档](#查看测试设置帮助文档)
-      + [查看测试设置](#查看测试设置)
-      + [修改测试设置](#修改测试设置)    
   * [查看订阅帮助文档](#查看订阅帮助文档)
     + [添加订阅](#添加订阅)
     + [查看订阅](#查看订阅)
@@ -36,9 +33,13 @@ Project X core： https://github.com/XTLS/Xray-core
     + [tcping测试](#tcping测试)
     + [节点查找](#节点查找)
     + [导出节点](#导出节点)
-  * [查看DNS帮助文档](#查看DNS帮助文档)
-    + [查看DNS设置](#查看DNS设置)
-    + [修改DNS设置](#修改DNS设置)
+    + [节点排序](#节点排序)
+  * [查看节点过滤器帮助文档](#查看节点过滤器帮助文档)
+    + [添加过滤器规则](#添加过滤器规则)
+    + [过滤节点](#过滤节点)
+  * [查看节点回收站帮助文档](#查看节点回收站帮助文档)
+  * [查看命令别名帮助文档](#查看命令别名帮助文档)
+      + [添加和修改别名](#添加和修改别名)
   * [查看路由帮助文档](#查看路由帮助文档)
     + [添加路由](#添加路由)
     + [domain路由规则](#domain路由规则)
@@ -98,23 +99,23 @@ Project X core： https://github.com/XTLS/Xray-core
 ## 命令总览
 ```
 Commands:
-    base                     基础设置             使用 'base help' 查看详细用法
-    dns                      DNS 设置             使用 'dns help' 查看详细用法
-    test                     测试设置             使用 'test help' 查看详细用法
+    setting                  基础设置             使用 'setting help' 查看详细用法
     node                     节点管理             使用 'node help' 查看详细用法
     sub                      订阅管理             使用 'sub help' 查看详细用法
     routing                  路由管理             使用 'routing help' 查看详细用法
+    filter                   节点过滤             使用 'filter help' 查看详细用法
+    recycle                  回收站               使用 'recycle help' 查看详细用法
+    alias                    命令别名             使用 'alias help' 查看详细用法
     help, -h                 查看帮助信息
     version, -v              查看版本
     clear                    清屏
     exit                     退出程序
-    stop                     停止服务
     run                      启动或重启服务
+    stop                     停止服务
+    kill                     强制杀死xray进程
 
-Usage: run [索引式 | -t [索引式]]
-
-    run [索引式]      默认为上一次运行节点，如果选中多个节点，则选择访问YouTube延迟最小的
-    run -t [索引式]   按tcp延迟选择节点，默认'1'，比如 'run -t 1-10' 为选择tcp延迟最小的10个节点
+Usage: run [索引式]
+    run [索引式]      默认为上一次运行节点，如果选中多个节点，则选择访问 'setting' 中测试国外URL延迟最小的
 
 
 说明：
@@ -133,83 +134,88 @@ Usage: run [索引式 | -t [索引式]]
 ## 查看基本设置帮助文档
 
 ```
->>> base help
-base {commands}
+>>> setting help
+setting {commands}
 
 Commands:
-                                  查看基本设置
+                                  查看所有设置
     help                          查看帮助
-    socks {port}                   设置socks端口
-    http {port}                   设置http端口, 0为关闭http监听
-    udp {y|n}                     是否启用udp
-    sniffing {y|n}                是否启用流量监听
-    lanconn {y|n}                 是否启用局域网连接
-    mux {y|n}                     是否启用多路复用
-    bypass {y|n}                  是否绕过局域网及大陆
-    routing {1|2|3}               设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}
+
+    socks [port]                  设置socks端口
+    http [port]                   设置http端口, 0为关闭http监听
+    udp [y|n]                     是否启用udp转发
+    sniffing [y|n]                是否启用流量地址监听
+    from_lan_conn [y|n]           是否启用来自局域网连接
+    mux [y|n]                     是否启用多路复用（下载和看视频时建议关闭）
+
+    dns.port [port]               设置DNS端口
+    dns.foreign [dns]             设置国外DNS
+    dns.domestic [dns]            设置国内DNS
+    dns.backup [dns]              设置国内备用DNS
+
+    routing.strategy {1|2|3}      设置路由策略为{AsIs|IPIfNonMatch|IPOnDemand}
+    routing.bypass {y|n}          是否绕过局域网及大陆
+
+    test.url [url]                设置外网测试URL
+    test.timeout [time]           设置外网测试超时时间 (秒)
+
+    run_before [命令组] [flags]    程序启动时执行命令或命令组，可与命令别名搭配
+
+
+run_before Flags
+    -c, --close                   启动时不执行任何命令
+
+说明：
+1.命令，如 'node' 'node tcping' 'sub update-node' 这样的单条命令。
+2.命令组，形如 'sub update-node | node tcping | run' 这样的多条命令，以 '|' 分隔，顺序执行。
+PS：命令组包含命令，即命令组也可以设置单条命令
 ```
 
 ### 查看基本设置
 
 ```
-# 
->>> base
-+------------+----------+---------+--------------+----------+----------------+------------------+--------------+
-|  SOCKS端口  | HTTP端口  | UDP转发 |   启用流量监听  |  多路复用  |  允许局域网连接  | 绕过局域网和大陆    |   路由策略     |
-+------------+----------+---------+--------------+----------+----------------+------------------+--------------+
-|    2333    |   2334   |  true   |    false     |  false   |     false      |       true       | IPIfNonMatch |
-+------------+----------+---------+--------------+----------+----------------+------------------+--------------+
+>>> setting
++-----------+----------+---------+--------------+--------------------+----------+
+| SOCKS端口 | HTTP端口  | UDP转发 | 流量地址监听  | 允许来自局域网连接   | 多路复用  |
++-----------+----------+---------+--------------+--------------------+----------+
+|   1080    |    0     |  true   |     true     |        true        |   true   |
++-----------+----------+---------+--------------+--------------------+----------+
++---------+---------+--------------+-----------------+------------+------------------+
+| DNS端口  | 国外DNS |   国内DNS    |   备用国内DNS    |  路由策略   | 绕过局域网和大陆  |
++---------+---------+--------------+-----------------+------------+------------------+
+|  1351   | 1.1.1.1 | 119.29.29.29 | 114.114.114.114 | IPOnDemand |       true       |
++---------+---------+--------------+-----------------+------------+------------------+
++-------------------------+-------------------+------------+
+|       测试国外URL        | 测试超时时间 (秒)  | 启动时执行  |
++-------------------------+-------------------+------------+
+| https://www.youtube.com |         6         |            |
++-------------------------+-------------------+------------+
 ```
 
 ### 修改基本设置
 
 ```
 # 修改socks监听端口为3333
->>> base socks 3333
+>>> setting socks 3333
 
 # 修改http监听端口为3334
->>> base http 3334
+>>> setting http 3334
 
 # 修改不绕过局域网和大陆
->>> base bypass n
+>>> setting routing.bypass n
 
 # 修改路由策略为IPIfNonMatch, {1|2|3}=>{AsIs|IPIfNonMatch|IPOnDemand}
->>> base routing 2
-```
+>>> setting routing.strategy 2
 
+# 启动时运行仅针对进入shell交互才会触发
+# 设置启动时从订阅更新节点
+>>> setting run_before "sub update-node"
 
-## 查看测试设置帮助文档
+# 设置启动时对节点进行tcp测试，然后运行延迟最小的那个
+>>> setting run_before "node tcping | run"
 
-```
->>> test help
-test [commands]
-
-Commands:
-                                  查看测试设置
-    help                          查看帮助
-    url {url}                     设置测试网站
-    timeout {time}                设置测试超时时间 (秒)
-```
-
-### 查看测试设置
-
-```
->>> test
-+-------------------------+----------------+
-|         测试URL         | 超时时间（秒）  |
-+-------------------------+----------------+
-| https://www.youtube.com |       5        |
-+-------------------------+----------------+
-```
-
-### 修改测试设置
-
-```
-# 修改测试URL为google
->>> test url https://google.com
-
-# 修改超时时间为10秒
->>> test timeout 10
+# 设置启动时不执行任何命令
+>>> setting run_before -c
 ```
 
 ## 查看订阅帮助文档
@@ -219,8 +225,8 @@ Commands:
 sub {commands} [flags] ...
 
 Commands:
-    [索引式]                      查看订阅信息
-    help                          查看帮助
+                                 查看订阅信息
+    help                         查看帮助
     rm {索引式}                   删除订阅
     add {订阅url} [flags]         添加订阅
     mv {索引式} {flags}           修改订阅
@@ -345,14 +351,18 @@ update-node Flags
 node {commands} [flags] ...
 
 Commands:
-    [索引式|t]                    查看节点信息, 默认'all', 't'表示按延迟降序查看
+    [索引式] [flags]              查看节点信息, 默认 'all'
     help                          查看帮助
+    tcping                        测试节点tcp延迟
+    sort {0|1|2|3|4|5}            排序方式，分别按{逆转|协议|别名|地址|端口|测试结果}排序
     info {索引}                   查看单个节点详细信息
     rm {索引式}                   删除节点
-    tcping {索引式}               测试节点tcp延迟
     find {关键词}                 查找节点（按别名）
     add [flags]                   添加节点
     export [索引式] [flags]       导出节点链接, 默认'all'
+
+Flags
+    -d, --desc                    降序查看
 
 add Flags
     -l, --link {link}             从链接导入一条节点
@@ -391,11 +401,11 @@ export Flags
 # 查看前20个节点
 >>> node 1-20
 
+# 降序查看所有节点
+>>> node -d
+
 # 查看某个节点的全部信息
 >>> node info 1
-
-# 查看按tcp延迟排序的节点
->>> node t
 
 ```
 
@@ -409,8 +419,8 @@ export Flags
 ### tcping测试
 
 ```
-# tcping前20个节点 （'-20' 等价于 '1-20'）
->>> node tcping -20
+# tcping测试所有节点
+>>> node tcping
 ```
 
 ### 节点查找
@@ -433,55 +443,100 @@ export Flags
 >>> node export -20 -c
 ```
 
-## 查看DNS帮助文档
-
+### 节点排序
 ```
->>> dns help
-dns {commands}
+# 逆转节点顺序
+>>> node sort 0
+
+# 按别名排序
+>>> node sort 2
+```
+
+## 查看节点过滤器帮助文档
+> 过滤器会在添加节点的时候自动运行，也可以使用 'filter run' 手动运行
+```
+>>> filter help
+filter {commands} ...
 
 Commands:
-                                  查看DNS设置
-    help                          查看帮助
-    port {port}                   设置dns端口, 0为关闭
-    inland {dns}                  设置一条境内DNS
-    outland {dns}                 设置一条境外DNS
-    backup {dns}                  设置备用DNS，多条以 ',' 分隔
+                                 查看过滤规则
+    help                         查看帮助
+    rm {索引式}                   删除过滤规则
+    open {索引式}                 开启过滤规则
+    close {索引式}                关闭过滤规则
+    add {过滤规则}                添加过滤规则
+    run [过滤规则]                手动过滤节点，默认使用内置规则
+
+PS: 过滤规则==> '过滤范围:正则表达式'
+过滤范围可选值 proto:|name:|addr:|port: 分别代表 协议|别名|地址|端口
+默认为 'name:'
 ```
 
-### 查看DNS设置
-
+### 添加过滤器规则
 ```
-# 查看DNS设置
->>> dns
-+---------+---------+-----------+---------+
-| DNS端口  | 境外DNS  |  境内DNS   | 备用DNS |
-+---------+---------+-----------+---------+
-|  23333  | 1.1.1.1 | 223.6.6.6 |         |
-+---------+---------+-----------+---------+
-```
+# 添加地址为baidu.com的过滤规则
+>>> filter add addr:baidu.com
 
-### 修改DNS设置
+# 添加协议为VMess的过滤规则
+>>> filter add proto:VMess
 
-```
-# 修改dns监听端口为23334
->>> dns port 23334
-
-# 关闭dns监听端口
->>> dns port 0
-
-# 修改境外DNS为8.8.8.8
->>> dns outland 8.8.8.8
-
-# 修改境内DNS为180.76.76.76
->>> dns inland 180.76.76.76
-
-# 修改备用DNS为180.76.76.76
->>> dns backup 180.76.76.76
-
-# 修改备用DNS为180.76.76.76和localhost
->>> dns backup 180.76.76.76,localhost
+# 添加别名含有'美国'的过滤规则
+>>> filter add "美国"
 ```
 
+### 过滤节点
+```
+# 删除地址为baidu.com的节点
+>>> filter run addr:baidu.com
+
+# 运行已有规则
+>>> filter run
+```
+
+## 查看节点回收站帮助文档
+> 数据仅保存当次交互中
+```
+>>> recycle help
+recycle {commands} ...
+
+Commands:
+    {索引式}                      查看节点回收站
+    help                         查看帮助
+    restore {索引式}              恢复节点
+    clear                        清空节点回收站
+
+PS: 回收站的数据仅运行存在 (仅存储在内存中)
+```
+
+## 查看命令别名帮助文档
+> 不能覆盖自带命令，小心使用，不要弄成死循环了
+```
+>>> alias help
+alias {commands} ...
+
+Commands:
+                                 查看命令别名
+    help                         查看帮助
+    set {别名} {命令组}           开启过滤规则
+    rm {索引式}                   删除命令别名
+
+说明：
+1.命令，如 'node' 'node tcping' 'sub update-node' 这样的单条命令。
+2.命令组，形如 'sub update-node | node tcping | run' 这样的多条命令，以 '|' 分隔，顺序执行。
+PS：命令组包含命令，即命令组也可以设置单条命令
+```
+
+### 添加和修改别名
+```
+# 设置别名 'one' 为更新订阅，然后tcping，最后运行延迟最小的那个
+>>> alias set one "sub update-node | node tcping | run"
+
+# 运行
+>>> one
+
+# 等价于 'sub update-node | node tcping | run 0-10'
+>>> one 0-10
+```
 
 ## 查看路由帮助文档
 
@@ -490,6 +545,7 @@ Commands:
 routing {commands} [flags] ...
 
 Commands:
+    help                          查看帮助
     block [索引式] | [flags]      查看或管理禁止路由规则
     direct [索引式] | [flags]     查看或管理直连路由规则
     proxy [索引式] | [flags]      查看或管理代理路由规则
@@ -499,6 +555,8 @@ block, direct, proxy Flags
     -r, --rm {索引式}             删除路由规则
     -f, --file {path}             从文件导入规则
     -c, --clipboard               从剪贴板导入规则
+
+PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 ```
 
 ### 添加路由
@@ -535,7 +593,6 @@ block, direct, proxy Flags
 - 特殊值：`geoip:private` (xray 3.5+)，包含所有私有地址，如`127.0.0.1`。
 - 从文件中加载 IP: 形如`ext:file:tag`，必须以`ext:`（小写）开头，后面跟文件名和标签，文件存放在[资源目录](https://www.v2ray.com/chapter_02/env.html#asset-location)中，文件格式与`geoip.dat`相同标签必须在文件中存在。
 
-### 
 
 ## 启动或重启xray-core服务
 
@@ -558,7 +615,11 @@ block, direct, proxy Flags
 ## 停止xray-core服务
 
 ```
+# 仅在交互式shell中起作用
 >>>stop
+
+# 杀死名为xray的进程
+>>>kill
 ```
 
 
@@ -566,7 +627,6 @@ block, direct, proxy Flags
 # 已知问题
 
 - 有时直接从订阅更新节点失败，可以用浏览器下载订阅文本然后使用 'node add -f {绝对路径}' 导入，或者使用代理导入（sub update-node -s [端口]）
-- ss://链接只支持形如 ss://base64编码#别名，trojan://链接只支持形如 trojan://密码@地址:端口#别名
 
 # 交流反馈
 

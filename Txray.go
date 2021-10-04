@@ -2,26 +2,37 @@ package main
 
 import (
 	"Txray/cmd"
-	"Txray/core/config"
-	"Txray/core/service"
+	"Txray/core"
+	"Txray/core/setting"
+	"Txray/core/setting/key"
 	"Txray/log"
-	"Txray/tools"
 	"github.com/abiosoft/ishell"
+	"github.com/spf13/viper"
 	"os"
 )
 
 const (
-	version = "v2.1.1"
+	version = "v3.0.0"
 	name    = "Txray"
 )
 
 func init() {
 	// 初始化日志
-	absPath := tools.PathJoin(config.GetConfigDir(), "info.log")
+	absPath := core.PathJoin(core.GetConfigDir(), "info.log")
 	log.Init(
 		log.GetConsoleZapcore(log.INFO),
 		log.GetFileZapcore(absPath, log.INFO, 5),
 	)
+}
+
+func beforeOfRun(shell *ishell.Shell) {
+	cmd := viper.GetString(key.RunBefore)
+	if cmd != "" {
+		for _, line := range setting.NewAlias("", cmd).GetCmd() {
+			shell.Process(line...)
+		}
+		shell.Print("\n>>> ")
+	}
 }
 
 func main() {
@@ -32,8 +43,8 @@ func main() {
 	if len(os.Args) > 1 {
 		_ = shell.Process(os.Args[1:]...)
 	} else {
+		go beforeOfRun(shell)
 		shell.Printf("%s - Xray Shell Client - %s\n", name, version)
 		shell.Run()
 	}
-	defer service.Stop()
 }

@@ -1,0 +1,22 @@
+sub {commands} [flags] ...
+
+Commands:
+                                  查看订阅信息
+    help                          查看帮助
+    rm {索引式}                   删除订阅
+    add {订阅url} [flags]         添加订阅
+    mv {索引式} {flags}           修改订阅
+    update-node [索引式] [flags]  从订阅更新节点, 索引式会忽略是否启用
+
+add Flags
+    -r, --remarks {别名}          定义别名
+
+mv Flags
+    -u, --url {订阅url}           修改订阅链接
+    -r, --remarks {别名}          定义别名
+    --using {y|n}                 是否启用此订阅
+
+update-node Flags
+    -s, --socks5 [port]           通过本地的socks5代理更新, 默认为设置中的socks5端口
+    -h, --http [port]             通过本地的http代理更新, 默认为设置中的http端口
+    -a, --addr {address}          对上面两个参数的补充, 修改代理地址

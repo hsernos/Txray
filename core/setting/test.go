@@ -1,21 +1,37 @@
 package setting
 
-import "Txray/log"
+import (
+	"Txray/core/setting/key"
+	"errors"
+	"github.com/spf13/viper"
+)
 
-func TestSetting() test {
-	return setting.Test
+func TestUrl() string {
+	return viper.GetString(key.TestURL)
 }
 
-// 设置超时时间
-func SetTimeOut(time uint) {
-	defer setting.save()
-	setting.Test.TimeOut = time
-	log.Infof("设置超时时间为: '%ds'", time)
+func SetTestUrl(url string) error {
+	viper.Set(key.TestURL, url)
+	return viper.WriteConfig()
 }
 
-// 设置测试网站
-func SetTestUrl(url string) {
-	defer setting.save()
-	setting.Test.Url = url
-	log.Infof("设置测试网站为: '%s'", url)
+func TestTimeout() int {
+	return viper.GetInt(key.TestTimeout)
+}
+
+func SetTestTimeout(timeout int) error {
+	if timeout < 0 {
+		return errors.New("取值不能小于0")
+	}
+	viper.Set(key.TestTimeout, timeout)
+	return viper.WriteConfig()
+}
+
+func RunBefore() string {
+	return viper.GetString(key.RunBefore)
+}
+
+func SetRunBefore(cmd string) error {
+	viper.Set(key.RunBefore, cmd)
+	return viper.WriteConfig()
 }

@@ -1,0 +1,31 @@
+Commands:
+    setting                  基础设置             使用 'setting help' 查看详细用法
+    node                     节点管理             使用 'node help' 查看详细用法
+    sub                      订阅管理             使用 'sub help' 查看详细用法
+    routing                  路由管理             使用 'routing help' 查看详细用法
+    filter                   节点过滤             使用 'filter help' 查看详细用法
+    recycle                  回收站               使用 'recycle help' 查看详细用法
+    alias                    命令别名             使用 'alias help' 查看详细用法
+    help, -h                 查看帮助信息
+    version, -v              查看版本
+    clear                    清屏
+    exit                     退出程序
+    run                      启动或重启服务
+    stop                     停止服务
+    kill                     强制杀死xray进程
+
+Usage: run [索引式]
+    run [索引式]      默认为上一次运行节点，如果选中多个节点，则选择访问 'setting' 中测试国外URL延迟最小的
+
+
+说明：
+一、索引式：更简单的批量选择
+1.选择前6个：'1,2,3,4,5,6' 或 '1-3,4-6' 或 '1-6' 或 '-6'
+2.选择第6个及后面的所有：'6-'
+3.选择第6个：'6'
+4.选择所有：'all' 或 '-'
+注意：超出部分会被忽略，'all' 只能单独使用
+
+二、[] 和 {}：帮助说明中的中括号和大括号
+1. []: 表示该选项可忽略
+2. {}: 表示该选项为必须，不可忽略

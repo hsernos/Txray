@@ -1,81 +1,24 @@
 package protocols
 
 import (
-	"Txray/tools"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
+	"strconv"
 )
 
 type VMess struct {
-	V    string
-	Ps   string
-	Add  string
-	Port string
-	Id   string
-	Aid  string
-	Net  string
-	Type string
-	Host string
-	Path string
-	Tls  string
-}
-
-func (v *VMess) ParseLink(link string) bool {
-	if strings.ToLower(link[:8]) == "vmess://" {
-		link = link[8:]
-	}
-	if len(link) == 0 {
-		return false
-	}
-	jsonStr := base64Decode(link)
-	if jsonStr == "" {
-		return false
-	}
-	var mapResult map[string]string
-	err := json.Unmarshal([]byte(jsonStr), &mapResult)
-	if err != nil {
-		return false
-	}
-	var ok bool
-	if v.V, ok = mapResult["v"]; !ok {
-		return false
-	}
-	if v.Ps, ok = mapResult["ps"]; !ok {
-		return false
-	}
-	if v.Add, ok = mapResult["add"]; !ok {
-		return false
-	}
-	if v.Port, ok = mapResult["port"]; !ok {
-		return false
-	}
-	if !tools.IsNetPort(v.Port) {
-		return false
-	}
-	if v.Id, ok = mapResult["id"]; !ok {
-		return false
-	}
-	if v.Aid, ok = mapResult["aid"]; !ok {
-		return false
-	}
-	if v.Net, ok = mapResult["net"]; !ok {
-		return false
-	}
-	if v.Type, ok = mapResult["type"]; !ok {
-		return false
-	}
-	if v.Host, ok = mapResult["host"]; !ok {
-		return false
-	}
-	if v.Path, ok = mapResult["path"]; !ok {
-		return false
-	}
-	if v.Tls, ok = mapResult["tls"]; !ok {
-		return false
-	}
-	return true
+	V    string `json:"v"`
+	Ps   string `json:"ps"`
+	Add  string `json:"add"`
+	Port int    `json:"port"`
+	Id   string `json:"id"`
+	Aid  int    `json:"aid"`
+	Net  string `json:"net"`
+	Type string `json:"type"`
+	Host string `json:"host"`
+	Path string `json:"path"`
+	Tls  string `json:"tls"`
 }
 
 func (v *VMess) GetProtocolMode() Mode {
@@ -91,19 +34,16 @@ func (v *VMess) GetAddr() string {
 }
 
 func (v *VMess) GetPort() int {
-	if tools.IsNetPort(v.Port) {
-		return tools.StrToInt(v.Port)
-	}
-	return -1
+	return v.Port
 }
 
 func (v *VMess) GetInfo() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "别名", v.Ps))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "地址", v.Add))
-	buf.WriteString(fmt.Sprintf("%7s: %s\n", "端口", v.Port))
+	buf.WriteString(fmt.Sprintf("%7s: %d\n", "端口", v.Port))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "用户ID", v.Id))
-	buf.WriteString(fmt.Sprintf("%7s: %s\n", "额外ID", v.Aid))
+	buf.WriteString(fmt.Sprintf("%7s: %d\n", "额外ID", v.Aid))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "加密方式", "auto"))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.Type))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装域名", v.Host))
@@ -120,9 +60,9 @@ func (v *VMess) GetLink() string {
 		"v":    v.V,
 		"ps":   v.Ps,
 		"add":  v.Add,
-		"port": v.Port,
+		"port": strconv.Itoa(v.Port),
 		"id":   v.Id,
-		"aid":  v.Aid,
+		"aid":  strconv.Itoa(v.Aid),
 		"net":  v.Net,
 		"type": v.Type,
 		"host": v.Host,
@@ -131,4 +71,11 @@ func (v *VMess) GetLink() string {
 	}
 	jsonData, _ := json.Marshal(data)
 	return "vmess://" + base64EncodeWithEq(string(jsonData))
+}
+
+func (v *VMess) Check() *VMess {
+	if v.Add != "" && v.Port > 0 && v.Port <= 65535 && v.Ps != "" && v.Id != "" && v.Net != "" && v.Type != "" {
+		return v
+	}
+	return nil
 }

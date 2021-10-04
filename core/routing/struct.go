@@ -1,9 +1,10 @@
 package routing
 
 import (
-	"Txray/core/config"
+	"Txray/core"
 	"Txray/log"
-	"Txray/tools"
+	"encoding/json"
+	"os"
 )
 
 type routing struct {
@@ -17,24 +18,31 @@ type Routing struct {
 	Block  []*routing `json:"block"`
 }
 
-var route *Routing = initRouting()
+var route *Routing = NewRouting()
 
-func initRouting() *Routing {
-	r := new(Routing)
-	file := config.Routing
-	if tools.IsFile(file) {
-		err := tools.ReadJSON(file, r)
+func NewRouting() *Routing {
+	return &Routing{
+		Proxy:  make([]*routing, 0),
+		Direct: make([]*routing, 0),
+		Block:  make([]*routing, 0),
+	}
+}
+
+func init() {
+	if _, err := os.Stat(core.RoutingFile); os.IsNotExist(err) {
+		route.save()
+	} else {
+		file, _ := os.Open(core.RoutingFile)
+		defer file.Close()
+		err := json.NewDecoder(file).Decode(route)
 		if err != nil {
 			log.Error(err)
-			return nil
 		}
 	}
-	return r
 }
 
 func (r *Routing) save() {
-	file := config.Routing
-	err := tools.WriteJSON(*r, file)
+	err := core.WriteJSON(r, core.RoutingFile)
 	if err != nil {
 		log.Error(err)
 	}

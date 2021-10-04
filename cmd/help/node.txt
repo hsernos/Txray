@@ -1,0 +1,23 @@
+node {commands} [flags] ...
+
+Commands:
+    [索引式] [flags]              查看节点信息, 默认 'all'
+    help                          查看帮助
+    tcping                        测试节点tcp延迟
+    sort {0|1|2|3|4|5}            排序方式，分别按{逆转|协议|别名|地址|端口|测试结果}排序
+    info {索引}                   查看单个节点详细信息
+    rm {索引式}                   删除节点
+    find {关键词}                 查找节点（按别名）
+    add [flags]                   添加节点
+    export [索引式] [flags]       导出节点链接, 默认'all'
+
+Flags
+    -d, --desc                    降序查看
+
+add Flags
+    -l, --link {link}             从链接导入一条节点
+    -f, --file {path}             从节点链接文件或订阅文件导入节点
+    -c, --clipboard               从剪贴板读取的节点链接或订阅文本导入节点
+
+export Flags
+    -c, --clipboard               导出节点链接到剪贴板

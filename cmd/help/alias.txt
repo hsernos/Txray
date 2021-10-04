@@ -1,0 +1,12 @@
+alias {commands} ...
+
+Commands:
+                                  查看命令别名
+    help                          查看帮助
+    set {别名} {命令组}           开启过滤规则
+    rm {索引式}                  删除命令别名
+
+说明：
+1.命令，如 'node' 'node tcping' 'sub update-node' 这样的单条命令。
+2.命令组，形如 'sub update-node | node tcping | run' 这样的多条命令，以 '|' 分隔，顺序执行。
+PS：命令组包含命令，即命令组也可以设置单条命令

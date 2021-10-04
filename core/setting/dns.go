@@ -1,54 +1,46 @@
 package setting
 
 import (
-	"Txray/log"
-	"strings"
+	"Txray/core/setting/key"
+	"errors"
+	"github.com/spf13/viper"
 )
 
-// 设置DNS监听端口
-func SetDNSPort(port uint) {
-	defer setting.save()
-	setting.DNS.Port = port
-	log.Info("设置本地DNS监听端口为 [", port, "]")
+func DNSPort() int {
+	return viper.GetInt(key.DNSPort)
 }
 
-// 设置境外DNS
-func SetOutlandDNS(dns string) {
-	defer setting.save()
-	setting.DNS.Outland = dns
-	log.Info("设置境外DNS为 [", dns, "]")
+func SetDNSPort(port int) error {
+	if port < 0 || port > 65535 {
+		return errors.New("http端口取值 0~65535")
+	}
+	viper.Set(key.DNSPort, port)
+	return viper.WriteConfig()
 }
 
-// 设置境内DNS
-func SetInlandDNS(dns string) {
-	defer setting.save()
-	setting.DNS.Inland = dns
-	log.Info("设置境内DNS为 [", dns, "]")
+func DNSDomestic() string {
+	return viper.GetString(key.DNSDomestic)
 }
 
-// 设置备用DNS端口（多个用英文逗号分隔）
-func SetBackupDNS(dns string) {
-	defer setting.save()
-	setting.DNS.Backup = dns
-	log.Info("设置备用DNS为 [", dns, "]")
+func SetDNSDomestic(dns string) error {
+	viper.Set(key.DNSDomestic, dns)
+	return viper.WriteConfig()
 }
 
-// DNS监听端口
-func DNSPort() uint {
-	return setting.DNS.Port
+func DNSForeign() string {
+	return viper.GetString(key.DNSForeign)
 }
 
-// 境外DNS
-func OutlandDNS() string {
-	return setting.DNS.Outland
+func SetDNSForeign(dns string) error {
+	viper.Set(key.DNSForeign, dns)
+	return viper.WriteConfig()
 }
 
-// 境内DNS
-func InlandDNS() string {
-	return setting.DNS.Inland
+func DNSBackup() string {
+	return viper.GetString(key.DNSBackup)
 }
 
-// 备用DNS端口
-func BackupDNS() []string {
-	return strings.Split(setting.DNS.Backup, ",")
+func SetDNSBackup(dns string) error {
+	viper.Set(key.DNSBackup, dns)
+	return viper.WriteConfig()
 }

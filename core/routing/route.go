@@ -1,44 +1,34 @@
 package routing
 
 import (
+	"Txray/core"
+	"Txray/core/manage"
 	"Txray/log"
-	"Txray/tools"
-	"Txray/tools/format"
+	"strconv"
 )
 
 // 添加规则
-func AddRule(rt Type, list ...string) {
+func AddRule(rt Type, list ...string) int {
 	defer route.save()
-	num := 0
+	count := 0
 	for _, rule := range list {
 		if rule != "" {
-			var mode = GetRuleMode(rule)
-			switch mode {
-			case ModeUnknown:
-				log.Warnf("%s: 不是IP或Domain规则", rule)
-			default:
-				num++
-				r := new(routing)
-				r.Data = rule
-				r.Mode = mode
-				switch rt {
-				case TypeBlock:
-					route.Block = append(route.Block, r)
-				case TypeDirect:
-					route.Direct = append(route.Direct, r)
-				case TypeProxy:
-					route.Proxy = append(route.Proxy, r)
-				}
-				if len(list) == 1 {
-					log.Infof("%s: 添加一条%s规则", rule, mode)
-				}
+			r := &routing{
+				Data: rule,
+				Mode: GetRuleMode(rule),
 			}
-
+			count += 1
+			switch rt {
+			case TypeBlock:
+				route.Block = append(route.Block, r)
+			case TypeDirect:
+				route.Direct = append(route.Direct, r)
+			case TypeProxy:
+				route.Proxy = append(route.Proxy, r)
+			}
 		}
 	}
-	if num > 1 {
-		log.Infof("共添加了 %d 条规则", num)
-	}
+	return count
 }
 
 func GetRule(rt Type, key string) [][]string {
@@ -51,12 +41,12 @@ func GetRule(rt Type, key string) [][]string {
 	case TypeBlock:
 		rules = route.Block
 	}
-	indexList := format.IndexDeal(key, len(rules))
+	indexList := core.IndexList(key, len(rules))
 	result := make([][]string, 0, len(indexList))
 	for _, x := range indexList {
-		r := rules[x]
+		r := rules[x-1]
 		result = append(result, []string{
-			tools.IntToStr(x + 1),
+			strconv.Itoa(x),
 			string(r.Mode),
 			r.Data,
 		})
@@ -98,15 +88,16 @@ func DelRule(rt Type, key string) {
 	case TypeBlock:
 		rules = route.Block
 	}
-	length := len(rules)
-	indexList := format.OtherIndex(key, length)
-	if len(indexList) == length {
+	indexList := core.IndexList(key, len(rules))
+	if len(indexList) == 0 {
 		return
 	}
 	defer route.save()
-	result := make([]*routing, 0, len(indexList))
-	for _, index := range indexList {
-		result = append(result, rules[index])
+	result := make([]*routing, 0)
+	for i, rule := range rules {
+		if !manage.HasIn(i+1, indexList) {
+			result = append(result, rule)
+		}
 	}
 	switch rt {
 	case TypeDirect:
@@ -116,5 +107,18 @@ func DelRule(rt Type, key string) {
 	case TypeBlock:
 		route.Block = result
 	}
-	log.Info("删除了 [", length-len(result), "] 条规则")
+	log.Info("删除了 [", len(indexList), "] 条规则")
+}
+
+func RuleLen(rt Type) int {
+	switch rt {
+	case TypeDirect:
+		return len(route.Direct)
+	case TypeProxy:
+		return len(route.Proxy)
+	case TypeBlock:
+		return len(route.Block)
+	default:
+		return 0
+	}
 }

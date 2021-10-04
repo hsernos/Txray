@@ -1,49 +1,17 @@
 package protocols
 
 import (
-	"Txray/tools"
 	"bytes"
 	"fmt"
 	"net/url"
-	"regexp"
-	"strings"
 )
 
 type Trojan struct {
-	Password string
-	Address  string
-	Port     string
-	Remarks  string
-}
-
-func (t *Trojan) ParseLink(link string) bool {
-	if strings.ToLower(link[:9]) == "trojan://" {
-		link = link[9:]
-	}
-	expr := `(^[a-zA-Z0-9-]*?)@([a-zA-Z0-9-_\.]*?):([0-9]*)(.*)`
-	r, _ := regexp.Compile(expr)
-	result := r.FindStringSubmatch(link)
-	if len(result) != 5 {
-		return false
-	}
-	t.Password = result[1]
-	t.Address = result[2]
-	t.Port = result[3]
-	other := result[4]
-	index := strings.IndexByte(other, '#')
-	if index >= 0 {
-		name := other[index+1:]
-		if name == "" {
-			t.Remarks = t.Address + ":" + t.Port
-		} else {
-			t.Remarks, _ = url.QueryUnescape(name)
-			t.Remarks = strings.Trim(t.Remarks, "\r")
-		}
-		other = other[:index]
-	} else {
-		t.Remarks = t.Address + ":" + t.Port
-	}
-	return true
+	url.Values
+	Password string `json:"password"`
+	Address  string `json:"address"`
+	Port     int    `json:"port"`
+	Remarks  string `json:"remarks"`
 }
 
 func (t *Trojan) GetProtocolMode() Mode {
@@ -58,22 +26,41 @@ func (t *Trojan) GetAddr() string {
 }
 
 func (t *Trojan) GetPort() int {
-	if tools.IsNetPort(t.Port) {
-		return tools.StrToInt(t.Port)
-	}
-	return -1
+	return t.Port
 }
 
 func (t *Trojan) GetInfo() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "别名", t.Remarks))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "地址", t.Address))
-	buf.WriteString(fmt.Sprintf("%3s: %s\n", "端口", t.Port))
+	buf.WriteString(fmt.Sprintf("%3s: %d\n", "端口", t.Port))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "密码", t.Password))
+	buf.WriteString(fmt.Sprintf("%5s: %s\n", "SNI", t.Sni()))
 	buf.WriteString(fmt.Sprintf("%3s: %s", "协议", t.GetProtocolMode()))
 	return buf.String()
 }
 
 func (t *Trojan) GetLink() string {
-	return fmt.Sprintf("trojan://%s@%s:%s#%s", t.Password, t.Address, t.Port, url.QueryEscape(t.Remarks))
+	u := &url.URL{
+		Scheme:   "trojan",
+		Host:     fmt.Sprintf("%s:%d", t.Address, t.Port),
+		Fragment: t.Remarks,
+		User:     url.User(t.Password),
+		RawQuery: t.Values.Encode(),
+	}
+	return u.String()
+}
+
+func (t *Trojan) Sni() string {
+	if t.Has("sni") {
+		return t.Get("sni")
+	}
+	return ""
+}
+
+func (t *Trojan) Check() *Trojan {
+	if t.Password != "" && t.Address != "" && t.Port > 0 && t.Port < 65535 && t.Remarks != "" {
+		return t
+	}
+	return nil
 }

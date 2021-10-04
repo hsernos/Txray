@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"Txray/cmd/help"
 	"github.com/abiosoft/ishell"
 )
 
@@ -18,16 +19,17 @@ func InitShell(shell *ishell.Shell) {
 		Aliases: []string{"-h", "--help"},
 		Help:    "帮助信息",
 		Func: func(c *ishell.Context) {
-			c.Println(Help())
+			c.Println(help.Help)
 		},
 	})
 	InitSettingShell(shell)
 	InitNodeShell(shell)
 	InitSubscribeShell(shell)
-	InitDNSShell(shell)
+	InitFilterShell(shell)
+	InitRecycleShell(shell)
 	InitRouteShell(shell)
-	InitTestShell(shell)
 	InitServiceShell(shell)
+	InitAliasShell(shell)
 }
 
 // 参数解析

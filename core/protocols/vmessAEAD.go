@@ -7,7 +7,7 @@ import (
 	"net/url"
 )
 
-type VLess struct {
+type VMessAEAD struct {
 	ID      string `json:"id"`
 	Address string `json:"address"`
 	Port    int    `json:"port"`
@@ -16,36 +16,33 @@ type VLess struct {
 }
 
 // GetProtocolMode 获取协议模式
-func (v *VLess) GetProtocolMode() Mode {
-	return ModeVLESS
+func (v *VMessAEAD) GetProtocolMode() Mode {
+	return ModeVMessAEAD
 }
 
 // GetName 获取别名
-func (v *VLess) GetName() string {
+func (v *VMessAEAD) GetName() string {
 	return v.Remarks
 }
 
 // GetAddr 获取远程地址
-func (v *VLess) GetAddr() string {
+func (v *VMessAEAD) GetAddr() string {
 	return v.Address
 }
 
 // GetPort 获取远程端口
-func (v *VLess) GetPort() int {
+func (v *VMessAEAD) GetPort() int {
 	return v.Port
 }
 
 // GetInfo 获取节点数据
-func (v *VLess) GetInfo() string {
+func (v *VMessAEAD) GetInfo() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "别名", v.Remarks))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "地址", v.Address))
 	buf.WriteString(fmt.Sprintf("%7s: %d\n", "端口", v.Port))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "用户ID", v.ID))
-	if v.GetValue(field.Security) == "xtls" {
-		buf.WriteString(fmt.Sprintf("%5s: %s\n", "流控方式", v.GetValue(field.Flow)))
-	}
-	buf.WriteString(fmt.Sprintf("%5s: %s\n", "加密方式", v.GetValue(field.VLessEncryption)))
+	buf.WriteString(fmt.Sprintf("%5s: %s\n", "加密方式", v.GetValue(field.VMessEncryption)))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输协议", v.GetValue(field.NetworkType)))
 	switch v.GetValue(field.NetworkType) {
 	case "tcp":
@@ -79,9 +76,9 @@ func (v *VLess) GetInfo() string {
 }
 
 // GetLink 获取节点分享链接
-func (v *VLess) GetLink() string {
+func (v *VMessAEAD) GetLink() string {
 	u := url.URL{
-		Scheme:   "vless",
+		Scheme:   "vmess",
 		User:     url.User(v.ID),
 		Host:     fmt.Sprintf("%s:%d", v.GetAddr(), v.GetPort()),
 		RawQuery: v.Values.Encode(),
@@ -90,7 +87,7 @@ func (v *VLess) GetLink() string {
 	return u.String()
 }
 
-func (v *VLess) GetValue(field field.Field) string {
+func (v *VMessAEAD) GetValue(field field.Field) string {
 	if v.Has(field.Key) {
 		return v.Get(field.Key)
 	}
@@ -98,14 +95,14 @@ func (v *VLess) GetValue(field field.Field) string {
 }
 
 // H2Host SNI
-func (v *VLess) GetHostValue(field field.Field) string {
+func (v *VMessAEAD) GetHostValue(field field.Field) string {
 	if v.Has(field.Key) {
 		return v.Get(field.Key)
 	}
 	return v.Address
 }
 
-func (v *VLess) Check() *VLess {
+func (v *VMessAEAD) Check() *VMessAEAD {
 	if v.ID != "" && v.Port > 0 && v.Port <= 65535 && v.Address != "" && v.Remarks != "" {
 		return v
 	}

@@ -1,0 +1,15 @@
+routing {commands} [flags] ...
+
+Commands:
+    help                          查看帮助
+    block [索引式] | [flags]      查看或管理禁止路由规则
+    direct [索引式] | [flags]     查看或管理直连路由规则
+    proxy [索引式] | [flags]      查看或管理代理路由规则
+
+block, direct, proxy Flags
+    -a, --add {规则}              添加路由规则
+    -r, --rm {索引式}             删除路由规则
+    -f, --file {path}             从文件导入规则
+    -c, --clipboard               从剪贴板导入规则
+
+PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject

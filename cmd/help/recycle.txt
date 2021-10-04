@@ -1,0 +1,9 @@
+recycle {commands} ...
+
+Commands:
+    {索引式}                      查看节点回收站
+    help                          查看帮助
+    restore {索引式}              恢复节点
+    clear                         清空节点回收站
+
+PS: 回收站的数据仅运行存在 (仅存储在内存中)
