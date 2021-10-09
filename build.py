@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
+
 import sys
 import os
 import shutil
@@ -25,30 +26,21 @@ def make_zip(source_dir, output_filename):
             zipf.write(pathfile, arcname)
     zipf.close()
 
-def get_os():
-    platform = sys.platform
-    if platform == 'linux2':
-        return 'linux'
-    elif platform == 'win32':
-        return 'win'
-    elif platform == 'darwin':
-        return 'mac'
-    else:
-        return 'other'
-
 
 def build(goos, goarch, path, cgo=0):
     e = '.exe' if goos == 'windows' else ''
     syst = 'macos' if goos == 'darwin' else goos
     arch = '64' if goarch == 'amd64' else goarch
     arch = '32' if goarch == '386' else arch
-    os.environ.setdefault("CGO_ENABLED", str(cgo))
-    os.environ.setdefault("GOOS", goos)
-    os.environ.setdefault("GOARCH", goarch)
+    os.environ["CGO_ENABLED"] = str(cgo)
+    os.environ["GOOS"] = goos
+    os.environ["GOARCH"] = goarch
     cmd = 'go build -o {} {} '.format("build/"+"-".join([Name, syst, arch]) + "/"+ Name+ e, path)
     os.system(cmd)
     shutil.copy("README.md", "build/"+"-".join([Name, syst, arch]))
     make_zip("build/"+"-".join([Name, syst, arch]), "build/"+"-".join([Name, syst, arch])+".zip")
+
+
 
 if __name__ == '__main__':
      for goos in INFO.keys():
