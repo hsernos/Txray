@@ -9,9 +9,12 @@ import zipfile
 INFO = {
     'linux': ['386', 'amd64', 'arm','arm64'],
     'darwin': ['amd64', 'arm64'],
-    'windows': ['386', 'amd64'],
+    'windows': ['386', 'amd64','arm','arm64'],
     'freebsd': ['386', 'amd64', 'arm', 'arm64'],
     'openbsd': ['386', 'amd64', 'arm', 'arm64'],
+    'android':['arm64'],
+    'dragonfly':['amd64'],
+
 }
 
 Name = 'Txray'
