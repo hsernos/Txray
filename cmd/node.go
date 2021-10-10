@@ -9,14 +9,15 @@ import (
 	"Txray/core/sub"
 	"Txray/log"
 	"fmt"
-	"github.com/abiosoft/ishell"
-	"github.com/atotto/clipboard"
-	"github.com/olekukonko/tablewriter"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/abiosoft/ishell"
+	"github.com/atotto/clipboard"
+	"github.com/olekukonko/tablewriter"
 )
 
 func InitNodeShell(shell *ishell.Shell) {
@@ -268,6 +269,7 @@ func InitNodeShell(shell *ishell.Shell) {
 				manage.Manager.AddNode(node.NewNode(linkArg, ""))
 			} else {
 				c.ShowPrompt(false)
+				defer c.ShowPrompt(true)
 				modeList := []string{
 					protocols.ModeVMess.String(),
 					protocols.ModeVLESS.String(),
@@ -278,9 +280,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					"退出",
 				}
 				i := c.MultiChoice(modeList, "手动添加何种协议的节点?")
-				c.ShowPrompt(true)
 				protocolMode := modeList[i]
-				c.Println()
 				switch protocolMode {
 				case protocols.ModeVMessAEAD.String():
 					c.Println("========================")

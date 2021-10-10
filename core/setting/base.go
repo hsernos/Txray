@@ -58,7 +58,7 @@ func SetFromLanConn(status bool) error {
 }
 
 func Mux() bool {
-	return viper.GetBool(key.FromLanConn)
+	return viper.GetBool(key.Mux)
 }
 
 func SetMux(status bool) error {

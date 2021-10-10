@@ -113,7 +113,7 @@ func policyConfig() interface{} {
 
 // DNS
 func dnsConfig() interface{} {
-	servers := make([]interface{}, 0, 0)
+	servers := make([]interface{}, 0)
 	if setting.DNSDomestic() != "" {
 		servers = append(servers, map[string]interface{}{
 			"address": setting.DNSDomestic(),
@@ -158,7 +158,7 @@ func dnsConfig() interface{} {
 
 // 路由
 func routingConfig() interface{} {
-	rules := make([]interface{}, 0, 0)
+	rules := make([]interface{}, 0)
 	if setting.DNSPort() != 0 {
 		rules = append(rules, map[string]interface{}{
 			"type": "field",
@@ -333,6 +333,16 @@ func shadowsocksOutbound(ss *protocols.ShadowSocks) interface{} {
 
 // Trojan
 func trojanOutbound(trojan *protocols.Trojan) interface{} {
+	streamSettings := map[string]interface{}{
+		"network":  "tcp",
+		"security": "tls",
+	}
+	if trojan.Sni() != "" {
+		streamSettings["tlsSettings"] = map[string]interface{}{
+			"allowInsecure": false,
+			"serverName":    trojan.Sni(),
+		}
+	}
 	return map[string]interface{}{
 		"tag":      "proxy",
 		"protocol": "trojan",
@@ -346,14 +356,7 @@ func trojanOutbound(trojan *protocols.Trojan) interface{} {
 				},
 			},
 		},
-		"streamSettings": map[string]interface{}{
-			"network":  "tcp",
-			"security": "tls",
-			"tlsSettings": map[string]interface{}{
-				"allowInsecure": false,
-				"serverName":    trojan.Sni(),
-			},
-		},
+		"streamSettings": streamSettings,
 		"mux": map[string]interface{}{
 			"enabled": setting.Mux(),
 		},
@@ -369,7 +372,7 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 	}
 	if vmess.Tls == "tls" {
 		streamSettings["tlsSettings"] = map[string]interface{}{
-			"allowInsecure": true,
+			"allowInsecure": false,
 			"serverName":    vmess.Host,
 		}
 	}
@@ -508,15 +511,16 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	switch security {
 	case "tls":
 		streamSettings["tlsSettings"] = map[string]interface{}{
-			"allowInsecure": true,
+			"allowInsecure": false,
 			"serverName":    vless.GetHostValue(field.SNI),
 		}
 	case "xtls":
 		streamSettings["xtlsSettings"] = map[string]interface{}{
-			"allowInsecure": true,
+			"allowInsecure": false,
 			"serverName":    vless.GetHostValue(field.SNI),
 		}
 		user["flow"] = vless.GetValue(field.Flow)
+		mux = false
 	}
 	switch network {
 	case "tcp":
