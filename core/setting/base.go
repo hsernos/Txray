@@ -65,3 +65,12 @@ func SetMux(status bool) error {
 	viper.Set(key.Mux, status)
 	return viper.WriteConfig()
 }
+
+func Pid() int {
+	return viper.GetInt(key.PID)
+}
+
+func SetPid(pid int) error {
+	viper.Set(key.PID, pid)
+	return viper.WriteConfig()
+}

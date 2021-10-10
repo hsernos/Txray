@@ -9,11 +9,10 @@ import (
 	"bufio"
 	"os/exec"
 	"time"
+	"os"
 )
 
 var Xray *exec.Cmd
-
-var isFirstRun = true
 
 func Start(key string) {
 	testUrl := setting.TestUrl()
@@ -29,6 +28,7 @@ func Start(key string) {
 		manager.Save()
 		exe := run(node.Protocol)
 		if exe {
+			setting.SetPid(Xray.Process.Pid)
 			if setting.Http() == 0 {
 				log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
 			} else {
@@ -61,6 +61,7 @@ func Start(key string) {
 			node := manager.GetNode(i)
 			exe := run(node.Protocol)
 			if exe {
+				setting.SetPid(Xray.Process.Pid)
 				if setting.Http() == 0 {
 					log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
 				} else {
@@ -77,12 +78,7 @@ func Start(key string) {
 }
 
 func run(node protocols.Protocol) bool {
-	if isFirstRun {
-		Kill()
-		isFirstRun = false
-	} else {
-		Stop()
-	}
+	Stop()
 	switch node.GetProtocolMode() {
 	case protocols.ModeShadowSocks, protocols.ModeTrojan, protocols.ModeVMess, protocols.ModeSocks, protocols.ModeVLESS, protocols.ModeVMessAEAD:
 		if CheckFile() {
@@ -121,11 +117,15 @@ func Stop() {
 		Xray.Process.Kill()
 		Xray = nil
 	}
+	if setting.Pid() != 0 {
+		process, err := os.FindProcess(setting.Pid())
+		if err == nil {
+			process.Kill()
+		}
+		setting.SetPid(0)
+	}
 }
 
-func Kill() {
-	KillProcessByName("xray")
-}
 
 func readInfo(r *bufio.Reader, lines *[]string) {
 	for i := 0; i < 20; i++ {

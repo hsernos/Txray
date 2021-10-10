@@ -29,11 +29,4 @@ func InitServiceShell(shell *ishell.Shell) {
 			xray.Stop()
 		},
 	})
-	// 强制结束xray进程
-	shell.AddCmd(&ishell.Cmd{
-		Name: "kill",
-		Func: func(c *ishell.Context) {
-			xray.Kill()
-		},
-	})
 }

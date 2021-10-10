@@ -37,6 +37,7 @@ func init() {
 	viper.SetDefault(key.TestTimeout, 5)
 	viper.SetDefault(key.RunBefore, "")
 
+	viper.SetDefault(key.PID, 0)
 	// 读取配置文件
 	err := viper.ReadInConfig()
 	if err != nil {

@@ -20,4 +20,5 @@ const (
 	TestTimeout = "test.timeout"
 
 	RunBefore = "run_before"
+	PID = "pid" // 核心进程id
 )

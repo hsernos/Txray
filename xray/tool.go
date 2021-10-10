@@ -3,34 +3,11 @@ package xray
 import (
 	"Txray/log"
 	"fmt"
-	"github.com/shirou/gopsutil/v3/process"
 	"net/http"
 	"net/url"
-	"os"
-	"strings"
 	"time"
 )
 
-func KillProcessByName(name string) error {
-	name = strings.ToLower(name)
-	processes, _ := process.Processes()
-	for _, p := range processes {
-		pName, _ := p.Name()
-		pName = strings.TrimSuffix(strings.ToLower(pName), ".exe")
-		if pName == name {
-			err := p.Kill()
-			if err != nil {
-				process, err := os.FindProcess(int(p.Pid))
-				if err != nil {
-					return err
-				}
-				return process.Kill()
-
-			}
-		}
-	}
-	return nil
-}
 
 // 获取节点代理访问外网的延迟
 func TestNode(url string, port int, timeout int) (int, string) {

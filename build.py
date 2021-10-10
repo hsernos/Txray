@@ -7,9 +7,11 @@ import shutil
 import zipfile
 
 INFO = {
-    'linux': ['386', 'amd64', 'arm'],
+    'linux': ['386', 'amd64', 'arm','arm64'],
     'darwin': ['amd64', 'arm64'],
-    'windows': ['386', 'amd64']
+    'windows': ['386', 'amd64'],
+    'freebsd': ['386', 'amd64', 'arm', 'arm64'],
+    'openbsd': ['386', 'amd64', 'arm', 'arm64'],
 }
 
 Name = 'Txray'
