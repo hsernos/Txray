@@ -615,11 +615,9 @@ PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 ## 停止xray-core服务
 
 ```
-# 仅在交互式shell中起作用
+# 停止上次启动的xray-core进程
 >>>stop
 
-# 杀死名为xray的进程
->>>kill
 ```
 
 
