@@ -39,8 +39,8 @@ Txray（目录命名随意）
 [root@xxx Txray-linux-64]# ./Txray
 -bash: ./Txray: 权限不够
 
-# 为 xray 添加可执行权限
-[root@xxx Txray-linux-64]# chmod u+x xray
+# 为 Txray 添加可执行权限
+[root@xxx Txray-linux-64]# chmod u+x Txray
 ```
 
 ```
