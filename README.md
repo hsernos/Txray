@@ -39,8 +39,8 @@ Txray（目录命名随意）
 [root@xxx Txray-linux-64]# ./Txray
 -bash: ./Txray: 权限不够
 
-# 为 xray 添加可执行权限
-[root@xxx Txray-linux-64]# chmod u+x xray
+# 为 Txray 添加可执行权限
+[root@xxx Txray-linux-64]# chmod u+x Txray
 ```
 
 ```
@@ -161,7 +161,6 @@ Commands:
     exit                     退出程序
     run                      启动或重启服务
     stop                     停止服务
-    kill                     强制杀死xray进程
 
 Usage: run [索引式]
     run [索引式]      默认为上一次运行节点，如果选中多个节点，则选择访问 'setting' 中测试国外URL延迟最小的
