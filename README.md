@@ -8,13 +8,72 @@ Project X core： https://github.com/XTLS/Xray-core
 ## 注意
 此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
 
+## 特色
+
+1.多平台支持, 支持 Windows, macOS, linux.
+
+2.Tab键命令补齐
+
+3.支持VMess、Shadowsocks、Trojan、VLESS、VMessAEAD、Socks协议
+
+## 安装和使用
+1.下载对应平台架构的[Txray](https://github.com/hsernos/Txray/releases)和[xray](https://github.com/XTLS/Xray-core/releases),按如下目录结构解压放置
+```
+Txray（目录命名随意）
+│   Txray
+│   REDEADME.md    
+│
+└───xray-core （目录命名随意）
+    │   xray
+    │   geoip.dat
+    |   geosite.dat
+    │   ...
+
+```
+
+2.将Txray程序所在目录添加到PATH环境变量（添加环境变量请自行谷歌或百度）
+
+3.非 Windows 平台用户检查`Txray`和`xray`可执行权限
+```
+# 进入 Txray 所在目录执行 './Txray'
+[root@xxx Txray-linux-64]# ./Txray
+-bash: ./Txray: 权限不够
+
+# 为 xray 添加可执行权限
+[root@xxx Txray-linux-64]# chmod u+x xray
+```
+
+```
+# 进入xray所在目录执行 './xray'
+[root@xxx Xray-linux-64]# ./xray 
+-bash: ./xray: 权限不够
+
+# 为 xray 添加可执行权限
+[root@xxx Xray-linux-64]# chmod u+x xray
+```
+4.打开终端输入`Txray`回车进入Shell交互 或 继续在末尾添加命令直接运行
+```
+# 1.shell交互运行，命令可Tab补齐
+[root@xxx  xxxx]# Txray
+
+# 2.直接运行，如更新节点 (不会进入shell交互)
+[root@xxx  xxxx]# Txray sub update-node
+```
+## 稍高级使用
+1.单电脑多系统共用同一份配置文件（配置环境变量`TXRAY_HOME`）
+
+* Txray检测xray-core所在的优先级: 环境变量 `CORE_HOME` > Txray所在目录
+* 配置文件目录优先级:  环境变量 `TXRAY_HOME` > Txray所在目录
+
+2.开机自启，请自行谷歌或百度查找对应系统的开机自启脚本的写法
+
+PS：开机自启推荐搭配[命令别名](#查看命令别名帮助文档)使用
+
 <!-- toc -->
 
 ## 目录
 
-- [特色](#特色)
 - [编译/交叉编译 说明](#编译交叉编译-说明)
-- [下载/运行 说明](#下载运行-说明)
 - [命令列表及说明](#命令列表及说明)
   * [命令总览](#命令总览)
   * [查看基本设置帮助文档](#查看基本设置帮助文档)
@@ -51,11 +110,7 @@ Project X core： https://github.com/XTLS/Xray-core
 
 <!-- tocstop -->
 
-# 特色
 
-1. 多平台支持, 支持 Windows, macOS, linux.
-2. Tab键命令补齐
-3. 支持VMess、Shadowsocks、Trojan、VLESS、VMessAEAD、Socks协议
 
 #  编译/交叉编译 说明
 
@@ -84,12 +139,6 @@ Project X core： https://github.com/XTLS/Xray-core
    `go build Txray.go`
 
 
-# 下载/运行 说明
-
-需要下载[xray-core](https://github.com/XTLS/Xray-core/releases)
-
-1. Txray检测xray-core所在的优先级: 环境变量 `CORE_HOME` > Txray所在目录
-2. 配置文件目录优先级:  环境变量 `TXRAY_HOME` > Txray所在目录
 
 
 # 命令列表及说明

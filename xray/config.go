@@ -325,9 +325,6 @@ func shadowsocksOutbound(ss *protocols.ShadowSocks) interface{} {
 		"streamSettings": map[string]interface{}{
 			"network": "tcp",
 		},
-		"mux": map[string]interface{}{
-			"enabled": setting.Mux(),
-		},
 	}
 }
 
@@ -357,9 +354,6 @@ func trojanOutbound(trojan *protocols.Trojan) interface{} {
 			},
 		},
 		"streamSettings": streamSettings,
-		"mux": map[string]interface{}{
-			"enabled": setting.Mux(),
-		},
 	}
 }
 

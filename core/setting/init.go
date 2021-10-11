@@ -4,8 +4,9 @@ import (
 	"Txray/core"
 	"Txray/core/setting/key"
 	"Txray/log"
-	"github.com/spf13/viper"
 	"os"
+
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -23,7 +24,7 @@ func init() {
 	viper.SetDefault(key.UDP, true)
 	viper.SetDefault(key.Sniffing, true)
 	viper.SetDefault(key.FromLanConn, false)
-	viper.SetDefault(key.Mux, true)
+	viper.SetDefault(key.Mux, false)
 
 	viper.SetDefault(key.RoutingStrategy, "IPIfNonMatch") //路由策略
 	viper.SetDefault(key.RoutingBypass, true)             // 绕过局域网和大陆
