@@ -1,27 +1,31 @@
 # Txray
-Txray是一款 xray 终端版客户端，使用go编写。
+
+Txray 是一款 xray 终端版客户端，使用 go 编写。
 
 项目地址：https://github.com/hsernos/Txray
 
 Project X core： https://github.com/XTLS/Xray-core
 
 ## 注意
-此文档只针对于最新的commit, 可能不适用于已发布的最新版本.
+
+此文档只针对于最新的 commit, 可能不适用于已发布的最新版本.
 
 ## 特色
 
 1.多平台支持, 支持 Windows, macOS, linux.
 
-2.Tab键命令补齐
+2.Tab 键命令补齐
 
-3.支持VMess、Shadowsocks、Trojan、VLESS、VMessAEAD、Socks协议
+3.支持 VMess、Shadowsocks、Trojan、VLESS、VMessAEAD、Socks 协议
 
 ## 安装和使用
+
 1.下载对应平台架构的[Txray](https://github.com/hsernos/Txray/releases)和[xray](https://github.com/XTLS/Xray-core/releases),按如下目录结构解压放置
+
 ```
 Txray（目录命名随意）
 │   Txray
-│   REDEADME.md    
+│   REDEADME.md
 │
 └───xray-core （目录命名随意）
     │   xray
@@ -31,9 +35,10 @@ Txray（目录命名随意）
 
 ```
 
-2.将Txray程序所在目录添加到PATH环境变量（添加环境变量请自行谷歌或百度）
+2.将 Txray 程序所在目录添加到 PATH 环境变量（添加环境变量请自行谷歌或百度）
 
 3.非 Windows 平台用户检查`Txray`和`xray`可执行权限
+
 ```
 # 进入 Txray 所在目录执行 './Txray'
 [root@xxx Txray-linux-64]# ./Txray
@@ -45,14 +50,14 @@ Txray（目录命名随意）
 
 ```
 # 进入xray所在目录执行 './xray'
-[root@xxx Xray-linux-64]# ./xray 
+[root@xxx Xray-linux-64]# ./xray
 -bash: ./xray: 权限不够
 
 # 为 xray 添加可执行权限
 [root@xxx Xray-linux-64]# chmod u+x xray
 ```
 
-4.打开终端输入`Txray`回车进入Shell交互 或 继续在末尾添加命令直接运行
+4.打开终端输入`Txray`回车进入 Shell 交互 或 继续在末尾添加命令直接运行
 
 ```
 # 1.shell交互运行，命令可Tab补齐
@@ -63,12 +68,13 @@ Txray（目录命名随意）
 ```
 
 ## 稍高级使用
+
 1.单电脑多系统共用同一份配置文件（配置环境变量`TXRAY_HOME`）
 
-* Txray检测xray-core所在的优先级: 环境变量 `CORE_HOME` > Txray所在目录
-* 配置文件目录优先级:  环境变量 `TXRAY_HOME` > Txray所在目录
+- Txray 检测 xray-core 所在的优先级: 环境变量 `CORE_HOME` > Txray 所在目录
+- 配置文件目录优先级: 环境变量 `TXRAY_HOME` > Txray 所在目录
 
-2.开机自启，请自行谷歌或百度查找对应系统的开机自启脚本的写法
+  2.开机自启，请自行谷歌或百度查找对应系统的开机自启脚本的写法
 
 PS：开机自启推荐搭配[命令别名](#查看命令别名帮助文档)使用
 
@@ -77,51 +83,50 @@ PS：开机自启推荐搭配[命令别名](#查看命令别名帮助文档)使�
 ## 目录
 
 - [编译/交叉编译 说明](#编译交叉编译-说明)
-- [命令列表及说明](#命令列表及说明)
-  * [命令总览](#命令总览)
-  * [查看基本设置帮助文档](#查看基本设置帮助文档)
-    + [查看基本设置](#查看基本设置)
-    + [修改基本设置](#修改基本设置)
-  * [查看订阅帮助文档](#查看订阅帮助文档)
-    + [添加订阅](#添加订阅)
-    + [查看订阅](#查看订阅)
-    + [修改订阅](#修改订阅)
-    + [删除订阅](#删除订阅)
-    + [从订阅更新节点](#从订阅更新节点)
-  * [查看节点帮助文档](#查看节点帮助文档)
-    + [添加节点](#添加节点)
-    + [查看节点](#查看节点)
-    + [删除节点](#删除节点)
-    + [tcping测试](#tcping测试)
-    + [节点查找](#节点查找)
-    + [导出节点](#导出节点)
-    + [节点排序](#节点排序)
-  * [查看节点过滤器帮助文档](#查看节点过滤器帮助文档)
-    + [添加过滤器规则](#添加过滤器规则)
-    + [过滤节点](#过滤节点)
-  * [查看节点回收站帮助文档](#查看节点回收站帮助文档)
-  * [查看命令别名帮助文档](#查看命令别名帮助文档)
-      + [添加和修改别名](#添加和修改别名)
-  * [查看路由帮助文档](#查看路由帮助文档)
-    + [添加路由](#添加路由)
-    + [domain路由规则](#domain路由规则)
-    + [ip路由规则](#ip路由规则)
-  * [启动或重启xray-core服务](#启动或重启xray-core服务)
-  * [停止xray-core服务](#停止xray-core服务)
+- [命令列表及说明 (以下全为Shell交互下的演示说明)](#命令列表及说明)
+  - [命令总览](#命令总览)
+  - [查看基本设置帮助文档](#查看基本设置帮助文档)
+    - [查看基本设置](#查看基本设置)
+    - [修改基本设置](#修改基本设置)
+  - [查看订阅帮助文档](#查看订阅帮助文档)
+    - [添加订阅](#添加订阅)
+    - [查看订阅](#查看订阅)
+    - [修改订阅](#修改订阅)
+    - [删除订阅](#删除订阅)
+    - [从订阅更新节点](#从订阅更新节点)
+  - [查看节点帮助文档](#查看节点帮助文档)
+    - [添加节点](#添加节点)
+    - [查看节点](#查看节点)
+    - [删除节点](#删除节点)
+    - [tcping 测试](#tcping测试)
+    - [节点查找](#节点查找)
+    - [导出节点](#导出节点)
+    - [节点排序](#节点排序)
+  - [查看节点过滤器帮助文档](#查看节点过滤器帮助文档)
+    - [添加过滤器规则](#添加过滤器规则)
+    - [过滤节点](#过滤节点)
+  - [查看节点回收站帮助文档](#查看节点回收站帮助文档)
+  - [查看命令别名帮助文档](#查看命令别名帮助文档)
+    - [添加和修改别名](#添加和修改别名)
+  - [查看路由帮助文档](#查看路由帮助文档)
+    - [添加路由](#添加路由)
+    - [domain 路由规则](#domain路由规则)
+    - [ip 路由规则](#ip路由规则)
+  - [启动或重启 xray-core 服务](#启动或重启xray-core服务)
+  - [停止 xray-core 服务](#停止xray-core服务)
+  - [显示运行时 xray 的日志](#显示运行时xray的日志)
 - [已知问题](#已知问题)
 - [交流反馈](#交流反馈)
 
 <!-- tocstop -->
 
-
-
-#  编译/交叉编译 说明
+# 编译/交叉编译 说明
 
 1. 在终端下进入项目目录
 
 2. 设置`GOPROXY`,提高编译所需依赖的下载速度
-   Linux/Mac下，运行 `GOPROXY=https://goproxy.cn,direct`
-   Windows下,运行 `set GOPROXY=https://goproxy.cn,direct`
+   Linux/Mac 下，运行 `GOPROXY=https://goproxy.cn,direct`
+   Windows 下,运行 `set GOPROXY=https://goproxy.cn,direct`
 
 3. 编译常用平台
    运行 `go build Txray.go`, 可编译当前平台的版本
@@ -133,22 +138,20 @@ PS：开机自启推荐搭配[命令别名](#查看命令别名帮助文档)使�
    Linux/Darwin 例子: 编译 Windows 下的 64 位程序
 
    `GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build Txray.go`
-   
+
    Windows 例子: 编译 Linux 下的 32 位程序
-   
+
    `set GOOS=linux`
    `set GOARCH=386`
    `set CGO_ENABLED=0`
    `go build Txray.go`
 
-
-
-
 # 命令列表及说明
 
-> 在终端中运行Txray进入shell交互
+> 在终端中运行 Txray 进入 shell 交互
 
 ## 命令总览
+
 ```
 Commands:
     setting                  基础设置             使用 'setting help' 查看详细用法
@@ -349,7 +352,7 @@ update-node Flags
 
 # 禁用索引为3和5的订阅链接
 >>> sub mv 3,5 --using n
->>> sub 
+>>> sub
 +------+-------+---------------------+----------+
 | 索引 |  别名  |         URL         |  是否启用  |
 +------+-------+---------------------+----------+
@@ -393,8 +396,6 @@ update-node Flags
 # 使用端口为2333，地址为1.2.3.4的socks代理更新节点
 >>> sub update-node -s 2333 -a 1.2.3.4
 ```
-
-
 
 ## 查看节点帮助文档
 
@@ -468,7 +469,7 @@ export Flags
 >>> node rm 1-20
 ```
 
-### tcping测试
+### tcping 测试
 
 ```
 # tcping测试所有节点
@@ -496,6 +497,7 @@ export Flags
 ```
 
 ### 节点排序
+
 ```
 # 逆转节点顺序
 >>> node sort 0
@@ -505,7 +507,9 @@ export Flags
 ```
 
 ## 查看节点过滤器帮助文档
+
 > 过滤器会在添加节点的时候自动运行，也可以使用 'filter run' 手动运行
+
 ```
 >>> filter help
 filter {commands} ...
@@ -525,6 +529,7 @@ PS: 过滤规则==> '过滤范围:正则表达式'
 ```
 
 ### 添加过滤器规则
+
 ```
 # 添加地址为baidu.com的过滤规则
 >>> filter add addr:baidu.com
@@ -537,6 +542,7 @@ PS: 过滤规则==> '过滤范围:正则表达式'
 ```
 
 ### 过滤节点
+
 ```
 # 删除地址为baidu.com的节点
 >>> filter run addr:baidu.com
@@ -546,7 +552,9 @@ PS: 过滤规则==> '过滤范围:正则表达式'
 ```
 
 ## 查看节点回收站帮助文档
+
 > 数据仅保存当次交互中
+
 ```
 >>> recycle help
 recycle {commands} ...
@@ -561,7 +569,9 @@ PS: 回收站的数据仅运行存在 (仅存储在内存中)
 ```
 
 ## 查看命令别名帮助文档
+
 > 不能覆盖自带命令，小心使用，不要弄成死循环了
+
 ```
 >>> alias help
 alias {commands} ...
@@ -579,6 +589,7 @@ PS：命令组包含命令，即命令组也可以设置单条命令
 ```
 
 ### 添加和修改别名
+
 ```
 # 设置别名 'one' 为更新订阅，然后tcping，最后运行延迟最小的那个
 >>> alias set one "sub update-node | node tcping | run"
@@ -628,16 +639,16 @@ PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 
 ```
 
-### domain路由规则
+### domain 路由规则
 
-- 纯字符串: 当此字符串匹配目标域名中任意部分，该规则生效。比如`sina.com`可以匹配`sina.com`、sina.com.cn和www.sina.com，但不匹配`sina.cn`。
+- 纯字符串: 当此字符串匹配目标域名中任意部分，该规则生效。比如`sina.com`可以匹配`sina.com`、sina.com.cn 和www.sina.com，但不匹配`sina.cn`。
 - 正则表达式: 由`regexp:`开始，余下部分是一个正则表达式。当此正则表达式匹配目标域名时，该规则生效。例如`regexp:\\.goo.*\\.com$`匹配`www.google.com`、`fonts.googleapis.com`，但不匹配`google.com`。
 - 子域名 (推荐): 由`domain:`开始，余下部分是一个域名。当此域名是目标域名或其子域名时，该规则生效。例如`domain:xray.com`匹配`www.xray.com`、`xray.com`，但不匹配`xxray.com`。
 - 完整匹配: 由`full:`开始，余下部分是一个域名。当此域名完整匹配目标域名时，该规则生效。例如`full:xray.com`匹配`xray.com`但不匹配`www.xray.com`。
 - 预定义域名列表：由`"geosite:"`开头，余下部分是一个名称，如`geosite:google`或者`geosite:cn`。名称及域名列表参考[预定义域名列表](https://www.v2ray.com/chapter_02/03_routing.html#dlc)。
 - 从文件中加载域名: 形如`ext:file:tag`，必须以`ext:`（小写）开头，后面跟文件名和标签，文件存放在[资源目录](https://www.v2ray.com/chapter_02/env.html#asset-location)中，文件格式与`geosite.dat`相同，标签必须在文件中存在。
 
-### ip路由规则
+### ip 路由规则
 
 - IP: 形如`127.0.0.1`。
 - [CIDR](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing): 形如`10.0.0.0/8`.
@@ -645,8 +656,7 @@ PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 - 特殊值：`geoip:private` (xray 3.5+)，包含所有私有地址，如`127.0.0.1`。
 - 从文件中加载 IP: 形如`ext:file:tag`，必须以`ext:`（小写）开头，后面跟文件名和标签，文件存放在[资源目录](https://www.v2ray.com/chapter_02/env.html#asset-location)中，文件格式与`geoip.dat`相同标签必须在文件中存在。
 
-
-## 启动或重启xray-core服务
+## 启动或重启 xray-core 服务
 
 ```
 # 启动或重启索引为3的节点
@@ -662,17 +672,21 @@ PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 >>> run -t -10
 ```
 
-
-
-## 停止xray-core服务
+## 停止 xray-core 服务
 
 ```
 # 停止上次启动的xray-core进程
->>>stop
+>>> stop
 
 ```
 
+## 显示运行时 xray 的日志
 
+```
+# 显示运行时 xray 的日志
+>>> log
+
+```
 
 # 已知问题
 
@@ -680,4 +694,4 @@ PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 
 # 交流反馈
 
-提交Issue: [Issues](https://github.com/hsernos/Txray/issues)
+提交 Issue: [Issues](https://github.com/hsernos/Txray/issues)
