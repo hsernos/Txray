@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	version = "v3.0.1"
+	version = "v3.0.2"
 	name    = "Txray"
 )
 
@@ -23,6 +23,7 @@ func init() {
 		log.GetConsoleZapcore(log.INFO),
 		log.GetFileZapcore(absPath, log.INFO, 5),
 	)
+	
 }
 
 func beforeOfRun(shell *ishell.Shell) {

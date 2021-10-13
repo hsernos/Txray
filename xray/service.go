@@ -7,9 +7,12 @@ import (
 	"Txray/core/setting"
 	"Txray/log"
 	"bufio"
+	"os"
 	"os/exec"
 	"time"
-	"os"
+	"fmt"
+
+	"github.com/hpcloud/tail"
 )
 
 var Xray *exec.Cmd
@@ -124,8 +127,30 @@ func Stop() {
 		}
 		setting.SetPid(0)
 	}
+	logPath := PathJoin(core.GetConfigDir(), "xray_access.log")
+	file, _ := os.Stat(logPath)
+	if file != nil  {
+		fileSize := float64(file.Size())/ (1 << 20)
+		if fileSize > 5 {
+			os.Remove(logPath)
+		}
+	}
 }
 
+// 查看xray日志
+func ShowLog() {
+	t, _ := tail.TailFile(PathJoin(core.GetConfigDir(), "xray_access.log"), tail.Config{
+		ReOpen:    true,                                 // 重新打开
+		Follow:    true,                                 // 是否跟随
+		Location:  &tail.SeekInfo{Offset: 0, Whence: 2}, // 从文件的哪个地方开始读
+		MustExist: false,                                // 文件不存在不报错
+		Poll:      true,
+	})
+	
+	for line := range t.Lines {
+		fmt.Println(line.Text)
+	}
+}
 
 func readInfo(r *bufio.Reader, lines *[]string) {
 	for i := 0; i < 20; i++ {

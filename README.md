@@ -51,7 +51,9 @@ Txray（目录命名随意）
 # 为 xray 添加可执行权限
 [root@xxx Xray-linux-64]# chmod u+x xray
 ```
+
 4.打开终端输入`Txray`回车进入Shell交互 或 继续在末尾添加命令直接运行
+
 ```
 # 1.shell交互运行，命令可Tab补齐
 [root@xxx  xxxx]# Txray
@@ -59,6 +61,7 @@ Txray（目录命名随意）
 # 2.直接运行，如更新节点 (不会进入shell交互)
 [root@xxx  xxxx]# Txray sub update-node
 ```
+
 ## 稍高级使用
 1.单电脑多系统共用同一份配置文件（配置环境变量`TXRAY_HOME`）
 
@@ -159,8 +162,9 @@ Commands:
     version, -v              查看版本
     clear                    清屏
     exit                     退出程序
-    run                      启动或重启服务
-    stop                     停止服务
+    run                      启动或重启节点
+    stop                     关闭节点
+    log                      查看运行时xray日志
 
 Usage: run [索引式]
     run [索引式]      默认为上一次运行节点，如果选中多个节点，则选择访问 'setting' 中测试国外URL延迟最小的

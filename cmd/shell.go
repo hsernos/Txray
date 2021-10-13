@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"Txray/cmd/help"
+	"Txray/xray"
+
 	"github.com/abiosoft/ishell"
 )
 
@@ -30,6 +32,12 @@ func InitShell(shell *ishell.Shell) {
 	InitRouteShell(shell)
 	InitServiceShell(shell)
 	InitAliasShell(shell)
+	shell.AddCmd(&ishell.Cmd{
+		Name:    "log",
+		Func: func(c *ishell.Context) {
+			xray.ShowLog()
+		},
+	})
 }
 
 // 参数解析
