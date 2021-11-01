@@ -25,7 +25,7 @@ Project X core： https://github.com/XTLS/Xray-core
 ```
 Txray（目录命名随意）
 │   Txray
-│   REDEADME.md
+│   README.md
 │
 └───xray-core （目录命名随意）
     │   xray
