@@ -610,7 +610,7 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 	switch security {
 	case "tls":
 		streamSettings["tlsSettings"] = map[string]interface{}{
-			"allowInsecure": true,
+			"allowInsecure": false,
 			"serverName":    vmess.GetHostValue(field.SNI),
 		}
 	}
