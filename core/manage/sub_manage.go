@@ -48,7 +48,7 @@ func (m *Manage) UpdataNode(opt sub.UpdataOption) {
 		})
 	} else {
 		for _, index := range core.IndexList(opt.Key, m.SubLen()) {
-			m.updataNode(m.getSub(index), opt)
+			m.updataNode(m.GetSub(index), opt)
 		}
 	}
 }
