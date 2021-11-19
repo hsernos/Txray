@@ -16,9 +16,9 @@ type FilterMode string
 
 const (
 	NameFilter     FilterMode = "name"
-	AddrFilter                = "addr"
-	PortFilter                = "port"
-	ProtocolFilter            = "proto"
+	AddrFilter     FilterMode = "addr"
+	PortFilter     FilterMode = "port"
+	ProtocolFilter FilterMode = "proto"
 )
 
 func NewNodeFilter(key string) *NodeFilter {

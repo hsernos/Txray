@@ -17,21 +17,32 @@ func ParseLink(link string) Protocol {
 	}
 	switch u.Scheme {
 	case "vmess":
-		if obj := ParseVMessLink(link); obj == nil {
-			return ParseVMessAEADLink(link)
-		} else {
+		if obj := ParseVMessLink(link); obj != nil {
 			return obj
-		}
+		} 
+		if obj := ParseVMessAEADLink(link); obj != nil {
+			return obj
+		} 
 	case "vless":
-		return ParseVLessLink(link)
+		if obj := ParseVLessLink(link); obj != nil {
+			return obj
+		} 
 	case "ss":
-		return ParseSSLink(link)
+		if obj := ParseSSLink(link); obj != nil {
+			return obj
+		} 
 	case "ssr":
-		return ParseSSRLink(link)
+		if obj := ParseSSRLink(link); obj != nil {
+			return obj
+		} 
 	case "trojan":
-		return ParseTrojanLink(link)
+		if obj := ParseTrojanLink(link); obj != nil {
+			return obj
+		} 
 	case "socks":
-		return ParseSocksLink(link)
+		if obj := ParseSocksLink(link); obj != nil {
+			return obj
+		} 
 	}
 	return nil
 }
