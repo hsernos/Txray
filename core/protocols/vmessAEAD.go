@@ -46,7 +46,7 @@ func (v *VMessAEAD) GetInfo() string {
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输协议", v.GetValue(field.NetworkType)))
 	switch v.GetValue(field.NetworkType) {
 	case "tcp":
-		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.NetworkType)))
+		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.TCPHeaderType)))
 	case "kcp":
 		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.MkcpHeaderType)))
 		if v.GetValue(field.Seed) != "" {
