@@ -29,7 +29,7 @@ func InitNodeShell(shell *ishell.Shell) {
 			})
 			key := "all"
 			if _, ok := argMap["data"]; ok {
-				key, _ = argMap["data"]
+				key = argMap["data"]
 			}
 			_, isDesc := argMap["desc"]
 			table := tablewriter.NewWriter(os.Stdout)
@@ -153,7 +153,7 @@ func InitNodeShell(shell *ishell.Shell) {
 			})
 			key := "all"
 			if _, ok := argMap["data"]; ok {
-				key, _ = argMap["data"]
+				key = argMap["data"]
 			}
 			links := manage.Manager.GetNodeLink(key)
 			if _, ok := argMap["clipboard"]; ok {
@@ -298,7 +298,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					}
 					c.Print("用户ID（id）: ")
 					id := c.ReadLine()
-					data := make(map[string]string, 0)
+					data := make(map[string]string)
 					networkList := []string{
 						"tcp",
 						"kcp",
@@ -307,21 +307,12 @@ func InitNodeShell(shell *ishell.Shell) {
 						"quic",
 						"grpc",
 					}
-					network_index := c.MultiChoice(networkList, "传输协议（network）?")
-					network := networkList[network_index]
+					index := c.MultiChoice(networkList, "传输协议（network）?")
+					network := networkList[index]
 					if network != "tcp" {
 						data["type"] = network
 					}
 					switch network {
-					case "tcp":
-						typeList := []string{
-							"none",
-							"http",
-						}
-						type_index := c.MultiChoice(typeList, "伪装类型（headerType） ?")
-						if typeList[type_index] != "none" {
-							data["headerType"] = typeList[type_index]
-						}
 					case "kcp":
 						typeList := []string{
 							"none",
@@ -331,9 +322,9 @@ func InitNodeShell(shell *ishell.Shell) {
 							"dtls",
 							"wireguard",
 						}
-						type_index := c.MultiChoice(typeList, "伪装类型（headerType） ?")
-						if typeList[type_index] != "none" {
-							data["headerType"] = typeList[type_index]
+						index := c.MultiChoice(typeList, "伪装类型（headerType） ?")
+						if typeList[index] != "none" {
+							data["headerType"] = typeList[index]
 						}
 						c.Print("KCP种子（seed）: ")
 						seed := c.ReadLine()
@@ -371,15 +362,15 @@ func InitNodeShell(shell *ishell.Shell) {
 							"dtls",
 							"wireguard",
 						}
-						type_index := c.MultiChoice(typeList, "伪装类型（headerType）?")
-						data["headerType"] = typeList[type_index]
+						index := c.MultiChoice(typeList, "伪装类型（headerType）?")
+						data["headerType"] = typeList[index]
 						quicSecurityList := []string{
 							"none",
 							"aes-128-gcm",
 							"chacha20-poly1305",
 						}
-						quicSecurity_index := c.MultiChoice(quicSecurityList, "QUIC 的加密方式（quicSecurity）?")
-						quicSecurity := quicSecurityList[quicSecurity_index]
+						index = c.MultiChoice(quicSecurityList, "QUIC 的加密方式（quicSecurity）?")
+						quicSecurity := quicSecurityList[index]
 						data["quicSecurity"] = quicSecurity
 						if quicSecurity != "none" {
 							c.Print("当 QUIC 的加密方式不为 none 时的加密密钥（key）: ")
@@ -400,25 +391,35 @@ func InitNodeShell(shell *ishell.Shell) {
 							"gun",
 							"multi",
 						}
-						grpcMode_index := c.MultiChoice(grpcModeList, "gRPC 的传输模式（mode）?")
-						mode := grpcModeList[grpcMode_index]
+						index := c.MultiChoice(grpcModeList, "gRPC 的传输模式（mode）?")
+						mode := grpcModeList[index]
 						if mode != "gun" {
 							data["mode"] = mode
 						}
 					}
 					securityList := []string{
-						"none",
+						"",
 						"tls",
 					}
 					security_index := c.MultiChoice(securityList, "底层传输安全（security）?")
 					security := securityList[security_index]
-					if security != "none" {
+					if security != "" {
 						data["security"] = security
-					}
-					c.Print("SNI（sni）: ")
-					sni := c.ReadLine()
-					if sni != "" {
-						data["sni"] = sni
+						c.Print("SNI（sni）: ")
+						sni := c.ReadLine()
+						if sni != "" {
+							data["sni"] = sni
+						}
+						alpnList := []string{
+							"",
+							"h2",
+							"http/1.1",
+							"h2,http/1.1",
+						}
+						index := c.MultiChoice(alpnList, "Alpn ?")
+						if alpnList[index] != "" {
+							data["alpn"] = alpnList[index]
+						}
 					}
 					vmessAEAD := &protocols.VMessAEAD{
 						ID:      id,
@@ -449,7 +450,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					}
 					c.Print("用户ID（id）: ")
 					id := c.ReadLine()
-					data := make(map[string]string, 0)
+					data := make(map[string]string)
 					networkList := []string{
 						"tcp",
 						"kcp",
@@ -458,8 +459,8 @@ func InitNodeShell(shell *ishell.Shell) {
 						"quic",
 						"grpc",
 					}
-					network_index := c.MultiChoice(networkList, "传输协议（network）?")
-					network := networkList[network_index]
+					index := c.MultiChoice(networkList, "传输协议（network）?")
+					network := networkList[index]
 					if network != "tcp" {
 						data["type"] = network
 					}
@@ -469,9 +470,9 @@ func InitNodeShell(shell *ishell.Shell) {
 							"none",
 							"http",
 						}
-						type_index := c.MultiChoice(typeList, "伪装类型（headerType） ?")
-						if typeList[type_index] != "none" {
-							data["headerType"] = typeList[type_index]
+						index = c.MultiChoice(typeList, "伪装类型（headerType） ?")
+						if typeList[index] != "none" {
+							data["headerType"] = typeList[index]
 						}
 					case "kcp":
 						typeList := []string{
@@ -482,9 +483,9 @@ func InitNodeShell(shell *ishell.Shell) {
 							"dtls",
 							"wireguard",
 						}
-						type_index := c.MultiChoice(typeList, "伪装类型（headerType） ?")
-						if typeList[type_index] != "none" {
-							data["headerType"] = typeList[type_index]
+						index = c.MultiChoice(typeList, "伪装类型（headerType） ?")
+						if typeList[index] != "none" {
+							data["headerType"] = typeList[index]
 						}
 						c.Print("KCP种子（seed）: ")
 						seed := c.ReadLine()
@@ -522,15 +523,15 @@ func InitNodeShell(shell *ishell.Shell) {
 							"dtls",
 							"wireguard",
 						}
-						type_index := c.MultiChoice(typeList, "伪装类型（headerType）?")
-						data["headerType"] = typeList[type_index]
+						index = c.MultiChoice(typeList, "伪装类型（headerType）?")
+						data["headerType"] = typeList[index]
 						quicSecurityList := []string{
 							"none",
 							"aes-128-gcm",
 							"chacha20-poly1305",
 						}
-						quicSecurity_index := c.MultiChoice(quicSecurityList, "QUIC 的加密方式（quicSecurity）?")
-						quicSecurity := quicSecurityList[quicSecurity_index]
+						index = c.MultiChoice(quicSecurityList, "QUIC 的加密方式（quicSecurity）?")
+						quicSecurity := quicSecurityList[index]
 						data["quicSecurity"] = quicSecurity
 						if quicSecurity != "none" {
 							c.Print("当 QUIC 的加密方式不为 none 时的加密密钥（key）: ")
@@ -551,28 +552,39 @@ func InitNodeShell(shell *ishell.Shell) {
 							"gun",
 							"multi",
 						}
-						grpcMode_index := c.MultiChoice(grpcModeList, "gRPC 的传输模式（mode）?")
-						mode := grpcModeList[grpcMode_index]
+						index = c.MultiChoice(grpcModeList, "gRPC 的传输模式（mode）?")
+						mode := grpcModeList[index]
 						if mode != "gun" {
 							data["mode"] = mode
 						}
 					}
 
 					securityList := []string{
-						"none",
+						"",
 						"tls",
 						"xtls",
 					}
-					security_index := c.MultiChoice(securityList, "底层传输安全（security）?")
-					security := securityList[security_index]
-					if security != "none" {
+					index = c.MultiChoice(securityList, "底层传输安全（security）?")
+					security := securityList[index]
+					if security != "" {
 						data["security"] = security
+						c.Print("SNI（sni）: ")
+						sni := c.ReadLine()
+						if sni != "" {
+							data["sni"] = sni
+						}
+						alpnList := []string{
+							"",
+							"h2",
+							"http/1.1",
+							"h2,http/1.1",
+						}
+						index := c.MultiChoice(alpnList, "Alpn ?")
+						if alpnList[index] != "" {
+							data["alpn"] = alpnList[index]
+						}
 					}
-					c.Print("SNI（sni）: ")
-					sni := c.ReadLine()
-					if sni != "" {
-						data["sni"] = sni
-					}
+					
 					switch security {
 					case "xtls":
 						flowList := []string{
@@ -583,8 +595,8 @@ func InitNodeShell(shell *ishell.Shell) {
 							"xtls-rprx-splice",
 							"xtls-rprx-splice-udp443",
 						}
-						flow_index := c.MultiChoice(flowList, "流控（flow）?")
-						flow := flowList[flow_index]
+						index = c.MultiChoice(flowList, "流控（flow）?")
+						flow := flowList[index]
 						data["flow"] = flow
 					}
 					vless := &protocols.VLess{
@@ -601,27 +613,39 @@ func InitNodeShell(shell *ishell.Shell) {
 						c.Println("添加成功")
 					}
 				case protocols.ModeVMess.String():
+					vmess := &protocols.VMess{V: "2"}
 					c.Println("========================")
 					c.Println(protocolMode)
 					c.Println("========================")
 					c.Print("别名（remarks）: ")
-					remarks := c.ReadLine()
+					vmess.Ps = c.ReadLine()
 					c.Print("地址（address）: ")
-					address := c.ReadLine()
+					vmess.Add = c.ReadLine()
 					c.Print("端口（port）: ")
 					port, err := strconv.Atoi(c.ReadLine())
 					if err != nil || port < 1 || port > 65535 {
 						log.Warn("端口为数字，且取值为1~65535")
 						return
 					}
+					vmess.Port = port
 					c.Print("用户ID（id）: ")
-					id := c.ReadLine()
+					vmess.Id = c.ReadLine()
 					c.Print("额外ID（alterID）: ")
 					alterID, err := strconv.Atoi(c.ReadLine())
-					if err != nil || port < 1 || port > 65535 {
-						log.Warn("额外ID为数字，且取值为1~65535")
+					if err != nil  {
+						log.Warn("额外ID为数字")
 						return
 					}
+					vmess.Aid = alterID
+					securityList := []string{
+						"auto",
+						"aes-128-gcm",
+						"chacha20-poly1305",
+						"none",
+						"zero",
+					}
+					index := c.MultiChoice(securityList, "加密方式（security）?")
+					vmess.Scy = securityList[index]
 					networkList := []string{
 						"tcp",
 						"kcp",
@@ -630,20 +654,13 @@ func InitNodeShell(shell *ishell.Shell) {
 						"quic",
 						"grpc",
 					}
-					network := c.MultiChoice(networkList, "传输协议（network）?")
-
-					typeList := []string{
-						"none",
-						"http",
-					}
-					switch networkList[network] {
+					index = c.MultiChoice(networkList, "传输协议（network）?")
+					vmess.Net = networkList[index]
+					switch networkList[index] {
 					case "tcp":
-						typeList = []string{
-							"none",
-							"http",
-						}
-					case "kcp", "quic":
-						typeList = []string{
+						vmess.Type = "none"
+					case "kcp":
+						typeList := []string{
 							"none",
 							"srtp",
 							"utp",
@@ -651,42 +668,67 @@ func InitNodeShell(shell *ishell.Shell) {
 							"dtls",
 							"wireguard",
 						}
-					case "ws", "h2":
-						typeList = []string{
+						index = c.MultiChoice(typeList, "伪装头部类型（type）?")
+						vmess.Type = typeList[index]
+						c.Print("mKCP 种子（path）: ")
+						vmess.Path = c.ReadLine()
+					case "quic":
+						typeList := []string{
 							"none",
+							"srtp",
+							"utp",
+							"wechat-video",
+							"dtls",
+							"wireguard",
 						}
+						index = c.MultiChoice(typeList, "伪装类型（type）?")
+						vmess.Type = typeList[index]
+						quicSecurityList := []string{
+							"none",
+							"aes-128-gcm",
+							"chacha20-poly1305",
+						}
+						index = c.MultiChoice(quicSecurityList, "QUIC的加密方式（host）?")
+						vmess.Host = quicSecurityList[index]
+						if vmess.Host != "none" {
+							c.Print("QUIC的加密key（path）: ")
+							vmess.Path = c.ReadLine()
+						}
+						
+					case "ws", "h2":
+						c.Print("Host（host）: ")
+						vmess.Host = c.ReadLine()
+						c.Print("Path（path）: ")
+						vmess.Path = c.ReadLine()
 					case "grpc":
-						typeList = []string{
+						typeList := []string{
 							"gun",
 							"multi",
 						}
+						index = c.MultiChoice(typeList, "gRPC的传输模式（type）?")
+						vmess.Type = typeList[index]
+						c.Print("gRPC的ServiceName（path）: ")
+						vmess.Path = c.ReadLine()
 					}
-					types := 0
-					if networkList[network] != "ws" && networkList[network] != "h2" {
-						types = c.MultiChoice(typeList, "伪装类型（type） ?")
-					}
-					c.Print("伪装域名 host（ws host/h2 host(多个以,隔开)/QUIC 加密方式）: ")
-					host := c.ReadLine()
-					c.Print("path（ws path/h2 path/QUIC 加密秘钥/Kcp Seed/grpc ServerName）: ")
-					path := c.ReadLine()
 					tlsList := []string{
-						"tls",
 						"",
+						"tls",
 					}
-					tls := c.MultiChoice(tlsList, "底层安全传输 ?")
+					index = c.MultiChoice(tlsList, "底层安全传输 （tls）?")
+					vmess.Tls = tlsList[index]
+					if vmess.Tls != "" {
+						c.Print("SNI: ")
+						vmess.Sni = c.ReadLine()
+						alpnList := []string{
+							"",
+							"h2",
+							"http/1.1",
+							"h2,http/1.1",
+						}
+						index := c.MultiChoice(alpnList, "Alpn ?")
+						vmess.Alpn = alpnList[index]
+					}
 					c.Println("========================")
-					vmess := &protocols.VMess{
-						Ps:   remarks,
-						Add:  address,
-						Port: port,
-						Id:   id,
-						Aid:  alterID,
-						Net:  networkList[network],
-						Type: typeList[types],
-						Host: host,
-						Path: path,
-						Tls:  tlsList[tls],
-					}
 					if manage.Manager.AddNode(node.NewNodeByData(vmess)) {
 						c.Println("添加成功")
 					}

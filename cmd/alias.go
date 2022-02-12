@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-var names = make(map[string]int, 0)
+var names = make(map[string]int)
 
 func InitAliasShell(shell *ishell.Shell) {
 	// 读取内置命令

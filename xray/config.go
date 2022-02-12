@@ -365,10 +365,16 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 		"security": vmess.Tls,
 	}
 	if vmess.Tls == "tls" {
-		streamSettings["tlsSettings"] = map[string]interface{}{
+		tlsSettings := map[string]interface{}{
 			"allowInsecure": false,
-			"serverName":    vmess.Host,
 		}
+		if vmess.Sni != "" {
+			tlsSettings["serverName"] = vmess.Sni
+		}
+		if vmess.Alpn != "" {
+			tlsSettings["alpn"] = strings.Split(vmess.Alpn, ",")
+		}
+		streamSettings["tlsSettings"] = tlsSettings
 	}
 	switch vmess.Net {
 	case "tcp":
@@ -415,13 +421,16 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 			"host": host,
 		}
 	case "quic":
-		streamSettings["quicSettings"] = map[string]interface{}{
+		quicSettings := map[string]interface{}{
 			"security": vmess.Host,
-			"key":      vmess.Path,
 			"header": map[string]interface{}{
 				"type": vmess.Type,
 			},
 		}
+		if vmess.Host != "none" {
+			quicSettings["key"] = vmess.Path
+		}
+		streamSettings["quicSettings"] = quicSettings
 	case "grpc":
 		streamSettings["grpcSettings"] = map[string]interface{}{
 			"serviceName": vmess.Path,
@@ -440,7 +449,7 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 						map[string]interface{}{
 							"id":       vmess.Id,
 							"alterId":  vmess.Aid,
-							"security": "auto",
+							"security": vmess.Scy,
 							"level":    0,
 						},
 					},
@@ -504,15 +513,31 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	}
 	switch security {
 	case "tls":
-		streamSettings["tlsSettings"] = map[string]interface{}{
+		tlsSettings := map[string]interface{}{
 			"allowInsecure": false,
-			"serverName":    vless.GetHostValue(field.SNI),
 		}
+		sni := vless.GetHostValue(field.SNI)
+		alpn := vless.GetValue(field.Alpn)
+		if sni != "" {
+			tlsSettings["serverName"] = sni
+		}
+		if alpn != "" {
+			tlsSettings["alpn"] = strings.Split(alpn, ",")
+		}
+		streamSettings["tlsSettings"] = tlsSettings
 	case "xtls":
-		streamSettings["xtlsSettings"] = map[string]interface{}{
+		xtlsSettings := map[string]interface{}{
 			"allowInsecure": false,
-			"serverName":    vless.GetHostValue(field.SNI),
 		}
+		sni := vless.GetHostValue(field.SNI)
+		alpn := vless.GetValue(field.Alpn)
+		if sni != "" {
+			xtlsSettings["serverName"] = sni
+		}
+		if alpn != "" {
+			xtlsSettings["alpn"] = strings.Split(alpn, ",")
+		}
+		streamSettings["xtlsSettings"] = xtlsSettings
 		user["flow"] = vless.GetValue(field.Flow)
 		mux = false
 	}
@@ -609,10 +634,18 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 	}
 	switch security {
 	case "tls":
-		streamSettings["tlsSettings"] = map[string]interface{}{
+		tlsSettings := map[string]interface{}{
 			"allowInsecure": false,
-			"serverName":    vmess.GetHostValue(field.SNI),
 		}
+		sni := vmess.GetHostValue(field.SNI)
+		alpn := vmess.GetValue(field.Alpn)
+		if sni != "" {
+			tlsSettings["serverName"] = sni
+		}
+		if alpn != "" {
+			tlsSettings["alpn"] = strings.Split(alpn, ",")
+		}
+		streamSettings["tlsSettings"] = tlsSettings
 	}
 	switch network {
 	case "tcp":

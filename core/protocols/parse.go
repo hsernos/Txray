@@ -157,6 +157,11 @@ func ParseVMessLink(link string) *VMess {
 	} else {
 		return nil
 	}
+	if scy, ok := mapResult["scy"]; ok {
+		vmess.Scy = fmt.Sprintf("%v", scy)
+	} else {
+		vmess.Scy = "auto"
+	}
 	if port, ok := mapResult["port"]; ok {
 		value, err := strconv.Atoi(fmt.Sprintf("%v", port))
 		if err == nil {
@@ -206,6 +211,12 @@ func ParseVMessLink(link string) *VMess {
 		vmess.Tls = fmt.Sprintf("%v", tls)
 	} else {
 		return nil
+	}
+	if sni, ok := mapResult["sni"]; ok {
+		vmess.Sni = fmt.Sprintf("%v", sni)
+	}
+	if alpn, ok := mapResult["alpn"]; ok {
+		vmess.Alpn = fmt.Sprintf("%v", alpn)
 	}
 	return vmess.Check()
 }
@@ -298,7 +309,7 @@ func ParseSSLink(link string) *ShadowSocks {
 			return nil
 		}
 		ss.Address = u.Hostname()
-		ss.Port, err = strconv.Atoi(u.Port())
+		ss.Port, _ = strconv.Atoi(u.Port())
 		ss.Method = u.User.Username()
 		ss.Password, _ = u.User.Password()
 		if ss.Remarks == "" {

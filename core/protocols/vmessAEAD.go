@@ -69,7 +69,8 @@ func (v *VMessAEAD) GetInfo() string {
 		buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输模式", v.GetValue(field.GrpcMode)))
 	}
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "底层传输", v.GetValue(field.Security)))
-	buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.GetHostValue(field.SNI)))
+	buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.GetValue(field.SNI)))
+	buf.WriteString(fmt.Sprintf("%9s: %s\n", "Alpn", v.GetValue(field.Alpn)))
 	buf.WriteString(fmt.Sprintf("%7s: %s", "协议", v.GetProtocolMode()))
 
 	return buf.String()

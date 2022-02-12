@@ -58,5 +58,6 @@ var (
 
 	Security = NoneField("security")
 	SNI      = NilStrField("sni")  // TLS SNI
+	Alpn     = NilStrField("alpn") // alpn 多选 h2,http/1.1
 	Flow     = NilStrField("flow") // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
 )
