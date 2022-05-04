@@ -1,6 +1,6 @@
 module Txray
 
-go 1.17
+go 1.18
 
 require (
 	github.com/abiosoft/ishell v2.0.0+incompatible

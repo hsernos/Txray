@@ -7,12 +7,13 @@ import (
 	"Txray/core/routing"
 	"Txray/core/setting"
 	"Txray/log"
+	"path/filepath"
 	"strings"
 )
 
 // 生成xray-core配置文件
 func GenConfig(node protocols.Protocol) string {
-	path := PathJoin(core.GetConfigDir(), "config.json")
+	path := filepath.Join(core.GetConfigDir(), "config.json")
 	var conf = map[string]interface{}{
 		"log":       logConfig(),
 		"inbounds":  inboundsConfig(),
@@ -31,7 +32,7 @@ func GenConfig(node protocols.Protocol) string {
 
 // 日志
 func logConfig() interface{} {
-	path := PathJoin(core.GetConfigDir(), "xray_access.log")
+	path := core.LogFile
 	return map[string]string{
 		"access":   path,
 		"loglevel": "warning",

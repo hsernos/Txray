@@ -7,10 +7,10 @@ import (
 	"Txray/core/setting"
 	"Txray/log"
 	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"time"
-	"fmt"
 
 	"github.com/hpcloud/tail"
 )
@@ -49,6 +49,11 @@ func Start(key string) {
 			if exe {
 				result, status := TestNode(testUrl, setting.Socks(), testTimeout)
 				log.Infof("%6s [ %s ] 节点: %d, 延迟: %dms", status, testUrl, index, result)
+				if result > 0 && result <= setting.TestMinTime(){
+					i = index
+					min = result
+					break
+				}
 				if result != -1 && min > result {
 					i = index
 					min = result
@@ -84,12 +89,8 @@ func run(node protocols.Protocol) bool {
 	Stop()
 	switch node.GetProtocolMode() {
 	case protocols.ModeShadowSocks, protocols.ModeTrojan, protocols.ModeVMess, protocols.ModeSocks, protocols.ModeVLESS, protocols.ModeVMessAEAD:
-		if CheckFile() {
-			file := GenConfig(node)
-			Xray = exec.Command(XrayPath(), "-c", file)
-		} else {
-			return false
-		}
+		file := GenConfig(node)
+		Xray = exec.Command(XrayPath, "-c", file)
 	default:
 		log.Infof("暂不支持%v协议", node.GetProtocolMode())
 		return false
@@ -127,26 +128,25 @@ func Stop() {
 		}
 		setting.SetPid(0)
 	}
-	logPath := PathJoin(core.GetConfigDir(), "xray_access.log")
-	file, _ := os.Stat(logPath)
+	// 日志文件过大清除
+	file, _ := os.Stat(core.LogFile)
 	if file != nil  {
 		fileSize := float64(file.Size())/ (1 << 20)
 		if fileSize > 5 {
-			os.Remove(logPath)
+			os.Remove(core.LogFile)
 		}
 	}
 }
 
 // 查看xray日志
 func ShowLog() {
-	t, _ := tail.TailFile(PathJoin(core.GetConfigDir(), "xray_access.log"), tail.Config{
+	t, _ := tail.TailFile(core.LogFile, tail.Config{
 		ReOpen:    true,                                 // 重新打开
 		Follow:    true,                                 // 是否跟随
 		Location:  &tail.SeekInfo{Offset: 0, Whence: 2}, // 从文件的哪个地方开始读
 		MustExist: false,                                // 文件不存在不报错
 		Poll:      true,
 	})
-	
 	for line := range t.Lines {
 		fmt.Println(line.Text)
 	}

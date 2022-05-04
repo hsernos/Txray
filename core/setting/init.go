@@ -29,13 +29,14 @@ func init() {
 	viper.SetDefault(key.RoutingStrategy, "IPIfNonMatch") //路由策略
 	viper.SetDefault(key.RoutingBypass, true)             // 绕过局域网和大陆
 
-	viper.SetDefault(key.DNSPort, 1350)
+	viper.SetDefault(key.DNSPort, 13500)
 	viper.SetDefault(key.DNSForeign, "1.1.1.1")
 	viper.SetDefault(key.DNSDomestic, "119.29.29.29")
 	viper.SetDefault(key.DNSBackup, "114.114.114.114")
 
 	viper.SetDefault(key.TestURL, "https://www.youtube.com")
 	viper.SetDefault(key.TestTimeout, 5)
+	viper.SetDefault(key.TestMinTime, 1000)
 	viper.SetDefault(key.RunBefore, "")
 
 	viper.SetDefault(key.PID, 0)

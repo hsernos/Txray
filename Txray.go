@@ -6,24 +6,25 @@ import (
 	"Txray/core/setting"
 	"Txray/core/setting/key"
 	"Txray/log"
+	"os"
+	"path/filepath"
+
 	"github.com/abiosoft/ishell"
 	"github.com/spf13/viper"
-	"os"
 )
 
 const (
-	version = "v3.0.4"
+	version = "v3.0.5"
 	name    = "Txray"
 )
 
 func init() {
 	// 初始化日志
-	absPath := core.PathJoin(core.GetConfigDir(), "info.log")
+	absPath := filepath.Join(core.GetConfigDir(), "info.log")
 	log.Init(
 		log.GetConsoleZapcore(log.INFO),
 		log.GetFileZapcore(absPath, log.INFO, 5),
 	)
-	
 }
 
 func beforeOfRun(shell *ishell.Shell) {

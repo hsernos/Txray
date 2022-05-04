@@ -21,6 +21,7 @@ Commands:
 
     test.url [url]                设置外网测试URL
     test.timeout [time]           设置外网测试超时时间 (秒)
+    test.mintime [time]           设置批量测试终止时间 (毫秒)
 
     run_before [命令组] [flags]    程序启动时执行命令或命令组，可与命令别名搭配
 

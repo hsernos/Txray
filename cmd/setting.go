@@ -46,11 +46,12 @@ func InitSettingShell(shell *ishell.Shell) {
 			table.Render()
 
 			table = tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"测试国外URL", "测试超时时间 (秒)", "启动时执行"})
+			table.SetHeader([]string{"测试国外URL", "测试超时时间 (秒)", "批量测试终止时间 (毫秒)", "启动时执行"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
 			data = []string{
 				setting.TestUrl(),
 				strconv.Itoa(setting.TestTimeout()),
+				strconv.Itoa(setting.TestMinTime()),
 				setting.RunBefore(),
 			}
 			table.Append(data)
@@ -272,6 +273,24 @@ func InitSettingShell(shell *ishell.Shell) {
 				}
 			}
 			log.Info("外网测试超时时间 (秒): ", setting.TestTimeout())
+		},
+	})
+	baseSettingCmd.AddCmd(&ishell.Cmd{
+		Name: "test.mintime",
+		Func: func(c *ishell.Context) {
+			if len(c.Args) > 0 {
+				v, err := strconv.Atoi(c.Args[0])
+				if err != nil {
+					log.Error("非法输入")
+					return
+				}
+				err = setting.SetTestMinTime(v)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+			}
+			log.Info("批量测试终止时间 (毫秒): ", setting.TestMinTime())
 		},
 	})
 	baseSettingCmd.AddCmd(&ishell.Cmd{
