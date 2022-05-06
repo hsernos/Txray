@@ -37,34 +37,28 @@ Txray（目录命名随意）
 
 2.将 Txray 程序所在目录添加到 PATH 环境变量（添加环境变量请自行谷歌或百度）
 
-3.非 Windows 平台用户检查`Txray`和`xray`可执行权限
+3.非 Windows 平台用户添加`Txray`和`xray`可执行权限
 
 ```
-# 进入 Txray 所在目录执行 './Txray'
-[root@xxx Txray-linux-64]# ./Txray
--bash: ./Txray: 权限不够
-
+# 进入 Txray 所在目录执行 'chmod u+x Txray'
 # 为 Txray 添加可执行权限
-[root@xxx Txray-linux-64]# chmod u+x Txray
+[xxx@xxx Txray-linux-64]$ chmod u+x Txray
 ```
 
 ```
-# 进入xray所在目录执行 './xray'
-[root@xxx Xray-linux-64]# ./xray
--bash: ./xray: 权限不够
-
+# 进入xray所在目录执行 'chmod u+x xray'
 # 为 xray 添加可执行权限
-[root@xxx Xray-linux-64]# chmod u+x xray
+[xxx@xxx Xray-linux-64]$ chmod u+x xray
 ```
 
 4.打开终端输入`Txray`回车进入 Shell 交互 或 继续在末尾添加命令直接运行
 
 ```
 # 1.shell交互运行，命令可Tab补齐
-[root@xxx  xxxx]# Txray
+[xxx@xxx  xxxx]$ Txray
 
 # 2.直接运行，如更新节点 (不会进入shell交互)
-[root@xxx  xxxx]# Txray sub update-node
+[xxx@xxx  xxxx]$ Txray sub update-node
 ```
 
 ## 稍高级使用
