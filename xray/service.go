@@ -31,7 +31,6 @@ func Start(key string) {
 		manager.Save()
 		exe := run(node.Protocol)
 		if exe {
-			setting.SetPid(Xray.Process.Pid)
 			if setting.Http() == 0 {
 				log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
 			} else {
@@ -69,7 +68,6 @@ func Start(key string) {
 			node := manager.GetNode(i)
 			exe := run(node.Protocol)
 			if exe {
-				setting.SetPid(Xray.Process.Pid)
 				if setting.Http() == 0 {
 					log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
 				} else {
@@ -105,6 +103,7 @@ func run(node protocols.Protocol) bool {
 	stopper := time.NewTimer(time.Millisecond * 300)
 	select {
 	case <-stopper.C:
+		setting.SetPid(Xray.Process.Pid)
 		return true
 	case <-status:
 		log.Error("开启xray服务失败, 查看下面报错信息来检查出错问题")
