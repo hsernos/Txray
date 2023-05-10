@@ -42,9 +42,7 @@ func (v *VLess) GetInfo() string {
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "地址", v.Address))
 	buf.WriteString(fmt.Sprintf("%7s: %d\n", "端口", v.Port))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "用户ID", v.ID))
-	if v.GetValue(field.Security) == "xtls" {
-		buf.WriteString(fmt.Sprintf("%5s: %s\n", "流控方式", v.GetValue(field.Flow)))
-	}
+	buf.WriteString(fmt.Sprintf("%5s: %s\n", "流控方式", v.GetValue(field.Flow)))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "加密方式", v.GetValue(field.VLessEncryption)))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输协议", v.GetValue(field.NetworkType)))
 	switch v.GetValue(field.NetworkType) {
