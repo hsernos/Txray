@@ -337,7 +337,7 @@ func trojanOutbound(trojan *protocols.Trojan) interface{} {
 	}
 	if trojan.Sni() != "" {
 		streamSettings["tlsSettings"] = map[string]interface{}{
-			"allowInsecure": false,
+			"allowInsecure": setting.AllowInsecure(),
 			"serverName":    trojan.Sni(),
 		}
 	}
@@ -367,7 +367,7 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 	}
 	if vmess.Tls == "tls" {
 		tlsSettings := map[string]interface{}{
-			"allowInsecure": false,
+			"allowInsecure": setting.AllowInsecure(),
 		}
 		if vmess.Sni != "" {
 			tlsSettings["serverName"] = vmess.Sni
@@ -505,6 +505,7 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	network := vless.GetValue(field.NetworkType)
 	user := map[string]interface{}{
 		"id":         vless.ID,
+		"flow":       vless.GetValue(field.Flow),
 		"encryption": vless.GetValue(field.VLessEncryption),
 		"level":      0,
 	}
@@ -515,7 +516,7 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	switch security {
 	case "tls":
 		tlsSettings := map[string]interface{}{
-			"allowInsecure": false,
+			"allowInsecure": setting.AllowInsecure(),
 		}
 		sni := vless.GetHostValue(field.SNI)
 		alpn := vless.GetValue(field.Alpn)
@@ -528,7 +529,7 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		streamSettings["tlsSettings"] = tlsSettings
 	case "xtls":
 		xtlsSettings := map[string]interface{}{
-			"allowInsecure": false,
+			"allowInsecure": setting.AllowInsecure(),
 		}
 		sni := vless.GetHostValue(field.SNI)
 		alpn := vless.GetValue(field.Alpn)
@@ -539,7 +540,6 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 			xtlsSettings["alpn"] = strings.Split(alpn, ",")
 		}
 		streamSettings["xtlsSettings"] = xtlsSettings
-		user["flow"] = vless.GetValue(field.Flow)
 		mux = false
 	case "reality":
 		realitySettings := map[string]interface{}{
@@ -647,7 +647,7 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 	switch security {
 	case "tls":
 		tlsSettings := map[string]interface{}{
-			"allowInsecure": false,
+			"allowInsecure": setting.AllowInsecure(),
 		}
 		sni := vmess.GetHostValue(field.SNI)
 		alpn := vmess.GetValue(field.Alpn)

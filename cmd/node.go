@@ -484,6 +484,20 @@ func InitNodeShell(shell *ishell.Shell) {
 					c.Print("用户ID（id）: ")
 					id := c.ReadLine()
 					data := make(map[string]string)
+					flowList := []string{
+						"",
+						"xtls-rprx-vision",
+						"xtls-rprx-vision-udp443",
+						"xtls-rprx-origin",
+						"xtls-rprx-origin-udp443",
+						"xtls-rprx-direct",
+						"xtls-rprx-direct-udp443",
+						"xtls-rprx-splice",
+						"xtls-rprx-splice-udp443",
+					}
+					index := c.MultiChoice(flowList, "流控（flow）?")
+					flow := flowList[index]
+					data["flow"] = flow
 					networkList := []string{
 						"tcp",
 						"kcp",
@@ -492,7 +506,7 @@ func InitNodeShell(shell *ishell.Shell) {
 						"quic",
 						"grpc",
 					}
-					index := c.MultiChoice(networkList, "传输协议（network）?")
+					index = c.MultiChoice(networkList, "传输协议（network）?")
 					network := networkList[index]
 					if network != "tcp" {
 						data["type"] = network
@@ -636,17 +650,6 @@ func InitNodeShell(shell *ishell.Shell) {
 						if alpnList[index] != "" {
 							data["alpn"] = alpnList[index]
 						}
-						flowList := []string{
-							"xtls-rprx-origin",
-							"xtls-rprx-origin-udp443",
-							"xtls-rprx-direct",
-							"xtls-rprx-direct-udp443",
-							"xtls-rprx-splice",
-							"xtls-rprx-splice-udp443",
-						}
-						index = c.MultiChoice(flowList, "流控（flow）?")
-						flow := flowList[index]
-						data["flow"] = flow
 					case "reality":
 						data["security"] = security
 						c.Print("SNI（sni）: ")

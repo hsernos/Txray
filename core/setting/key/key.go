@@ -7,6 +7,7 @@ const (
 	Sniffing    = "sniffing"
 	FromLanConn = "from_lan_conn"
 	Mux         = "mux"
+	AllowInsecure = "allow_insecure"
 
 	RoutingStrategy = "routing.strategy"
 	RoutingBypass   = "routing.bypass" // 绕过局域网和大陆

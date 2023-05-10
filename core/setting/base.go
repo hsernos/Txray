@@ -74,3 +74,12 @@ func SetPid(pid int) error {
 	viper.Set(key.PID, pid)
 	return viper.WriteConfig()
 }
+
+func AllowInsecure() bool {
+	return viper.GetBool(key.AllowInsecure)
+}
+
+func SetAllowInsecure(status bool) error {
+	viper.Set(key.AllowInsecure, status)
+	return viper.WriteConfig()
+}

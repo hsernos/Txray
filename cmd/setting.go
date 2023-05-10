@@ -17,7 +17,7 @@ func InitSettingShell(shell *ishell.Shell) {
 		Func: func(c *ishell.Context) {
 			// 连接设置
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"socks端口", "http端口", "udp转发", "流量地址监听", "允许来自局域网连接", "多路复用"})
+			table.SetHeader([]string{"socks端口", "http端口", "udp转发", "流量地址监听", "允许来自局域网连接", "多路复用", "允许不安全的连接"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
 			data := []string{
 				strconv.Itoa(setting.Socks()),
@@ -26,6 +26,7 @@ func InitSettingShell(shell *ishell.Shell) {
 				strconv.FormatBool(setting.Sniffing()),
 				strconv.FormatBool(setting.FromLanConn()),
 				strconv.FormatBool(setting.Mux()),
+				strconv.FormatBool(setting.AllowInsecure()),
 			}
 			table.Append(data)
 			table.Render()
@@ -146,6 +147,21 @@ func InitSettingShell(shell *ishell.Shell) {
 				}
 			}
 			log.Info("多路复用: ", setting.Mux())
+		},
+	})
+	baseSettingCmd.AddCmd(&ishell.Cmd{
+		Name: "allow_insecure",
+		Func: func(c *ishell.Context) {
+			if len(c.Args) > 0 {
+				str := strings.ToLower(c.Args[0])
+				switch str {
+				case "y", "yes", "true", "t":
+					setting.SetAllowInsecure(true)
+				case "n", "no", "false", "f":
+					setting.SetAllowInsecure(false)
+				}
+			}
+			log.Info("允许不安全的连接: ", setting.AllowInsecure())
 		},
 	})
 	baseSettingCmd.AddCmd(&ishell.Cmd{

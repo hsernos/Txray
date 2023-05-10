@@ -25,6 +25,7 @@ func init() {
 	viper.SetDefault(key.Sniffing, true)
 	viper.SetDefault(key.FromLanConn, false)
 	viper.SetDefault(key.Mux, false)
+	viper.SetDefault(key.AllowInsecure, false)
 
 	viper.SetDefault(key.RoutingStrategy, "IPIfNonMatch") //路由策略
 	viper.SetDefault(key.RoutingBypass, true)             // 绕过局域网和大陆
