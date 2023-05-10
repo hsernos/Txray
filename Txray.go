@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	version = "v3.0.6"
+	version = "v3.0.7"
 	name    = "Txray"
 )
 

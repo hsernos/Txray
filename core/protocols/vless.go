@@ -71,6 +71,12 @@ func (v *VLess) GetInfo() string {
 		buf.WriteString(fmt.Sprintf("%9s: %s\n", "ServiceName", v.GetValue(field.GrpcServiceName)))
 		buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输模式", v.GetValue(field.GrpcMode)))
 	}
+	if v.GetValue(field.Security) == "reality" {
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "FingerPrint", v.GetValue(field.FingerPrint)))
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "reality公钥", v.GetValue(field.PublicKey)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "realityID", v.GetValue(field.ShortId)))
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "REALITY爬虫", v.GetValue(field.SpiderX)))
+	}
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "底层传输", v.GetValue(field.Security)))
 	buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.GetValue(field.SNI)))
 	buf.WriteString(fmt.Sprintf("%9s: %s\n", "Alpn", v.GetValue(field.Alpn)))

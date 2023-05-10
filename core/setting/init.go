@@ -31,7 +31,7 @@ func init() {
 
 	viper.SetDefault(key.DNSPort, 13500)
 	viper.SetDefault(key.DNSForeign, "1.1.1.1")
-	viper.SetDefault(key.DNSDomestic, "119.29.29.29")
+	viper.SetDefault(key.DNSDomestic, "223.6.6.6")
 	viper.SetDefault(key.DNSBackup, "114.114.114.114")
 
 	viper.SetDefault(key.TestURL, "https://www.youtube.com")
@@ -45,6 +45,4 @@ func init() {
 	if err != nil {
 		log.Error(err)
 	}
-	// 监听配置文件
-	viper.WatchConfig()
 }

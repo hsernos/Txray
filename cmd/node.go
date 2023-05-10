@@ -400,10 +400,13 @@ func InitNodeShell(shell *ishell.Shell) {
 					securityList := []string{
 						"",
 						"tls",
+						"reality",
 					}
 					security_index := c.MultiChoice(securityList, "底层传输安全（security）?")
 					security := securityList[security_index]
-					if security != "" {
+					switch security {
+					case "":
+					case "tls":
 						data["security"] = security
 						c.Print("SNI（sni）: ")
 						sni := c.ReadLine()
@@ -420,6 +423,36 @@ func InitNodeShell(shell *ishell.Shell) {
 						if alpnList[index] != "" {
 							data["alpn"] = alpnList[index]
 						}
+					case "reality":
+						data["security"] = security
+						c.Print("SNI（sni）: ")
+						sni := c.ReadLine()
+						if sni != "" {
+							data["sni"] = sni
+						}
+						fpList := []string{
+							"",
+							"chrome",
+							"firefox",
+							"safari",
+							"ios",
+							"android",
+							"edge",
+							"360",
+							"qq",
+							"random",
+							"randomized",
+						}
+						index := c.MultiChoice(fpList, "指纹（FingerPrint） ?")
+						if fpList[index] != "" {
+							data["fp"] = fpList[index]
+						}
+						c.Print("公钥（PublicKey）: ")
+						data["pbk"] = c.ReadLine()
+						c.Print("ShortId: ")
+						data["sid"] = c.ReadLine()
+						c.Print("SpiderX: ")
+						data["spx"] = c.ReadLine()
 					}
 					vmessAEAD := &protocols.VMessAEAD{
 						ID:      id,
@@ -563,10 +596,13 @@ func InitNodeShell(shell *ishell.Shell) {
 						"",
 						"tls",
 						"xtls",
+						"reality",
 					}
 					index = c.MultiChoice(securityList, "底层传输安全（security）?")
 					security := securityList[index]
-					if security != "" {
+					switch security {
+					case "":
+					case "tls":
 						data["security"] = security
 						c.Print("SNI（sni）: ")
 						sni := c.ReadLine()
@@ -583,10 +619,23 @@ func InitNodeShell(shell *ishell.Shell) {
 						if alpnList[index] != "" {
 							data["alpn"] = alpnList[index]
 						}
-					}
-					
-					switch security {
 					case "xtls":
+						data["security"] = security
+						c.Print("SNI（sni）: ")
+						sni := c.ReadLine()
+						if sni != "" {
+							data["sni"] = sni
+						}
+						alpnList := []string{
+							"",
+							"h2",
+							"http/1.1",
+							"h2,http/1.1",
+						}
+						index := c.MultiChoice(alpnList, "Alpn ?")
+						if alpnList[index] != "" {
+							data["alpn"] = alpnList[index]
+						}
 						flowList := []string{
 							"xtls-rprx-origin",
 							"xtls-rprx-origin-udp443",
@@ -598,6 +647,36 @@ func InitNodeShell(shell *ishell.Shell) {
 						index = c.MultiChoice(flowList, "流控（flow）?")
 						flow := flowList[index]
 						data["flow"] = flow
+					case "reality":
+						data["security"] = security
+						c.Print("SNI（sni）: ")
+						sni := c.ReadLine()
+						if sni != "" {
+							data["sni"] = sni
+						}
+						fpList := []string{
+							"",
+							"chrome",
+							"firefox",
+							"safari",
+							"ios",
+							"android",
+							"edge",
+							"360",
+							"qq",
+							"random",
+							"randomized",
+						}
+						index := c.MultiChoice(fpList, "指纹（FingerPrint） ?")
+						if fpList[index] != "" {
+							data["fp"] = fpList[index]
+						}
+						c.Print("公钥（PublicKey）: ")
+						data["pbk"] = c.ReadLine()
+						c.Print("ShortId: ")
+						data["sid"] = c.ReadLine()
+						c.Print("SpiderX: ")
+						data["spx"] = c.ReadLine()
 					}
 					vless := &protocols.VLess{
 						ID:      id,

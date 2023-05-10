@@ -30,7 +30,7 @@ var (
 	NetworkType     Field = NewField("type", "tcp")        // 协议的传输方式, 可选值 tcp/kcp/ws/http/quic/grpc
 	VLessEncryption       = NoneField("encryption")        // 加密, VLESS可选值 none
 	VMessEncryption       = NewField("encryption", "auto") // 加密,  VMess可选值 auto/aes-128-gcm/chacha20-poly1305/none
-	TlsSecurity           = NoneField("security")          // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls
+	TlsSecurity           = NoneField("security")          // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls/reality
 
 	// TCP
 	TCPHeaderType = NoneField("headerType")
@@ -60,4 +60,9 @@ var (
 	SNI      = NilStrField("sni")  // TLS SNI
 	Alpn     = NilStrField("alpn") // alpn 多选 h2,http/1.1
 	Flow     = NilStrField("flow") // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
+
+	FingerPrint = NewField("fp", "chrome") // TLS Client Hello 指纹
+	PublicKey = NilStrField("pbk") // REALITY的公钥
+	ShortId = NilStrField("sid") // REALITY 的 ID
+	SpiderX = NilStrField("spx") // REALITY 的爬虫
 )

@@ -541,6 +541,17 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		streamSettings["xtlsSettings"] = xtlsSettings
 		user["flow"] = vless.GetValue(field.Flow)
 		mux = false
+	case "reality":
+		realitySettings := map[string]interface{}{
+			"show": false,
+			"fingerprint": vless.GetValue(field.FingerPrint),
+            "serverName": vless.GetHostValue(field.SNI),
+            "publicKey": vless.GetValue(field.PublicKey), 
+            "shortId": vless.GetValue(field.ShortId), 
+            "spiderX": vless.GetValue(field.SpiderX), 
+		}
+		streamSettings["realitySettings"] = realitySettings
+		mux = false
 	}
 	switch network {
 	case "tcp":
@@ -647,6 +658,17 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 			tlsSettings["alpn"] = strings.Split(alpn, ",")
 		}
 		streamSettings["tlsSettings"] = tlsSettings
+	case "reality":
+		realitySettings := map[string]interface{}{
+			"show": false,
+			"fingerprint": vmess.GetValue(field.FingerPrint),
+            "serverName": vmess.GetHostValue(field.SNI),
+            "publicKey": vmess.GetValue(field.PublicKey), 
+            "shortId": vmess.GetValue(field.ShortId), 
+            "spiderX": vmess.GetValue(field.SpiderX), 
+		}
+		streamSettings["realitySettings"] = realitySettings
+		mux = false
 	}
 	switch network {
 	case "tcp":
