@@ -471,9 +471,11 @@ func socksOutbound(socks *protocols.Socks) interface{} {
 		"port":    socks.Port,
 	}
 	if socks.Username != "" || socks.Password != "" {
-		user["users"] = map[string]interface{}{
-			"user": socks.Username,
-			"pass": socks.Password,
+		user["users"] = []interface{}{
+			map[string]interface{}{
+				"user": socks.Username,
+				"pass": socks.Password,
+			},
 		}
 	}
 	return map[string]interface{}{
@@ -543,12 +545,12 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		mux = false
 	case "reality":
 		realitySettings := map[string]interface{}{
-			"show": false,
+			"show":        false,
 			"fingerprint": vless.GetValue(field.FingerPrint),
-            "serverName": vless.GetHostValue(field.SNI),
-            "publicKey": vless.GetValue(field.PublicKey), 
-            "shortId": vless.GetValue(field.ShortId), 
-            "spiderX": vless.GetValue(field.SpiderX), 
+			"serverName":  vless.GetHostValue(field.SNI),
+			"publicKey":   vless.GetValue(field.PublicKey),
+			"shortId":     vless.GetValue(field.ShortId),
+			"spiderX":     vless.GetValue(field.SpiderX),
 		}
 		streamSettings["realitySettings"] = realitySettings
 		mux = false
@@ -660,12 +662,12 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 		streamSettings["tlsSettings"] = tlsSettings
 	case "reality":
 		realitySettings := map[string]interface{}{
-			"show": false,
+			"show":        false,
 			"fingerprint": vmess.GetValue(field.FingerPrint),
-            "serverName": vmess.GetHostValue(field.SNI),
-            "publicKey": vmess.GetValue(field.PublicKey), 
-            "shortId": vmess.GetValue(field.ShortId), 
-            "spiderX": vmess.GetValue(field.SpiderX), 
+			"serverName":  vmess.GetHostValue(field.SNI),
+			"publicKey":   vmess.GetValue(field.PublicKey),
+			"shortId":     vmess.GetValue(field.ShortId),
+			"spiderX":     vmess.GetValue(field.SpiderX),
 		}
 		streamSettings["realitySettings"] = realitySettings
 		mux = false
