@@ -505,6 +505,7 @@ func InitNodeShell(shell *ishell.Shell) {
 						"h2",
 						"quic",
 						"grpc",
+						"splithttp",
 					}
 					index = c.MultiChoice(networkList, "传输协议（network）?")
 					network := networkList[index]
@@ -604,6 +605,17 @@ func InitNodeShell(shell *ishell.Shell) {
 						if mode != "gun" {
 							data["mode"] = mode
 						}
+					case "splithttp":
+						c.Print("SplitHTTP 的路径（path）: ")
+						path := c.ReadLine()
+						if path != "" {
+							data["path"] = path
+						}
+						c.Print("SplitHTTP Host（host）: ")
+						host := c.ReadLine()
+						if host != "" {
+							data["host"] = host
+						}
 					}
 
 					securityList := []string{
@@ -625,8 +637,11 @@ func InitNodeShell(shell *ishell.Shell) {
 						}
 						alpnList := []string{
 							"",
+							"h3",
 							"h2",
 							"http/1.1",
+							"h3,h2,http/1.1",
+							"h3,h2",
 							"h2,http/1.1",
 						}
 						index := c.MultiChoice(alpnList, "Alpn ?")

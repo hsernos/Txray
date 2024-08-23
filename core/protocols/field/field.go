@@ -43,6 +43,10 @@ var (
 	WsPath = NewField("path", "/")
 	WsHost = NilStrField("host")
 
+	//SplitHTTP
+	SpPath = NewField("path", "/")
+	SpHost = NilStrField("host")
+
 	// mKCP
 	MkcpHeaderType = NoneField("headerType") // mKCP 的伪装头部类型, 可选值 none/srtp/utp/wechat-video/dtls/wireguard
 	Seed           = NilStrField("seed")     // mKCP 种子
@@ -62,7 +66,7 @@ var (
 	Flow     = NilStrField("flow") // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
 
 	FingerPrint = NewField("fp", "chrome") // TLS Client Hello 指纹
-	PublicKey = NilStrField("pbk") // REALITY的公钥
-	ShortId = NilStrField("sid") // REALITY 的 ID
-	SpiderX = NilStrField("spx") // REALITY 的爬虫
+	PublicKey   = NilStrField("pbk")       // REALITY的公钥
+	ShortId     = NilStrField("sid")       // REALITY 的 ID
+	SpiderX     = NilStrField("spx")       // REALITY 的爬虫
 )
