@@ -1,3 +1,4 @@
+// log/log.go 负责日志系统的初始化、输出、级别控制等功能
 package log
 
 import (
@@ -57,64 +58,80 @@ func GetFileZapcore(absPath string, level zapcore.Level, fileMaxSize int) zapcor
 	return zapcore.NewCore(zapcore.NewJSONEncoder(encoder), syncWriter, zap.NewAtomicLevelAt(level))
 }
 
+// Init 初始化日志系统
+// 接受多个日志核心参数，支持同时输出到多个目标
 func Init(cores ...zapcore.Core) {
 	core := zapcore.NewTee(cores...)
 	zapLogger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	logger = zapLogger.Sugar()
 }
 
+// Debug 输出调试级别日志
 func Debug(args ...interface{}) {
 	logger.Debug(args...)
 }
 
+// Debugf 输出格式化的调试级别日志
 func Debugf(template string, args ...interface{}) {
 	logger.Debugf(template, args...)
 }
 
+// Info 输出一般信息级别日志
 func Info(args ...interface{}) {
 	logger.Info(args...)
 }
 
+// Infof 输出格式化的一般信息级别日志
 func Infof(template string, args ...interface{}) {
 	logger.Infof(template, args...)
 }
 
+// Warn 输出警告级别日志
 func Warn(args ...interface{}) {
 	logger.Warn(args...)
 }
 
+// Warnf 输出格式化的警告级别日志
 func Warnf(template string, args ...interface{}) {
 	logger.Warnf(template, args...)
 }
 
+// Error 输出错误级别日志
 func Error(args ...interface{}) {
 	logger.Error(args...)
 }
 
+// Errorf 输出格式化的错误级别日志
 func Errorf(template string, args ...interface{}) {
 	logger.Errorf(template, args...)
 }
 
+// DPanic 输出严重错误级别日志，并导致程序崩溃
 func DPanic(args ...interface{}) {
 	logger.DPanic(args...)
 }
 
+// DPanicf 输出格式化的严重错误级别日志，并导致程序崩溃
 func DPanicf(template string, args ...interface{}) {
 	logger.DPanicf(template, args...)
 }
 
+// Panic 输出恐慌级别日志，并导致程序崩溃
 func Panic(args ...interface{}) {
 	logger.Panic(args...)
 }
 
+// Panicf 输出格式化的恐慌级别日志，并导致程序崩溃
 func Panicf(template string, args ...interface{}) {
 	logger.Panicf(template, args...)
 }
 
+// Fatal 输出致命错误级别日志，并导致程序退出
 func Fatal(args ...interface{}) {
 	logger.Fatal(args...)
 }
 
+// Fatalf 输出格式化的致命错误级别日志，并导致程序退出
 func Fatalf(template string, args ...interface{}) {
 	logger.Fatalf(template, args...)
 }

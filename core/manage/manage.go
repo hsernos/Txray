@@ -1,3 +1,4 @@
+// core/manage/manage.go 负责节点、订阅、回收站等核心数据的统一管理
 package manage
 
 import (
@@ -9,12 +10,13 @@ import (
 	"os"
 )
 
+// Manage 结构体用于管理核心数据，包括订阅、节点、过滤器等
 type Manage struct {
-	Subs            []*sub.Subscirbe   `json:"subs"`
-	Index           int                `json:"index"`
-	NodeList        []*node.Node       `json:"nodes"`
-	Filter          []*node.NodeFilter `json:"filter"`
-	RecycleNodeList []*node.Node       `json:"-"`
+	Subs            []*sub.Subscirbe   `json:"subs"`            // 订阅列表
+	Index           int                `json:"index"`           // 当前索引
+	NodeList        []*node.Node       `json:"nodes"`           // 节点列表
+	Filter          []*node.NodeFilter `json:"filter"`          // 过滤器列表
+	RecycleNodeList []*node.Node       `json:"-"`               // 回收站节点列表
 }
 
 var Manager *Manage
@@ -37,6 +39,7 @@ func init() {
 	}
 }
 
+// NewManage 创建一个新的 Manage 实例
 func NewManage() *Manage {
 	return &Manage{
 		NodeList: make([]*node.Node, 0),
@@ -46,7 +49,7 @@ func NewManage() *Manage {
 	}
 }
 
-// Save 保存数据
+// Save 保存数据到文件
 func (m *Manage) Save() {
 	err := core.WriteJSON(m, core.DataFile)
 	if err != nil {

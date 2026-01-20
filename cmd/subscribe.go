@@ -1,20 +1,23 @@
+// cmd/subscribe.go 负责 shell 层面订阅管理相关命令的注册与实现
 package cmd
 
 import (
-	"Txray/cmd/help"
-	"Txray/core/manage"
-	"Txray/core/sub"
-	"Txray/log"
-	"github.com/abiosoft/ishell"
-	"github.com/olekukonko/tablewriter"
-	"os"
-	"strconv"
+	"Txray/cmd/help"      // 帮助文档内容
+	"Txray/core/manage"   // 节点/订阅管理器
+	"Txray/core/sub"      // 订阅相关结构体与方法
+	"Txray/log"           // 日志输出
+	"github.com/abiosoft/ishell" // shell 框架
+	"github.com/olekukonko/tablewriter" // 表格输出
+	"os"                  // 系统操作
+	"strconv"             // 字符串与数字转换
 )
 
+// InitSubscribeShell 向 shell 注册 sub 相关命令（展示、添加、删除、帮助等）
 func InitSubscribeShell(shell *ishell.Shell) {
 	subCmd := &ishell.Cmd{
 		Name: "sub",
 		Func: func(c *ishell.Context) {
+			// 展示所有订阅信息
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"索引", "别名", "订阅地址", "是否启用"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
@@ -29,7 +32,7 @@ func InitSubscribeShell(shell *ishell.Shell) {
 			table.Render()
 		},
 	}
-	// help
+	// help 子命令，输出帮助内容
 	subCmd.AddCmd(&ishell.Cmd{
 		Name:    "help",
 		Aliases: []string{"-h", "--help"},
@@ -37,10 +40,11 @@ func InitSubscribeShell(shell *ishell.Shell) {
 			c.Println(help.Sub)
 		},
 	})
-	// add
+	// add 子命令，添加订阅
 	subCmd.AddCmd(&ishell.Cmd{
 		Name: "add",
 		Func: func(c *ishell.Context) {
+			// 解析参数，支持 -r 备注
 			argMap := FlagsParse(c.Args, map[string]string{
 				"r": "remarks",
 			})
@@ -51,7 +55,7 @@ func InitSubscribeShell(shell *ishell.Shell) {
 					} else {
 						manage.Manager.AddSubscirbe(sub.NewSubscirbe(sublink, "remarks"))
 					}
-					_ = shell.Process("sub")
+					_ = shell.Process("sub") // 添加后刷新列表
 				} else {
 					log.Warn("需要输入一个订阅链接")
 				}
@@ -60,10 +64,11 @@ func InitSubscribeShell(shell *ishell.Shell) {
 			}
 		},
 	})
-	// update-node
+	// update-node 子命令，更新节点信息
 	subCmd.AddCmd(&ishell.Cmd{
 		Name: "update-node",
 		Func: func(c *ishell.Context) {
+			// 解析参数，支持 -s socks  -h http -a addr
 			argMap := FlagsParse(c.Args, map[string]string{
 				"s": "socks",
 				"h": "http",
@@ -71,6 +76,7 @@ func InitSubscribeShell(shell *ishell.Shell) {
 			})
 			opt := sub.UpdataOption{}
 			opt.Key = argMap["data"]
+			// 判断是 socks 还是 http
 			if socks, ok := argMap["socks"]; ok {
 				if v, err := strconv.Atoi(socks); err == nil {
 					if 0 < v && v <= 65535 {
@@ -86,13 +92,14 @@ func InitSubscribeShell(shell *ishell.Shell) {
 				}
 				opt.ProxyMode = sub.HTTP
 			}
+			// addr 为必填项
 			if address, ok := argMap["addr"]; ok {
 				opt.Addr = address
 			}
 			manage.Manager.UpdataNode(opt)
 		},
 	})
-	// rm
+	// rm 子命令，删除订阅
 	subCmd.AddCmd(&ishell.Cmd{
 		Name:    "rm",
 		Aliases: []string{"del"},
@@ -103,11 +110,12 @@ func InitSubscribeShell(shell *ishell.Shell) {
 			}
 		},
 	})
-	// mv
+	// mv 子命令，修改订阅信息
 	subCmd.AddCmd(&ishell.Cmd{
 		Name:    "mv",
 		Aliases: []string{"set"},
 		Func: func(c *ishell.Context) {
+			// 解析参数，支持 -r 备注 -u url
 			argMap := FlagsParse(c.Args, map[string]string{
 				"r": "remarks",
 				"u": "url",

@@ -1,3 +1,4 @@
+// core/setting/init.go 负责设置模块的初始化流程
 package setting
 
 import (
@@ -19,7 +20,9 @@ func init() {
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(core.GetConfigDir())
 	// 设置默认值
-	viper.SetDefault(key.Socks, 23333)
+	// Xray-core 一直都支持代理协议来端口转发 https://github.com/XTLS/Xray-core/pull/4968
+	viper.SetDefault(key.Mixed, 1025)
+	viper.SetDefault(key.Socks, 0)
 	viper.SetDefault(key.Http, 0)
 	viper.SetDefault(key.UDP, true)
 	viper.SetDefault(key.Sniffing, true)
@@ -41,6 +44,10 @@ func init() {
 	viper.SetDefault(key.RunBefore, "")
 
 	viper.SetDefault(key.PID, 0)
+
+	viper.SetDefault(key.VersionMin, "") // 版本最小值，默认为空（不限制）
+	viper.SetDefault(key.VersionMax, "") // 版本最大值，默认为空（不限制）
+
 	// 读取配置文件
 	err := viper.ReadInConfig()
 	if err != nil {

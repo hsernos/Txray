@@ -1,3 +1,4 @@
+// cmd/filter.go 负责 shell 层面节点过滤命令的注册与实现
 package cmd
 
 import (
@@ -10,6 +11,7 @@ import (
 	"strconv"
 )
 
+// InitFilterShell 初始化过滤器相关的命令
 func InitFilterShell(shell *ishell.Shell) {
 	filterCmd := &ishell.Cmd{
 		Name: "filter",

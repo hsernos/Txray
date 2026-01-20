@@ -1,25 +1,29 @@
+// cmd/setting.go 负责 shell 层面设置展示与管理命令注册
 package cmd
 
 import (
-	"Txray/cmd/help"
-	"Txray/core/setting"
-	"Txray/log"
-	"github.com/abiosoft/ishell"
-	"github.com/olekukonko/tablewriter"
-	"os"
-	"strconv"
-	"strings"
+	"Txray/cmd/help"     // 帮助文档内容
+	"Txray/core/setting" // 设置项
+	"Txray/log"          // 日志
+	"os"                 // 系统操作
+	"strconv"            // 字符串与数字转换
+	"strings"            // 字符串处理
+
+	"github.com/abiosoft/ishell"        // shell 框架
+	"github.com/olekukonko/tablewriter" // 表格输出
 )
 
+// InitSettingShell 注册 setting 命令及其子命令，展示所有设置项
 func InitSettingShell(shell *ishell.Shell) {
 	baseSettingCmd := &ishell.Cmd{
 		Name: "setting",
 		Func: func(c *ishell.Context) {
-			// 连接设置
+			// 展示连接基础设置
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"socks端口", "http端口", "udp转发", "流量地址监听", "允许来自局域网连接", "多路复用", "允许不安全的连接"})
+			table.SetHeader([]string{"mixed端口", "socks端口", "http端口", "udp转发", "流量地址监听", "允许来自局域网连接", "多路复用", "允许不安全的连接"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
 			data := []string{
+				strconv.Itoa(setting.Mixed()),
 				strconv.Itoa(setting.Socks()),
 				strconv.Itoa(setting.Http()),
 				strconv.FormatBool(setting.UDP()),
@@ -31,7 +35,7 @@ func InitSettingShell(shell *ishell.Shell) {
 			table.Append(data)
 			table.Render()
 
-			// DNS及路由设置
+			// DNS 及路由设置
 			table = tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"DNS端口", "国外DNS", "国内DNS", "备用国内DNS", "路由策略", "绕过局域网和大陆"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
@@ -42,6 +46,17 @@ func InitSettingShell(shell *ishell.Shell) {
 				setting.DNSBackup(),
 				setting.RoutingStrategy(),
 				strconv.FormatBool(setting.RoutingBypass()),
+			}
+			table.Append(data)
+			table.Render()
+
+			// 版本设置
+			table = tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"版本最小值", "版本最大值"})
+			table.SetAlignment(tablewriter.ALIGN_CENTER)
+			data = []string{
+				setting.VersionMin(),
+				setting.VersionMax(),
 			}
 			table.Append(data)
 			table.Render()
@@ -68,6 +83,25 @@ func InitSettingShell(shell *ishell.Shell) {
 	})
 
 	// 本地连接设置
+	baseSettingCmd.AddCmd(&ishell.Cmd{
+		Name: "mixed",
+		Func: func(c *ishell.Context) {
+			if len(c.Args) > 0 {
+				v, err := strconv.Atoi(c.Args[0])
+				if err != nil {
+					log.Warn("非法输入")
+					return
+				}
+				err = setting.SetMixed(v)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				log.Info("mixed端口: ", setting.Mixed())
+			}
+		},
+	})
+
 	baseSettingCmd.AddCmd(&ishell.Cmd{
 		Name: "socks",
 		Func: func(c *ishell.Context) {
@@ -322,6 +356,35 @@ func InitSettingShell(shell *ishell.Shell) {
 			log.Info("外网测试URL: ", setting.TestUrl())
 		},
 	})
+
+	// 版本设置
+	baseSettingCmd.AddCmd(&ishell.Cmd{
+		Name: "version.min",
+		Func: func(c *ishell.Context) {
+			if len(c.Args) > 0 {
+				err := setting.SetVersionMin(c.Args[0])
+				if err != nil {
+					log.Warn(err)
+					return
+				}
+			}
+			log.Info("版本最小值: ", setting.VersionMin())
+		},
+	})
+	baseSettingCmd.AddCmd(&ishell.Cmd{
+		Name: "version.max",
+		Func: func(c *ishell.Context) {
+			if len(c.Args) > 0 {
+				err := setting.SetVersionMax(c.Args[0])
+				if err != nil {
+					log.Warn(err)
+					return
+				}
+			}
+			log.Info("版本最大值: ", setting.VersionMax())
+		},
+	})
+
 	baseSettingCmd.AddCmd(&ishell.Cmd{
 		Name: "run_before",
 		Func: func(c *ishell.Context) {

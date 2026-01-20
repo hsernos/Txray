@@ -1,3 +1,4 @@
+// core/key.go 负责全局 key 常量的定义
 package core
 
 import (
@@ -7,6 +8,7 @@ import (
 	"strings"
 )
 
+// Range 返回一个从 srart 到 end 的整数切片，包含 srart 和 end
 func Range(srart, end int) []int {
 	result := make([]int, 0)
 	if srart <= end {
@@ -23,6 +25,11 @@ func Range(srart, end int) []int {
 	return result
 }
 
+// IndexList 根据给定的 key 和最大值 max 返回一个整数切片
+// key 可以是 "all" 或者以逗号分隔的数字和范围
+// 如果 key 是 "all"，则返回从 1 到 max 的所有整数
+// 如果 key 是数字，则返回该数字
+// 如果 key 是范围（如 "1-5"），则返回范围内的所有整数
 func IndexList(key string, max int) []int {
 	if max == 0 {
 		return []int{}
@@ -87,6 +94,7 @@ func RemoveRepByMap(slc []int) []int {
 	return result
 }
 
+// Reverse 反转整数切片
 func Reverse(slc []int) []int {
 	for i := 0; i < len(slc)/2; i++ {
 		j := len(slc) - i - 1

@@ -1,29 +1,31 @@
+// cmd/node.go 负责 shell 层面节点管理命令的注册与实现
 package cmd
 
 import (
-	"Txray/cmd/help"
-	"Txray/core"
-	"Txray/core/manage"
-	"Txray/core/node"
-	"Txray/core/protocols"
-	"Txray/core/sub"
-	"Txray/log"
-	"fmt"
-	"io/ioutil"
-	"net/url"
-	"os"
-	"strconv"
-	"strings"
+	"Txray/cmd/help"       // 帮助文档内容
+	"Txray/core"           // 索引工具
+	"Txray/core/manage"    // 节点管理器
+	"Txray/core/node"      // 节点结构体
+	"Txray/core/protocols" // 协议定义
+	"Txray/core/sub"       // 订阅相关
+	"Txray/log"            // 日志
+	"fmt"                  // 格式化输出
+	"net/url"              // URL 解析
+	"os"                   // 系统操作
+	"strconv"              // 字符串与数字转换
+	"strings"              // 字符串处理
 
-	"github.com/abiosoft/ishell"
-	"github.com/atotto/clipboard"
-	"github.com/olekukonko/tablewriter"
+	"github.com/abiosoft/ishell"        // shell 框架
+	"github.com/atotto/clipboard"       // 剪贴板操作
+	"github.com/olekukonko/tablewriter" // 表格输出
 )
 
+// InitNodeShell 注册 node 命令及其子命令，支持节点展示、添加、删除、测试、帮助等
 func InitNodeShell(shell *ishell.Shell) {
 	nodeCmd := &ishell.Cmd{
 		Name: "node",
 		Func: func(c *ishell.Context) {
+			// 解析参数，支持 -d 降序
 			argMap := FlagsParse(c.Args, map[string]string{
 				"d": "desc",
 			})
@@ -249,7 +251,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					log.Error("open ", fileArg, " : 没有这个文件")
 					return
 				}
-				data, _ := ioutil.ReadFile(fileArg)
+				data, _ := os.ReadFile(fileArg)
 				content := strings.ReplaceAll(string(data), "\r\n", "\n")
 				content = strings.ReplaceAll(content, "\r", "\n")
 				c.Println("文件内容如下：")
@@ -303,6 +305,7 @@ func InitNodeShell(shell *ishell.Shell) {
 						"tcp",
 						"kcp",
 						"ws",
+						"xhttp",
 						"h2",
 						"quic",
 						"grpc",
@@ -342,6 +345,29 @@ func InitNodeShell(shell *ishell.Shell) {
 						if host != "" {
 							data["host"] = host
 						}
+
+					case "xhttp":
+						typeList := []string{
+							"auto",
+							"packet-up",
+							"stream-up",
+							"stream-one",
+						}
+						index := c.MultiChoice(typeList, "xhttp 的模式（mode）?")
+						mode := typeList[index]
+						data["mode"] = mode
+
+						c.Print("xhttp 的路径（path）: ")
+						path := c.ReadLine()
+						if path != "" {
+							data["path"] = path
+						}
+						c.Print("xhttp Host（host）: ")
+						host := c.ReadLine()
+						if host != "" {
+							data["host"] = host
+						}
+
 					case "h2":
 						c.Print("HTTP/2 的路径（path）: ")
 						path := c.ReadLine()
@@ -415,13 +441,28 @@ func InitNodeShell(shell *ishell.Shell) {
 						}
 						alpnList := []string{
 							"",
+							"h3",
 							"h2",
 							"http/1.1",
+							"h3,h2",
 							"h2,http/1.1",
+							"h3,h2,http/1.1",
 						}
 						index := c.MultiChoice(alpnList, "Alpn ?")
 						if alpnList[index] != "" {
 							data["alpn"] = alpnList[index]
+						}
+						c.Print("EchConfigList(默认为空)：")
+						data["echConfigList"] = c.ReadLine()
+						echForceQueryList := []string{
+							"",
+							"full",
+							"half",
+							"none",
+						}
+						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
+						if echForceQueryList[index] != "" {
+							data["echForceQuery"] = echForceQueryList[index]
 						}
 					case "reality":
 						data["security"] = security
@@ -453,6 +494,8 @@ func InitNodeShell(shell *ishell.Shell) {
 						data["sid"] = c.ReadLine()
 						c.Print("SpiderX: ")
 						data["spx"] = c.ReadLine()
+						c.Print("客户端公钥可留空(mldsa65Verify): ")
+						data["pqv"] = c.ReadLine()
 					}
 					vmessAEAD := &protocols.VMessAEAD{
 						ID:      id,
@@ -505,6 +548,8 @@ func InitNodeShell(shell *ishell.Shell) {
 						"h2",
 						"quic",
 						"grpc",
+						"xhttp",
+						"splithttp",
 					}
 					index = c.MultiChoice(networkList, "传输协议（network）?")
 					network := networkList[index]
@@ -604,8 +649,49 @@ func InitNodeShell(shell *ishell.Shell) {
 						if mode != "gun" {
 							data["mode"] = mode
 						}
+					case "splithttp":
+						c.Print("SplitHTTP 的路径（path）: ")
+						path := c.ReadLine()
+						if path != "" {
+							data["path"] = path
+						}
+						c.Print("SplitHTTP Host（host）: ")
+						host := c.ReadLine()
+						if host != "" {
+							data["host"] = host
+						}
+						c.Print("SplitHTTP Mode（mode）: ")
+						mode := c.ReadLine()
+						if mode != "" {
+							data["mode"] = mode
+						}
+						c.Print("SplitHTTP 额外信息（extra）: ")
+						extra := c.ReadLine()
+						if extra != "" {
+							data["extra"] = mode
+						}
+					case "xhttp":
+						c.Print("xhttp 的路径（path）: ")
+						path := c.ReadLine()
+						if path != "" {
+							data["path"] = path
+						}
+						c.Print("xhttp Host（host）: ")
+						host := c.ReadLine()
+						if host != "" {
+							data["host"] = host
+						}
+						c.Print("xhttp Mode（mode）: ")
+						mode := c.ReadLine()
+						if mode != "" {
+							data["mode"] = mode
+						}
+						c.Print("xhttp 额外信息（extra）: ")
+						extra := c.ReadLine()
+						if extra != "" {
+							data["extra"] = mode
+						}
 					}
-
 					securityList := []string{
 						"",
 						"tls",
@@ -623,15 +709,35 @@ func InitNodeShell(shell *ishell.Shell) {
 						if sni != "" {
 							data["sni"] = sni
 						}
+						//  ALPN参数选取，用于 TLS/QUIC 等协议的握手，告诉服务器客户端支持哪些应用层协议（比如 HTTP/2、HTTP/3）。
+
 						alpnList := []string{
 							"",
+							"h3",
 							"h2",
 							"http/1.1",
+							"h3,h2",
 							"h2,http/1.1",
+							"h3,h2,http/1.1",
 						}
 						index := c.MultiChoice(alpnList, "Alpn ?")
 						if alpnList[index] != "" {
 							data["alpn"] = alpnList[index]
+						}
+						c.Print("EchConfigList(默认为空)：")
+						echConfigList := c.ReadLine()
+						if echConfigList != "" {
+							data["echConfigList"] = echConfigList
+						}
+						echForceQueryList := []string{
+							"",
+							"full",
+							"half",
+							"none",
+						}
+						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
+						if echForceQueryList[index] != "" {
+							data["echForceQuery"] = echForceQueryList[index]
 						}
 					case "xtls":
 						data["security"] = security
@@ -642,13 +748,28 @@ func InitNodeShell(shell *ishell.Shell) {
 						}
 						alpnList := []string{
 							"",
+							"h3",
 							"h2",
 							"http/1.1",
+							"h3,h2",
 							"h2,http/1.1",
+							"h3,h2,http/1.1",
 						}
 						index := c.MultiChoice(alpnList, "Alpn ?")
 						if alpnList[index] != "" {
 							data["alpn"] = alpnList[index]
+						}
+						c.Print("EchConfigList(默认为空)：")
+						data["echConfigList"] = c.ReadLine()
+						echForceQueryList := []string{
+							"",
+							"full",
+							"half",
+							"none",
+						}
+						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
+						if echForceQueryList[index] != "" {
+							data["echForceQuery"] = echForceQueryList[index]
 						}
 					case "reality":
 						data["security"] = security
@@ -680,6 +801,8 @@ func InitNodeShell(shell *ishell.Shell) {
 						data["sid"] = c.ReadLine()
 						c.Print("SpiderX: ")
 						data["spx"] = c.ReadLine()
+						c.Print("MLDSA65验证,可留空（Mldsa65Verify）: ")
+						data["pqv"] = c.ReadLine()
 					}
 					vless := &protocols.VLess{
 						ID:      id,
@@ -714,7 +837,7 @@ func InitNodeShell(shell *ishell.Shell) {
 					vmess.Id = c.ReadLine()
 					c.Print("额外ID（alterID）: ")
 					alterID, err := strconv.Atoi(c.ReadLine())
-					if err != nil  {
+					if err != nil {
 						log.Warn("额外ID为数字")
 						return
 					}
@@ -776,7 +899,7 @@ func InitNodeShell(shell *ishell.Shell) {
 							c.Print("QUIC的加密key（path）: ")
 							vmess.Path = c.ReadLine()
 						}
-						
+
 					case "ws", "h2":
 						c.Print("Host（host）: ")
 						vmess.Host = c.ReadLine()
@@ -803,12 +926,25 @@ func InitNodeShell(shell *ishell.Shell) {
 						vmess.Sni = c.ReadLine()
 						alpnList := []string{
 							"",
+							"h3",
 							"h2",
 							"http/1.1",
+							"h3,h2",
 							"h2,http/1.1",
+							"h3,h2,http/1.1",
 						}
 						index := c.MultiChoice(alpnList, "Alpn ?")
 						vmess.Alpn = alpnList[index]
+						c.Print("EchConfigList(默认为空)：")
+						vmess.EchConfigList = c.ReadLine()
+						echForceQueryList := []string{
+							"",
+							"full",
+							"half",
+							"none",
+						}						
+						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
+						vmess.EchForceQuery = echForceQueryList[index]
 					}
 					c.Println("========================")
 					if manage.Manager.AddNode(node.NewNodeByData(vmess)) {
@@ -870,6 +1006,16 @@ func InitNodeShell(shell *ishell.Shell) {
 					password := c.ReadLine()
 					c.Print("SNI（sni）（可选）: ")
 					sni := c.ReadLine()
+					c.Print("EchConfigList(默认为空)：")
+					echConfigList := c.ReadLine()
+					echForceQueryList := []string{
+						"",
+						"full",
+						"half",
+						"none",
+					}
+					index := c.MultiChoice(echForceQueryList, "ECH强制查询（echForceQuery）?")
+					echForceQuery := echForceQueryList[index]
 					c.Println("========================")
 					trojan := &protocols.Trojan{
 						Remarks:  remarks,
@@ -877,10 +1023,18 @@ func InitNodeShell(shell *ishell.Shell) {
 						Address:  addr,
 						Port:     port,
 					}
+					values := url.Values{}
 					if sni != "" {
-						trojan.Values = url.Values{
-							"sni": []string{sni},
-						}
+						values["sni"] = []string{sni}
+					}
+					if echConfigList != "" {
+						values["echConfigList"] = []string{echConfigList}
+					}
+					if echForceQuery != "" {
+						values["echForceQuery"] = []string{echForceQuery}
+					}
+					if len(values) > 0 {
+						trojan.Values = values
 					}
 					if manage.Manager.AddNode(node.NewNodeByData(trojan)) {
 						c.Println("添加成功")

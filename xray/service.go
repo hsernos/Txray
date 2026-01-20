@@ -1,3 +1,4 @@
+// xray/service.go 负责 xray 核心服务的启动、停止、状态管理等功能
 package xray
 
 import (
@@ -17,6 +18,8 @@ import (
 
 var Xray *exec.Cmd
 
+// Start 根据用户选择的节点信息，启动相应的 xray 服务
+// key : 用户的节点选择的 key
 func Start(key string) {
 	testUrl := setting.TestUrl()
 	testTimeout := setting.TestTimeout()
@@ -31,12 +34,20 @@ func Start(key string) {
 		manager.Save()
 		exe := run(node.Protocol)
 		if exe {
-			if setting.Http() == 0 {
-				log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
+			if setting.Socks() == 0 {
+				if setting.Http() == 0 {
+					log.Infof("启动成功, 监听mixed端口: %d, 所选节点: %d", setting.Mixed(), manager.SelectedIndex())
+				} else {
+					log.Infof("启动成功, 监听mixed/http端口: %d/%d, 所选节点: %d", setting.Mixed(), setting.Http(), manager.SelectedIndex())
+				}
 			} else {
-				log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d", setting.Socks(), setting.Http(), manager.SelectedIndex())
+				if setting.Http() == 0 {
+					log.Infof("启动成功, 监听mixed/socks端口: %d/%d, 所选节点: %d", setting.Mixed(), setting.Socks(), manager.SelectedIndex())
+				} else {
+					log.Infof("启动成功, 监听mixed/socks/http端口: %d/%d/%d, 所选节点: %d", setting.Mixed(), setting.Socks(), setting.Http(), manager.SelectedIndex())
+				}
 			}
-			result, status := TestNode(testUrl, setting.Socks(), testTimeout)
+			result, status := TestNode(testUrl, setting.Mixed(), testTimeout)
 			log.Infof("%6s [ %s ] 延迟: %dms", status, testUrl, result)
 		}
 	} else {
@@ -46,9 +57,9 @@ func Start(key string) {
 			node := manager.GetNode(index)
 			exe := run(node.Protocol)
 			if exe {
-				result, status := TestNode(testUrl, setting.Socks(), testTimeout)
+				result, status := TestNode(testUrl, setting.Mixed(), testTimeout)
 				log.Infof("%6s [ %s ] 节点: %d, 延迟: %dms", status, testUrl, index, result)
-				if result > 0 && result <= setting.TestMinTime(){
+				if result > 0 && result <= setting.TestMinTime() {
 					i = index
 					min = result
 					break
@@ -68,10 +79,18 @@ func Start(key string) {
 			node := manager.GetNode(i)
 			exe := run(node.Protocol)
 			if exe {
-				if setting.Http() == 0 {
-					log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
+				if setting.Socks() == 0 {
+					if setting.Http() == 0 {
+						log.Infof("启动成功, 监听mixed端口: %d, 所选节点: %d", setting.Mixed(), manager.SelectedIndex())
+					} else {
+						log.Infof("启动成功, 监听mixed/http端口: %d/%d, 所选节点: %d", setting.Mixed(), setting.Http(), manager.SelectedIndex())
+					}
 				} else {
-					log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d", setting.Socks(), setting.Http(), manager.SelectedIndex())
+					if setting.Http() == 0 {
+						log.Infof("启动成功, 监听mixed/socks端口: %d/%d, 所选节点: %d", setting.Mixed(), setting.Socks(), manager.SelectedIndex())
+					} else {
+						log.Infof("启动成功, 监听mixed/socks/http端口: %d/%d/%d, 所选节点: %d", setting.Mixed(), setting.Socks(), setting.Http(), manager.SelectedIndex())
+					}
 				}
 			} else {
 				log.Error("启动失败")
@@ -83,6 +102,8 @@ func Start(key string) {
 	}
 }
 
+// run 根据节点协议启动相应的 xray 子进程
+// node : 节点的协议配置
 func run(node protocols.Protocol) bool {
 	Stop()
 	switch node.GetProtocolMode() {
@@ -129,8 +150,8 @@ func Stop() {
 	}
 	// 日志文件过大清除
 	file, _ := os.Stat(core.LogFile)
-	if file != nil  {
-		fileSize := float64(file.Size())/ (1 << 20)
+	if file != nil {
+		fileSize := float64(file.Size()) / (1 << 20)
 		if fileSize > 5 {
 			os.Remove(core.LogFile)
 		}

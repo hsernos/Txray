@@ -1,26 +1,28 @@
+// xray/check.go 负责检测 xray 核心程序及其资源文件的存在性，保证运行环境完整
 package xray
 
 import (
-	"Txray/log"
-	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
+	"Txray/log"           // 日志输出
+	"fmt"                 // 格式化输出
+	"os"                  // 系统操作
+	"path/filepath"       // 路径处理
+	"runtime"             // 运行时信息
+	"strings"             // 字符串处理
 )
 
-const CoreName string = "xray"
+const CoreName string = "xray" // xray 核心程序名
 
-var XrayPath = ""
+var XrayPath = "" // xray 程序绝对路径
 
+// init 自动执行，检测 xray 程序和资源文件
 func init() {
-	checkXrayFile()
-	checkResource()
+	checkXrayFile()   // 检查 xray 可执行文件
+	checkResource()   // 检查 geoip/geosite 数据文件
 }
 
-// 检查xray程序
+// checkXrayFile 检查 xray 核心程序是否存在，依次检测环境变量、当前目录、PATH 路径
 func checkXrayFile() {
-	// 1.检查环境变量CORE_HOME目录下
+	// 1. 检查环境变量 CORE_HOME 目录下
 	xrayPath := os.Getenv("CORE_HOME")
 	if xrayPath != "" {
 		if IsExistExe(xrayPath, CoreName) {
@@ -28,26 +30,26 @@ func checkXrayFile() {
 			return
 		}
 	}
-	// 2.检查当前可执行文件目录下(递归检查)
+	// 2. 检查当前可执行文件目录下（递归查找）
 	path, _ := os.Executable()
 	files, _ := FindFileByName(filepath.Dir(path), "xray", ".exe")
 	if len(files) != 0 {
 		XrayPath = files[0]
 		return
 	}
-	// 3.检查PATH环境变量
+	// 3. 检查 PATH 环境变量
 	if temp := getExePath(CoreName); temp != "" {
 		XrayPath = temp
 		return
 	}
-	// 提示信息
+	// 未找到则输出错误提示并退出
 	log.Error("在 ", filepath.Dir(path), " 下没有找到xray程序")
 	log.Error("请在 https://github.com/XTLS/Xray-core/releases 下载最新版本")
 	log.Error("并将解压后的文件夹或所有文件移动到 ", filepath.Dir(path), " 下")
 	os.Exit(0)
 }
 
-// 检查xray程序的资源文件
+// checkResource 检查 xray 程序所需的 geoip.dat/geosite.dat 资源文件
 func checkResource() {
 	var baseDir []string = make([]string, 0)
 	baseDir = append(baseDir, os.Getenv("XRAY_LOCATION_ASSET"))

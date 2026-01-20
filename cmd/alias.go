@@ -1,3 +1,4 @@
+// cmd/alias.go 负责 shell 层面别名命令的注册与实现
 package cmd
 
 import (
@@ -12,6 +13,9 @@ import (
 
 var names = make(map[string]int)
 
+// InitAliasShell 初始化别名命令
+// 将内置命令加载到 names 中，
+// 并读取已设置的别名，注册 alias 命令及其子命令
 func InitAliasShell(shell *ishell.Shell) {
 	// 读取内置命令
 	for _, cmd := range shell.Cmds() {
@@ -74,12 +78,16 @@ func InitAliasShell(shell *ishell.Shell) {
 	shell.AddCmd(aliasCmd)
 }
 
+// LoadAlias 加载所有别名
+// 遍历设置的别名列表，为每个别名调用 AddAliasShell 函数
 func LoadAlias(shell *ishell.Shell) {
 	for _, a := range setting.AliasList() {
 		AddAliasShell(shell, a)
 	}
 }
 
+// AddAliasShell 为单个别名注册 shell 命令
+// 如果别名不为 nil 且不与内置命令冲突，则为该别名注册一个新的 shell 命令
 func AddAliasShell(shell *ishell.Shell, a *setting.Alias) {
 	if a != nil {
 		// 防止覆盖内置命令
