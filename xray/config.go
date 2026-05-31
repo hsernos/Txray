@@ -285,6 +285,9 @@ func outboundConfig(n protocols.Protocol) interface{} {
 	case protocols.ModeVMessAEAD:
 		v := n.(*protocols.VMessAEAD)
 		out = append(out, vMessAEADOutbound(v))
+	case protocols.ModeHysteria2:
+		v := n.(*protocols.Hysteria2)
+		out = append(out, hysteria2Outbound(v))
 	}
 	out = append(out, map[string]interface{}{
 		"tag":      "direct",
@@ -307,7 +310,7 @@ func outboundConfig(n protocols.Protocol) interface{} {
 	return out
 }
 
-//Shadowsocks
+// Shadowsocks
 func shadowsocksOutbound(ss *protocols.ShadowSocks) interface{} {
 	return map[string]interface{}{
 		"tag":      "proxy",
@@ -358,85 +361,69 @@ func trojanOutbound(trojan *protocols.Trojan) interface{} {
 	}
 }
 
+// socks
+func socksOutbound(socks *protocols.Socks) interface{} {
+	user := map[string]interface{}{
+		"address": socks.Address,
+		"port":    socks.Port,
+	}
+	if socks.Username != "" || socks.Password != "" {
+		user["users"] = []interface{}{
+			map[string]interface{}{
+				"user": socks.Username,
+				"pass": socks.Password,
+			},
+		}
+	}
+	return map[string]interface{}{
+		"tag":      "proxy",
+		"protocol": "socks",
+		"settings": map[string]interface{}{
+			"servers": []interface{}{
+				user,
+			},
+		},
+		"streamSettings": map[string]interface{}{
+			"network": "raw",
+		},
+		"mux": map[string]interface{}{
+			"enabled": false,
+		},
+	}
+}
+
 // VMess
 func vMessOutbound(vmess *protocols.VMess) interface{} {
 	mux := setting.Mux()
+	network := vmess.Net
+	switch network {
+	case "tcp":
+		network = "raw"
+	case "kcp":
+		network = "mkcp"
+	}
 	streamSettings := map[string]interface{}{
-		"network":  vmess.Net,
+		"network":  network,
 		"security": vmess.Tls,
 	}
 	if vmess.Tls == "tls" {
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
-		if vmess.Sni != "" {
-			tlsSettings["serverName"] = vmess.Sni
-		}
-		if vmess.Alpn != "" {
-			tlsSettings["alpn"] = strings.Split(vmess.Alpn, ",")
-		}
-		streamSettings["tlsSettings"] = tlsSettings
+		streamSettings["tlsSettings"] = genTlsSetting(vmess.Sni, vmess.Alpn, "", setting.AllowInsecure())
 	}
-	switch vmess.Net {
-	case "tcp":
-		streamSettings["tcpSettings"] = map[string]interface{}{
-			"header": map[string]interface{}{
-				"type": vmess.Type,
-			},
-		}
-	case "kcp":
-		kcpSettings := map[string]interface{}{
-			"mtu":              1350,
-			"tti":              50,
-			"uplinkCapacity":   12,
-			"downlinkCapacity": 100,
-			"congestion":       false,
-			"readBufferSize":   2,
-			"writeBufferSize":  2,
-			"header": map[string]interface{}{
-				"type": vmess.Type,
-			},
-		}
-		if vmess.Type != "none" {
-			kcpSettings["seed"] = vmess.Path
-		}
-		streamSettings["kcpSettings"] = kcpSettings
+	switch network {
+	case "tcp", "raw":
+		streamSettings["rawSettings"] = genRawSetting(vmess.Type, vmess.Host, vmess.Path)
+	case "xhttp":
+		streamSettings["xhttpSettings"] = genXhttpSetting(vmess.Host, vmess.Path, vmess.Type, "")
+	case "kcp", "mkcp":
+		streamSettings["kcpSettings"] = genMkcpSetting("1350")
 	case "ws":
-		streamSettings["wsSettings"] = map[string]interface{}{
-			"path": vmess.Path,
-			"headers": map[string]interface{}{
-				"Host": vmess.Host,
-			},
-		}
+		streamSettings["wsSettings"] = genWsSetting(vmess.Host, vmess.Path)
 	case "h2":
-		mux = false
-		host := make([]string, 0)
-		for _, line := range strings.Split(vmess.Host, ",") {
-			line = strings.TrimSpace(line)
-			if line != "" {
-				host = append(host, line)
-			}
-		}
-		streamSettings["httpSettings"] = map[string]interface{}{
-			"path": vmess.Path,
-			"host": host,
-		}
-	case "quic":
-		quicSettings := map[string]interface{}{
-			"security": vmess.Host,
-			"header": map[string]interface{}{
-				"type": vmess.Type,
-			},
-		}
-		if vmess.Host != "none" {
-			quicSettings["key"] = vmess.Path
-		}
-		streamSettings["quicSettings"] = quicSettings
+		streamSettings["httpSettings"] = genHttpSetting(vmess.Host, vmess.Path)
 	case "grpc":
-		streamSettings["grpcSettings"] = map[string]interface{}{
-			"serviceName": vmess.Path,
-			"multiMode":   vmess.Type == "multi",
-		}
+		streamSettings["grpcSettings"] = genGrpcSetting(vmess.Type, vmess.Path, vmess.Host)
+	case "httpupgrade":
+		streamSettings["httpupgradeSettings"] = genHttpupgradeSetting(vmess.Host, vmess.Path)
 	}
 	return map[string]interface{}{
 		"tag":      "proxy",
@@ -464,52 +451,16 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 	}
 }
 
-// socks
-func socksOutbound(socks *protocols.Socks) interface{} {
-	user := map[string]interface{}{
-		"address": socks.Address,
-		"port":    socks.Port,
-	}
-	if socks.Username != "" || socks.Password != "" {
-		user["users"] = []interface{}{
-			map[string]interface{}{
-				"user": socks.Username,
-				"pass": socks.Password,
-			},
-		}
-	}
-	return map[string]interface{}{
-		"tag":      "proxy",
-		"protocol": "socks",
-		"settings": map[string]interface{}{
-			"servers": []interface{}{
-				user,
-			},
-		},
-		"streamSettings": map[string]interface{}{
-			"network": "tcp",
-			"tcpSettings": map[string]interface{}{
-				"header": map[string]interface{}{
-					"type": "none",
-				},
-			},
-		},
-		"mux": map[string]interface{}{
-			"enabled": false,
-		},
-	}
-}
-
-// VLESS
-func vLessOutbound(vless *protocols.VLess) interface{} {
+// VMessAEAD
+func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 	mux := setting.Mux()
-	security := vless.GetValue(field.Security)
-	network := vless.GetValue(field.NetworkType)
-	user := map[string]interface{}{
-		"id":         vless.ID,
-		"flow":       vless.GetValue(field.Flow),
-		"encryption": vless.GetValue(field.VLessEncryption),
-		"level":      0,
+	security := vmess.GetValue(field.TlsSecurity)
+	network := vmess.GetValue(field.NetworkType)
+	switch network {
+	case "tcp":
+		network = "raw"
+	case "kcp":
+		network = "mkcp"
 	}
 	streamSettings := map[string]interface{}{
 		"network":  network,
@@ -517,118 +468,67 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	}
 	switch security {
 	case "tls":
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
-		sni := vless.GetHostValue(field.SNI)
-		alpn := vless.GetValue(field.Alpn)
-		if sni != "" {
-			tlsSettings["serverName"] = sni
-		}
-		if alpn != "" {
-			tlsSettings["alpn"] = strings.Split(alpn, ",")
-		}
-		streamSettings["tlsSettings"] = tlsSettings
-	case "xtls":
-		xtlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
-		sni := vless.GetHostValue(field.SNI)
-		alpn := vless.GetValue(field.Alpn)
-		if sni != "" {
-			xtlsSettings["serverName"] = sni
-		}
-		if alpn != "" {
-			xtlsSettings["alpn"] = strings.Split(alpn, ",")
-		}
-		streamSettings["xtlsSettings"] = xtlsSettings
-		mux = false
+		streamSettings["tlsSettings"] = genTlsSetting(
+			vmess.GetHostValue(field.SNI),
+			vmess.GetValue(field.Alpn),
+			vmess.GetValue(field.FingerPrint),
+			setting.AllowInsecure(),
+		)
 	case "reality":
-		realitySettings := map[string]interface{}{
-			"show":        false,
-			"fingerprint": vless.GetValue(field.FingerPrint),
-			"serverName":  vless.GetHostValue(field.SNI),
-			"publicKey":   vless.GetValue(field.PublicKey),
-			"shortId":     vless.GetValue(field.ShortId),
-			"spiderX":     vless.GetValue(field.SpiderX),
-		}
-		streamSettings["realitySettings"] = realitySettings
+		streamSettings["realitySettings"] = genRealitySetting(
+			vmess.GetHostValue(field.SNI),
+			vmess.GetValue(field.FingerPrint),
+			vmess.GetValue(field.PublicKey),
+			vmess.GetValue(field.ShortId),
+			vmess.GetValue(field.SpiderX),
+			vmess.GetValue(field.Mldsa65Verify),
+		)
 		mux = false
 	}
 	switch network {
-	case "tcp":
-		streamSettings["tcpSettings"] = map[string]interface{}{
-			"header": map[string]interface{}{
-				"type": vless.GetValue(field.TCPHeaderType),
-			},
-		}
-	case "kcp":
-		kcpSettings := map[string]interface{}{
-			"mtu":              1350,
-			"tti":              50,
-			"uplinkCapacity":   12,
-			"downlinkCapacity": 100,
-			"congestion":       false,
-			"readBufferSize":   2,
-			"writeBufferSize":  2,
-			"header": map[string]interface{}{
-				"type": vless.GetValue(field.MkcpHeaderType),
-			},
-		}
-		if vless.Has(field.Seed.Key) {
-			kcpSettings["seed"] = vless.GetValue(field.Seed)
-		}
-		streamSettings["kcpSettings"] = kcpSettings
-	case "h2":
-		mux = false
-		host := make([]string, 0)
-		for _, line := range strings.Split(vless.GetHostValue(field.H2Host), ",") {
-			line = strings.TrimSpace(line)
-			if line != "" {
-				host = append(host, line)
-			}
-		}
-		streamSettings["httpSettings"] = map[string]interface{}{
-			"path": vless.GetValue(field.H2Path),
-			"host": host,
-		}
-	case "ws":
-		streamSettings["wsSettings"] = map[string]interface{}{
-			"path": vless.GetValue(field.WsPath),
-			"headers": map[string]interface{}{
-				"Host": vless.GetValue(field.WsHost),
-			},
-		}
-	case "quic":
-		quicSettings := map[string]interface{}{
-			"security": vless.GetValue(field.QuicSecurity),
-			"header": map[string]interface{}{
-				"type": vless.GetValue(field.QuicHeaderType),
-			},
-		}
-		if vless.GetValue(field.QuicSecurity) != "none" {
-			quicSettings["key"] = vless.GetValue(field.QuicKey)
-		}
-		streamSettings["quicSettings"] = quicSettings
+	case "tcp", "raw":
+		streamSettings["rawSettings"] = genRawSetting(
+			vmess.GetValue(field.RawHeaderType),
+			vmess.GetValue(field.RawHost),
+			vmess.GetValue(field.RawPath),
+		)
+	case "xhttp":
+		streamSettings["xhttpSettings"] = genXhttpSetting(
+			vmess.GetHostValue(field.XhttpHost),
+			vmess.GetValue(field.XhttpPath),
+			vmess.GetValue(field.XhttpMode),
+			vmess.GetValue(field.XhttpExtra),
+		)
+	case "kcp", "mkcp":
+		streamSettings["kcpSettings"] = genMkcpSetting(vmess.GetValue(field.KcpMtu))
 	case "grpc":
-		streamSettings["grpcSettings"] = map[string]interface{}{
-			"serviceName": vless.GetValue(field.GrpcServiceName),
-			"multiMode":   vless.GetValue(field.GrpcMode) == "multi",
-		}
+		streamSettings["grpcSettings"] = genGrpcSetting(
+			vmess.GetValue(field.GrpcMode),
+			vmess.GetValue(field.GrpcServiceName),
+			vmess.GetValue(field.GrpcAuthority),
+		)
+	case "ws":
+		streamSettings["wsSettings"] = genWsSetting(vmess.GetValue(field.WsHost), vmess.GetValue(field.WsPath))
+	case "h2":
+		streamSettings["httpSettings"] = genHttpSetting(vmess.GetValue(field.H2Host), vmess.GetValue(field.H2Path))
+	case "httpupgrade":
+		streamSettings["httpupgradeSettings"] = genHttpupgradeSetting(
+			vmess.GetValue(field.HttpUpgradeHost),
+			vmess.GetValue(field.HttpUpgradePath),
+		)
+	}
+	if vmess.GetValue(field.Finalmask) != "" {
+		streamSettings["finalmask"] = genFinalmask(vmess.GetValue(field.Finalmask))
 	}
 	return map[string]interface{}{
 		"tag":      "proxy",
-		"protocol": "vless",
+		"protocol": "vmess",
 		"settings": map[string]interface{}{
-			"vnext": []interface{}{
-				map[string]interface{}{
-					"address": vless.Address,
-					"port":    vless.Port,
-					"users": []interface{}{
-						user,
-					},
-				},
-			},
+			"address":  vmess.Address,
+			"port":     vmess.Port,
+			"id":       vmess.ID,
+			"security": vmess.GetValue(field.VMessEncryption),
+			"level":    0,
 		},
 		"streamSettings": streamSettings,
 		"mux": map[string]interface{}{
@@ -637,119 +537,140 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	}
 }
 
-// VMessAEAD
-func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
+// VLESS
+func vLessOutbound(vless *protocols.VLess) interface{} {
 	mux := setting.Mux()
-	security := vmess.GetValue(field.Security)
-	network := vmess.GetValue(field.NetworkType)
+	security := vless.GetValue(field.TlsSecurity)
+	network := vless.GetValue(field.NetworkType)
+	switch network {
+	case "tcp":
+		network = "raw"
+	case "kcp":
+		network = "mkcp"
+	}
 	streamSettings := map[string]interface{}{
 		"network":  network,
 		"security": security,
 	}
 	switch security {
 	case "tls":
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
-		sni := vmess.GetHostValue(field.SNI)
-		alpn := vmess.GetValue(field.Alpn)
-		if sni != "" {
-			tlsSettings["serverName"] = sni
-		}
-		if alpn != "" {
-			tlsSettings["alpn"] = strings.Split(alpn, ",")
-		}
-		streamSettings["tlsSettings"] = tlsSettings
+		streamSettings["tlsSettings"] = genTlsSetting(
+			vless.GetHostValue(field.SNI),
+			vless.GetValue(field.Alpn),
+			vless.GetValue(field.FingerPrint),
+			setting.AllowInsecure(),
+		)
 	case "reality":
-		realitySettings := map[string]interface{}{
-			"show":        false,
-			"fingerprint": vmess.GetValue(field.FingerPrint),
-			"serverName":  vmess.GetHostValue(field.SNI),
-			"publicKey":   vmess.GetValue(field.PublicKey),
-			"shortId":     vmess.GetValue(field.ShortId),
-			"spiderX":     vmess.GetValue(field.SpiderX),
-		}
-		streamSettings["realitySettings"] = realitySettings
+		streamSettings["realitySettings"] = genRealitySetting(
+			vless.GetHostValue(field.SNI),
+			vless.GetValue(field.FingerPrint),
+			vless.GetValue(field.PublicKey),
+			vless.GetValue(field.ShortId),
+			vless.GetValue(field.SpiderX),
+			vless.GetValue(field.Mldsa65Verify),
+		)
 		mux = false
 	}
 	switch network {
-	case "tcp":
-		streamSettings["tcpSettings"] = map[string]interface{}{
-			"header": map[string]interface{}{
-				"type": vmess.GetValue(field.TCPHeaderType),
-			},
-		}
-	case "kcp":
-		kcpSettings := map[string]interface{}{
-			"mtu":              1350,
-			"tti":              50,
-			"uplinkCapacity":   12,
-			"downlinkCapacity": 100,
-			"congestion":       false,
-			"readBufferSize":   2,
-			"writeBufferSize":  2,
-			"header": map[string]interface{}{
-				"type": vmess.GetValue(field.MkcpHeaderType),
-			},
-		}
-		if vmess.Has(field.Seed.Key) {
-			kcpSettings["seed"] = vmess.GetValue(field.Seed)
-		}
-		streamSettings["kcpSettings"] = kcpSettings
-	case "h2":
-		mux = false
-		host := make([]string, 0)
-		for _, line := range strings.Split(vmess.GetHostValue(field.H2Host), ",") {
-			line = strings.TrimSpace(line)
-			if line != "" {
-				host = append(host, line)
-			}
-		}
-		streamSettings["httpSettings"] = map[string]interface{}{
-			"path": vmess.GetValue(field.H2Path),
-			"host": host,
-		}
-	case "ws":
-		streamSettings["wsSettings"] = map[string]interface{}{
-			"path": vmess.GetValue(field.WsPath),
-			"headers": map[string]interface{}{
-				"Host": vmess.GetValue(field.WsHost),
-			},
-		}
-	case "quic":
-		quicSettings := map[string]interface{}{
-			"security": vmess.GetValue(field.QuicSecurity),
-			"header": map[string]interface{}{
-				"type": vmess.GetValue(field.QuicHeaderType),
-			},
-		}
-		if vmess.GetValue(field.QuicSecurity) != "none" {
-			quicSettings["key"] = vmess.GetValue(field.QuicKey)
-		}
-		streamSettings["quicSettings"] = quicSettings
+	case "tcp", "raw":
+		streamSettings["rawSettings"] = genRawSetting(
+			vless.GetValue(field.RawHeaderType),
+			vless.GetValue(field.RawHost),
+			vless.GetValue(field.RawPath),
+		)
+	case "xhttp":
+		streamSettings["xhttpSettings"] = genXhttpSetting(
+			vless.GetHostValue(field.XhttpHost),
+			vless.GetValue(field.XhttpPath),
+			vless.GetValue(field.XhttpMode),
+			vless.GetValue(field.XhttpExtra),
+		)
+	case "kcp", "mkcp":
+		streamSettings["kcpSettings"] = genMkcpSetting(vless.GetValue(field.KcpMtu))
 	case "grpc":
-		streamSettings["grpcSettings"] = map[string]interface{}{
-			"serviceName": vmess.GetValue(field.GrpcServiceName),
-			"multiMode":   vmess.GetValue(field.GrpcMode) == "multi",
-		}
+		streamSettings["grpcSettings"] = genGrpcSetting(
+			vless.GetValue(field.GrpcMode),
+			vless.GetValue(field.GrpcServiceName),
+			vless.GetValue(field.GrpcAuthority),
+		)
+	case "ws":
+		streamSettings["wsSettings"] = genWsSetting(vless.GetValue(field.WsHost), vless.GetValue(field.WsPath))
+	case "h2":
+		streamSettings["httpSettings"] = genHttpSetting(vless.GetValue(field.H2Host), vless.GetValue(field.H2Path))
+	case "httpupgrade":
+		streamSettings["httpupgradeSettings"] = genHttpupgradeSetting(
+			vless.GetValue(field.HttpUpgradeHost),
+			vless.GetValue(field.HttpUpgradePath),
+		)
+	}
+	if vless.GetValue(field.Finalmask) != "" {
+		streamSettings["finalmask"] = genFinalmask(vless.GetValue(field.Finalmask))
 	}
 	return map[string]interface{}{
 		"tag":      "proxy",
-		"protocol": "vmess",
+		"protocol": "vless",
 		"settings": map[string]interface{}{
-			"vnext": []interface{}{
-				map[string]interface{}{
-					"address": vmess.Address,
-					"port":    vmess.Port,
-					"users": []interface{}{
-						map[string]interface{}{
-							"id":       vmess.ID,
-							"security": vmess.GetValue(field.VMessEncryption),
-							"level":    0,
-						},
-					},
+			"address":    vless.Address,
+			"port":       vless.Port,
+			"id":         vless.ID,
+			"flow":       vless.GetValue(field.Flow),
+			"encryption": vless.GetValue(field.VLessEncryption),
+			"level":      0,
+		},
+		"streamSettings": streamSettings,
+		"mux": map[string]interface{}{
+			"enabled": mux,
+		},
+	}
+}
+
+// Hysteria2
+func hysteria2Outbound(hysteria2 *protocols.Hysteria2) interface{} {
+	mux := setting.Mux()
+	network := "hysteria"
+	security := "tls"
+	streamSettings := map[string]interface{}{
+		"network":  network,
+		"security": security,
+	}
+	switch security {
+	case "tls":
+		streamSettings["tlsSettings"] = genTlsSetting(
+			hysteria2.GetHostValue(field.SNI),
+			hysteria2.GetValue(field.Alpn),
+			hysteria2.GetValue(field.FingerPrint),
+			setting.AllowInsecure(),
+		)
+	}
+	// hysteriaSettings
+	streamSettings["hysteriaSettings"] = map[string]interface{}{
+		"version": 2,
+		"auth":    hysteria2.Password,
+	}
+	if hysteria2.GetValue(field.Mport) != "" {
+		// finalmask
+		streamSettings["finalmask"] = map[string]interface{}{
+			"quicParams": map[string]interface{}{
+				"congestion": "brutal",
+				"brutalUp":   "100mbps",
+				"brutalDown": "100mbps",
+				"udpHop": map[string]interface{}{
+					"ports":    hysteria2.GetValue(field.Mport),
+					"interval": strings.TrimSuffix(hysteria2.GetValue(field.Hopinterval), "s"),
 				},
 			},
+		}
+	}
+	if hysteria2.GetValue(field.Finalmask) != "" {
+		streamSettings["finalmask"] = genFinalmask(hysteria2.GetValue(field.Finalmask))
+	}
+	return map[string]interface{}{
+		"tag":      "proxy",
+		"protocol": "hysteria",
+		"settings": map[string]interface{}{
+			"address": hysteria2.Address,
+			"port":    hysteria2.Port,
+			"version": 2,
 		},
 		"streamSettings": streamSettings,
 		"mux": map[string]interface{}{

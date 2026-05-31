@@ -2,6 +2,7 @@ package xray
 
 import (
 	"Txray/log"
+	"Txray/core"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -28,14 +29,20 @@ func checkXrayFile() {
 			return
 		}
 	}
-	// 2.检查当前可执行文件目录下(递归检查)
-	path, _ := os.Executable()
-	files, _ := FindFileByName(filepath.Dir(path), "xray", ".exe")
+	// 2.检查当前配置目录下(递归检查)
+	files, _ := FindFileByName(filepath.Dir(core.GetConfigDir()), "xray", ".exe")
 	if len(files) != 0 {
 		XrayPath = files[0]
 		return
 	}
-	// 3.检查PATH环境变量
+	// 3.检查当前可执行文件目录下(递归检查)
+	path, _ := os.Executable()
+	files, _ = FindFileByName(filepath.Dir(path), "xray", ".exe")
+	if len(files) != 0 {
+		XrayPath = files[0]
+		return
+	}
+	// 4.检查PATH环境变量
 	if temp := getExePath(CoreName); temp != "" {
 		XrayPath = temp
 		return

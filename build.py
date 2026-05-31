@@ -38,8 +38,7 @@ def build(goos, goarch, path='Txray.go', cgo=0):
     os.environ["CGO_ENABLED"] = str(cgo)
     os.environ["GOOS"] = goos
     os.environ["GOARCH"] = goarch
-    cmd = 'go build -o {} {} '.format("build/" +
-                                      "-".join([Name, syst, arch]) + "/" + Name + e, path)
+    cmd = 'go build -o {} {} '.format("build/" + "-".join([Name, syst, arch]) + "/" + Name + e, path)
     os.system(cmd)
     shutil.copy("README.md", "build/"+"-".join([Name, syst, arch]))
     make_zip("build/"+"-".join([Name, syst, arch]),

@@ -29,14 +29,20 @@ func (t *Trojan) GetPort() int {
 	return t.Port
 }
 
+// GetNetwork 获取远程传输方式
+func (v *Trojan) GetNetwork() string {
+	return ""
+}
+
 func (t *Trojan) GetInfo() string {
 	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%3s: [%s]\n", "协议", t.GetProtocolMode()))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "别名", t.Remarks))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "地址", t.Address))
 	buf.WriteString(fmt.Sprintf("%3s: %d\n", "端口", t.Port))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "密码", t.Password))
-	buf.WriteString(fmt.Sprintf("%5s: %s\n", "SNI", t.Sni()))
-	buf.WriteString(fmt.Sprintf("%3s: %s", "协议", t.GetProtocolMode()))
+	buf.WriteString(fmt.Sprintf("%5s: %s", "SNI", t.Sni()))
+	
 	return buf.String()
 }
 

@@ -34,15 +34,20 @@ func (s *Socks) GetPort() int {
 	return s.Port
 }
 
+// GetNetwork 获取远程传输方式
+func (v *Socks) GetNetwork() string {
+	return ""
+}
+
 // GetInfo 获取节点数据
 func (s *Socks) GetInfo() string {
 	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%7s: [%s]\n", "协议", s.GetProtocolMode()))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "别名", s.Remarks))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "地址", s.Address))
 	buf.WriteString(fmt.Sprintf("%7s: %d\n", "端口", s.Port))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "用户", s.Username))
-	buf.WriteString(fmt.Sprintf("%7s: %s\n", "密码", s.Password))
-	buf.WriteString(fmt.Sprintf("%7s: %s", "协议", s.GetProtocolMode()))
+	buf.WriteString(fmt.Sprintf("%7s: %s", "密码", s.Password))
 	return buf.String()
 }
 

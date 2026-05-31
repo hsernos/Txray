@@ -30,17 +30,23 @@ func (s *ShadowSocks) GetPort() int {
 	return s.Port
 }
 
+// GetNetwork 获取远程传输方式
+func (v *ShadowSocks) GetNetwork() string {
+	return ""
+}
+
 func (s *ShadowSocks) GetInfo() string {
 	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%3s: [%s]\n", "协议", s.GetProtocolMode()))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "别名", s.Remarks))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "地址", s.Address))
 	buf.WriteString(fmt.Sprintf("%3s: %d\n", "端口", s.Port))
 	buf.WriteString(fmt.Sprintf("%3s: %s\n", "密码", s.Password))
-	buf.WriteString(fmt.Sprintf("%3s: %s\n", "加密", s.Method))
+	buf.WriteString(fmt.Sprintf("%3s: %s", "加密", s.Method))
 	if s.Has("plugin") {
-		buf.WriteString(fmt.Sprintf("%3s: %s\n", "其他", "plugin="+s.Get("plugin")))
+		buf.WriteString("\n")
+		buf.WriteString(fmt.Sprintf("%3s: %s", "其他", "plugin="+s.Get("plugin")))
 	}
-	buf.WriteString(fmt.Sprintf("%3s: %s", "协议", s.GetProtocolMode()))
 	return buf.String()
 }
 

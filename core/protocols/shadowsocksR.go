@@ -33,8 +33,14 @@ func (s *ShadowSocksR) GetPort() int {
 	return s.Port
 }
 
+// GetNetwork 获取远程传输方式
+func (v *ShadowSocksR) GetNetwork() string {
+	return ""
+}
+
 func (s *ShadowSocksR) GetInfo() string {
 	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%7s: [%s]\n", "协议", s.GetProtocolMode()))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "别名", s.Remarks))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "地址", s.Address))
 	buf.WriteString(fmt.Sprintf("%7s: %d\n", "端口", s.Port))
@@ -44,8 +50,7 @@ func (s *ShadowSocksR) GetInfo() string {
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "协议参数", s.ProtoParam))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "混淆", s.Obfs))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "混淆参数", s.ObfsParam))
-	buf.WriteString(fmt.Sprintf("%7s: %s\n", "分组", s.Group))
-	buf.WriteString(fmt.Sprintf("%7s: %s", "协议", s.GetProtocolMode()))
+	buf.WriteString(fmt.Sprintf("%7s: %s", "分组", s.Group))
 	return buf.String()
 }
 

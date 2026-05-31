@@ -12,7 +12,7 @@ import (
 // 解析链接
 func ParseLink(link string) Protocol {
 	u, err := url.Parse(link)
-	if err != nil {
+		if err != nil {
 		return nil
 	}
 	switch u.Scheme {
@@ -41,6 +41,10 @@ func ParseLink(link string) Protocol {
 		} 
 	case "socks":
 		if obj := ParseSocksLink(link); obj != nil {
+			return obj
+		} 
+	case "hysteria2":
+		if obj := ParseHysteria2Link(link); obj != nil {
 			return obj
 		} 
 	}
@@ -324,10 +328,45 @@ func ParseSSLink(link string) *ShadowSocks {
 		if ss.Remarks == "" {
 			ss.Remarks = u.Host
 		}
-		result := strings.SplitN(base64Decode(u.User.Username()), ":", 2)
+		var result []string
+		if base64Decode(u.User.Username()) == "" {
+			result = strings.SplitN(u.User.Username(), ":", 2)
+		} else{
+			result = strings.SplitN(base64Decode(u.User.Username()), ":", 2)
+		}
+		if len(result) < 2 {
+			return nil
+		}
 		ss.Method = result[0]
 		ss.Password = result[1]
 		ss.Values = u.Query()
 	}
 	return ss.Check()
+}
+
+
+func ParseHysteria2Link(link string) *Hysteria2 {
+	u, err := url.Parse(link)
+	if err != nil {
+		return nil
+	}
+	if u.Scheme != "hysteria2" {
+		return nil
+	}
+	hysteria2 := new(Hysteria2)
+	if u.User == nil {
+		return nil
+	}
+	hysteria2.Password = u.User.Username()
+	hysteria2.Address = u.Hostname()
+	hysteria2.Port, err = strconv.Atoi(u.Port())
+	if err != nil {
+		return nil
+	}
+	hysteria2.Remarks = u.Fragment
+	if hysteria2.Remarks == "" {
+		hysteria2.Remarks = u.Host
+	}
+	hysteria2.Values = u.Query()
+	return hysteria2.Check()
 }

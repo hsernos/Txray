@@ -5,20 +5,6 @@ type Field struct {
 	Value string // 默认值
 }
 
-func NilStrField(key string) Field {
-	return Field{
-		Key:   key,
-		Value: "",
-	}
-}
-
-func NoneField(key string) Field {
-	return Field{
-		Key:   key,
-		Value: "none",
-	}
-}
-
 func NewField(key, value string) Field {
 	return Field{
 		Key:   key,
@@ -27,42 +13,60 @@ func NewField(key, value string) Field {
 }
 
 var (
-	NetworkType     Field = NewField("type", "tcp")        // 协议的传输方式, 可选值 tcp/kcp/ws/http/quic/grpc
-	VLessEncryption       = NoneField("encryption")        // 加密, VLESS可选值 none
-	VMessEncryption       = NewField("encryption", "auto") // 加密,  VMess可选值 auto/aes-128-gcm/chacha20-poly1305/none
-	TlsSecurity           = NoneField("security")          // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls/reality
+	VLessEncryption = NewField("encryption", "none") // 加密, VLESS可选值 none
+	VMessEncryption = NewField("encryption", "auto") // 加密,  VMess可选值 auto/aes-128-gcm/chacha20-poly1305/none
+	Flow            = NewField("flow", "")           // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
 
-	// TCP
-	TCPHeaderType = NoneField("headerType")
-
-	// HTTP/2
-	H2Path = NewField("path", "/")
-	H2Host = NilStrField("host")
+	// ==================================  协议的传输方式 =====================================
+	NetworkType Field = NewField("type", "raw") // 协议的传输方式, 可选值 raw(tcp)/kcp/ws/http/quic/grpc/xhttp
+	// Raw
+	RawHeaderType = NewField("headerType", "none")
+	RawHost       = NewField("host", "")
+	RawPath       = NewField("path", "")
 
 	// WebSocket
 	WsPath = NewField("path", "/")
-	WsHost = NilStrField("host")
+	WsHost = NewField("host", "")
+
+	// H2
+	H2Path = NewField("path", "/")
+	H2Host = NewField("host", "")
 
 	// mKCP
-	MkcpHeaderType = NoneField("headerType") // mKCP 的伪装头部类型, 可选值 none/srtp/utp/wechat-video/dtls/wireguard
-	Seed           = NilStrField("seed")     // mKCP 种子
-
-	// QUIC
-	QuicSecurity   = NoneField("quicSecurity") // QUIC 的加密方式, 可选值 none/aes-128-gcm/chacha20-poly1305
-	QuicKey        = NilStrField("key")        //  QUIC 的加密方式不为 none 时的加密密钥
-	QuicHeaderType = NoneField("headerType")   // QUIC 的伪装头部类型。其他同 mKCP headerType 字段定义
+	KcpMtu = NewField("mtu", "1350")
 
 	// gRPC
-	GrpcServiceName = NilStrField("serviceName")
+	GrpcServiceName = NewField("serviceName", "")
+	GrpcAuthority   = NewField("authority", "")
 	GrpcMode        = NewField("mode", "gun") // gRPC 的传输模式, 可选值 gun/multi/guna
 
-	Security = NoneField("security")
-	SNI      = NilStrField("sni")  // TLS SNI
-	Alpn     = NilStrField("alpn") // alpn 多选 h2,http/1.1
-	Flow     = NilStrField("flow") // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
+	// xhttp
+	XhttpHost  = NewField("host", "")
+	XhttpPath  = NewField("path", "")
+	XhttpMode  = NewField("mode", "")
+	XhttpExtra = NewField("extra", "")
 
-	FingerPrint = NewField("fp", "chrome") // TLS Client Hello 指纹
-	PublicKey = NilStrField("pbk") // REALITY的公钥
-	ShortId = NilStrField("sid") // REALITY 的 ID
-	SpiderX = NilStrField("spx") // REALITY 的爬虫
+	// HTTPUpgrade
+	HttpUpgradeHost = NewField("host", "")
+	HttpUpgradePath = NewField("path", "")
+
+	// ====================================   底层传输所使用的TLS类型===========================
+	TlsSecurity = NewField("security", "none") // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/reality
+	// 公共
+	SNI         = NewField("sni", "") // TLS SNI
+	FingerPrint = NewField("fp", "")  // TLS Client Hello 指纹
+
+	// TLS
+	Alpn = NewField("alpn", "") // alpn 多选 h2,http/1.1
+
+	// REALITY
+	PublicKey     = NewField("pbk", "") // REALITY的公钥
+	ShortId       = NewField("sid", "") // REALITY 的 ID
+	SpiderX       = NewField("spx", "") // REALITY 的爬虫
+	Mldsa65Verify = NewField("pqv", "") // REALITY  mldsa65签名验证使用的公钥
+
+	// finalmask
+	Finalmask   = NewField("fm", "")
+	Mport       = NewField("mport", "")
+	Hopinterval = NewField("hopinterval", "60")
 )

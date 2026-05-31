@@ -36,6 +36,7 @@ func Start(key string) {
 			} else {
 				log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d", setting.Socks(), setting.Http(), manager.SelectedIndex())
 			}
+			time.Sleep(100 * time.Millisecond)
 			result, status := TestNode(testUrl, setting.Socks(), testTimeout)
 			log.Infof("%6s [ %s ] 延迟: %dms", status, testUrl, result)
 		}
@@ -46,6 +47,7 @@ func Start(key string) {
 			node := manager.GetNode(index)
 			exe := run(node.Protocol)
 			if exe {
+				time.Sleep(100 * time.Millisecond)
 				result, status := TestNode(testUrl, setting.Socks(), testTimeout)
 				log.Infof("%6s [ %s ] 节点: %d, 延迟: %dms", status, testUrl, index, result)
 				if result > 0 && result <= setting.TestMinTime(){
@@ -86,7 +88,7 @@ func Start(key string) {
 func run(node protocols.Protocol) bool {
 	Stop()
 	switch node.GetProtocolMode() {
-	case protocols.ModeShadowSocks, protocols.ModeTrojan, protocols.ModeVMess, protocols.ModeSocks, protocols.ModeVLESS, protocols.ModeVMessAEAD:
+	case protocols.ModeShadowSocks, protocols.ModeTrojan, protocols.ModeVMess, protocols.ModeSocks, protocols.ModeVLESS, protocols.ModeVMessAEAD, protocols.ModeHysteria2:
 		file := GenConfig(node)
 		Xray = exec.Command(XrayPath, "-c", file)
 	default:

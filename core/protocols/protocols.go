@@ -14,6 +14,8 @@ type Protocol interface {
 	GetAddr() string
 	// GetPort 获取远程端口
 	GetPort() int
+	// GetNetwork 获取远程传输方式
+	GetNetwork() string
 	// GetInfo 获取节点数据
 	GetInfo() string
 	// GetLink 获取节点分享链接
@@ -49,6 +51,8 @@ func Deserialize(text string) Protocol {
 			data = new(VLess)
 		case string(ModeVMessAEAD):
 			data = new(VMessAEAD)
+		case string(ModeHysteria2):
+			data = new(Hysteria2)
 		}
 		err := json.Unmarshal([]byte(jsonText), &data)
 		if err != nil {

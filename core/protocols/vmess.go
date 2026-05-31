@@ -40,6 +40,11 @@ func (v *VMess) GetPort() int {
 	return v.Port
 }
 
+// GetNetwork 获取远程传输方式
+func (v *VMess) GetNetwork() string {
+	return v.Net
+}
+
 func (v *VMess) GetInfo() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "别名", v.Ps))

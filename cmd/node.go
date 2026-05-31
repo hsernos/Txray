@@ -33,11 +33,11 @@ func InitNodeShell(shell *ishell.Shell) {
 			}
 			_, isDesc := argMap["desc"]
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"索引", "协议", "别名", "地址", "端口", "测试结果"})
+			table.SetHeader([]string{"索引", "协议", "别名", "地址", "端口", "传输方式", "测试结果"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
 			center := tablewriter.ALIGN_CENTER
 			left := tablewriter.ALIGN_LEFT
-			table.SetColumnAlignment([]int{center, center, left, center, center, center})
+			table.SetColumnAlignment([]int{center, center, left, center, center, center, center})
 			table.SetColWidth(70)
 			indexList := core.IndexList(key, manage.Manager.NodeLen())
 			if isDesc {
@@ -52,6 +52,7 @@ func InitNodeShell(shell *ishell.Shell) {
 						n.GetName(),
 						n.GetAddr(),
 						strconv.Itoa(n.GetPort()),
+						n.GetNetwork(),
 						n.TestResultStr(),
 					})
 				}

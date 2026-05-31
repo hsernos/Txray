@@ -35,51 +35,65 @@ func (v *VLess) GetPort() int {
 	return v.Port
 }
 
+// GetNetwork 获取远程传输方式
+func (v *VLess) GetNetwork() string {
+	return v.GetValue(field.NetworkType)
+}
+
 // GetInfo 获取节点数据
 func (v *VLess) GetInfo() string {
 	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%7s: [%s]\n", "协议", v.GetProtocolMode()))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "别名", v.Remarks))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "地址", v.Address))
 	buf.WriteString(fmt.Sprintf("%7s: %d\n", "端口", v.Port))
 	buf.WriteString(fmt.Sprintf("%7s: %s\n", "用户ID", v.ID))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "流控方式", v.GetValue(field.Flow)))
-	buf.WriteString(fmt.Sprintf("%5s: %s\n", "加密方式", v.GetValue(field.VLessEncryption)))
+	buf.WriteString(fmt.Sprintf("%5s: %s\n\n", "加密方式", v.GetValue(field.VLessEncryption)))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输协议", v.GetValue(field.NetworkType)))
 	switch v.GetValue(field.NetworkType) {
-	case "tcp":
-		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.TCPHeaderType)))
-	case "kcp":
-		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.MkcpHeaderType)))
-		if v.GetValue(field.Seed) != "" {
-			buf.WriteString(fmt.Sprintf("%7s: %s\n", "KCP种子", v.GetValue(field.Seed)))
-		}
+	case "tcp", "raw":
+		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.RawHeaderType)))
+		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装域名", v.GetValue(field.RawHost)))
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "路径path", v.GetValue(field.RawPath)))
+	case "xhttp":
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "XHTTP模式", v.GetValue(field.XhttpMode)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Host", v.GetValue(field.XhttpHost)))
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "路径path", v.GetValue(field.XhttpPath)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Extra", v.GetValue(field.XhttpExtra)))
+	case "kcp", "mkcp":
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "MTU", v.GetValue(field.KcpMtu)))
 	case "ws":
-		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Path", v.GetValue(field.WsPath)))
 		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Host", v.GetValue(field.WsHost)))
-	case "h2":
 		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Path", v.GetValue(field.WsPath)))
-		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Host", v.GetHostValue(field.WsHost)))
-	case "quic":
-		buf.WriteString(fmt.Sprintf("%5s: %s\n", "伪装类型", v.GetValue(field.QuicHeaderType)))
-		buf.WriteString(fmt.Sprintf("%7s: %s\n", "QUIC加密", v.GetValue(field.QuicSecurity)))
-		if v.GetValue(field.QuicSecurity) != "none" {
-			buf.WriteString(fmt.Sprintf("%5s: %s\n", "加密密钥", v.GetValue(field.QuicKey)))
-		}
+	case "h2":
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Host", v.GetHostValue(field.H2Host)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Path", v.GetValue(field.H2Path)))
 	case "grpc":
-		buf.WriteString(fmt.Sprintf("%9s: %s\n", "ServiceName", v.GetValue(field.GrpcServiceName)))
 		buf.WriteString(fmt.Sprintf("%5s: %s\n", "传输模式", v.GetValue(field.GrpcMode)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Authority", v.GetValue(field.GrpcAuthority)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "ServiceName", v.GetValue(field.GrpcServiceName)))
+	case "httpupgrade":
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Host", v.GetHostValue(field.HttpUpgradeHost)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Path", v.GetValue(field.HttpUpgradePath)))
 	}
-	if v.GetValue(field.Security) == "reality" {
-		buf.WriteString(fmt.Sprintf("%9s: %s\n", "FingerPrint", v.GetValue(field.FingerPrint)))
-		buf.WriteString(fmt.Sprintf("%7s: %s\n", "reality公钥", v.GetValue(field.PublicKey)))
-		buf.WriteString(fmt.Sprintf("%9s: %s\n", "realityID", v.GetValue(field.ShortId)))
-		buf.WriteString(fmt.Sprintf("%7s: %s\n", "REALITY爬虫", v.GetValue(field.SpiderX)))
+	buf.WriteString(fmt.Sprintf("%9s: %s\n\n", "FinalMask", v.GetValue(field.Finalmask)))
+	buf.WriteString(fmt.Sprintf("%5s: %s", "底层传输", v.GetValue(field.TlsSecurity)))
+	switch v.GetValue(field.TlsSecurity) {
+	case "tls":
+		buf.WriteString("\n")
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.GetValue(field.SNI)))
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "FP指纹", v.GetValue(field.FingerPrint)))
+		buf.WriteString(fmt.Sprintf("%9s: %s", "Alpn", v.GetValue(field.Alpn)))
+	case "reality":
+		buf.WriteString("\n")
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.GetValue(field.SNI)))
+		buf.WriteString(fmt.Sprintf("%7s: %s\n", "FP指纹", v.GetValue(field.FingerPrint)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "PublicKey", v.GetValue(field.PublicKey)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "ShortId", v.GetValue(field.ShortId)))
+		buf.WriteString(fmt.Sprintf("%9s: %s\n", "SpiderX", v.GetValue(field.SpiderX)))
+		buf.WriteString(fmt.Sprintf("%9s: %s", "Mldsa65Verify", v.GetValue(field.Mldsa65Verify)))
 	}
-	buf.WriteString(fmt.Sprintf("%5s: %s\n", "底层传输", v.GetValue(field.Security)))
-	buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.GetValue(field.SNI)))
-	buf.WriteString(fmt.Sprintf("%9s: %s\n", "Alpn", v.GetValue(field.Alpn)))
-	buf.WriteString(fmt.Sprintf("%7s: %s", "协议", v.GetProtocolMode()))
-
 	return buf.String()
 }
 
