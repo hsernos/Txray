@@ -20,6 +20,7 @@ const (
 	TestURL     = "test.url"
 	TestTimeout = "test.timeout"
 	TestMinTime = "test.mintime" 
+	TestBefore = "test.before" 
 
 	RunBefore = "run_before"
 	PID = "pid" // 核心进程id

@@ -32,11 +32,11 @@ func Start(key string) {
 		exe := run(node.Protocol)
 		if exe {
 			if setting.Http() == 0 {
-				log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
+				log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d: %s", setting.Socks(), manager.SelectedIndex(), node.GetName())
 			} else {
-				log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d", setting.Socks(), setting.Http(), manager.SelectedIndex())
+				log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d: %s", setting.Socks(), setting.Http(), manager.SelectedIndex(), node.GetName())
 			}
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(time.Duration(setting.TestBeforeTime()) * time.Millisecond)
 			result, status := TestNode(testUrl, setting.Socks(), testTimeout)
 			log.Infof("%6s [ %s ] 延迟: %dms", status, testUrl, result)
 		}
@@ -47,7 +47,7 @@ func Start(key string) {
 			node := manager.GetNode(index)
 			exe := run(node.Protocol)
 			if exe {
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(time.Duration(setting.TestBeforeTime()) * time.Millisecond)
 				result, status := TestNode(testUrl, setting.Socks(), testTimeout)
 				log.Infof("%6s [ %s ] 节点: %d, 延迟: %dms", status, testUrl, index, result)
 				if result > 0 && result <= setting.TestMinTime(){
@@ -71,9 +71,9 @@ func Start(key string) {
 			exe := run(node.Protocol)
 			if exe {
 				if setting.Http() == 0 {
-					log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d", setting.Socks(), manager.SelectedIndex())
+					log.Infof("启动成功, 监听socks端口: %d, 所选节点: %d: %s", setting.Socks(), manager.SelectedIndex(), node.GetName())
 				} else {
-					log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d", setting.Socks(), setting.Http(), manager.SelectedIndex())
+					log.Infof("启动成功, 监听socks/http端口: %d/%d, 所选节点: %d: %s", setting.Socks(), setting.Http(), manager.SelectedIndex(), node.GetName())
 				}
 			} else {
 				log.Error("启动失败")

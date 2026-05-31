@@ -38,6 +38,7 @@ func init() {
 	viper.SetDefault(key.TestURL, "https://www.youtube.com")
 	viper.SetDefault(key.TestTimeout, 5)
 	viper.SetDefault(key.TestMinTime, 1000)
+	viper.SetDefault(key.TestBefore, 1000)
 	viper.SetDefault(key.RunBefore, "")
 
 	viper.SetDefault(key.PID, 0)

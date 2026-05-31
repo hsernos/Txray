@@ -19,6 +19,8 @@ func TestNode(url string, port int, timeout int) (int, string) {
 		if e != nil {
 			if strings.HasSuffix(fmt.Sprint(e), "(Client.Timeout exceeded while awaiting headers)") {
 				log.Warnf("请求超时, 网络环境波动 或 配置test.timeout=%d 过小", timeout)
+			} else if strings.HasSuffix(fmt.Sprint(e), "connect: connection refused"){
+				log.Warn("代理服务未启动或启动中, 配置test.before过小")
 			} else {
 				log.Warn(e)
 			}

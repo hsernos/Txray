@@ -39,6 +39,19 @@ func SetTestMinTime(timeout int) error {
 	return viper.WriteConfig()
 }
 
+
+func TestBeforeTime() int {
+	return viper.GetInt(key.TestBefore)
+}
+
+func SetTestBeforeTime(timeout int) error {
+	if timeout < 0 {
+		return errors.New("取值不能小于0")
+	}
+	viper.Set(key.TestBefore, timeout)
+	return viper.WriteConfig()
+}
+
 func RunBefore() string {
 	return viper.GetString(key.RunBefore)
 }
