@@ -18,6 +18,8 @@ Project X core： https://github.com/XTLS/Xray-core
 
 3.支持 VMess、Shadowsocks、Trojan、VLESS、VMessAEAD、Socks 协议
 
+4.无需root权限即可运行
+
 ## 安装和使用
 
 1.下载对应平台架构的[Txray](https://github.com/hsernos/Txray/releases)和[xray](https://github.com/XTLS/Xray-core/releases),按如下目录结构解压放置
@@ -439,7 +441,8 @@ Commands:
     [索引式] [flags]              查看节点信息, 默认 'all'
     help                          查看帮助
     tcping                        测试节点tcp延迟
-    sort {0|1|2|3|4|5}            排序方式，分别按{逆转|协议|别名|地址|端口|测试结果}排序
+    test                          测试节点真实连接延迟
+    sort {0|1|2|3|4|5|6}          排序方式，分别按{逆转顺序|协议|别名|地址|端口|测试结果|实际延迟}排序
     info {索引}                   查看单个节点详细信息
     rm {索引式}                   删除节点
     find {关键词}                 查找节点（按别名）
@@ -726,4 +729,4 @@ PS: 规则详情请访问 https://xtls.github.io/config/routing.html#ruleobject
 
 # 交流反馈
 
-提交 Issue: [Issues](https://github.com/hsernos/Txray/issues)
+提交 Issue: [Issues](https://github.com/yuze66/Txray/issues)

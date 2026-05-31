@@ -9,6 +9,7 @@ import (
 	"Txray/core/protocols" // 协议定义
 	"Txray/core/sub"       // 订阅相关
 	"Txray/log"            // 日志
+	"Txray/xray"           // 代理服务与延迟测试
 	"fmt"                  // 格式化输出
 	"net/url"              // URL 解析
 	"os"                   // 系统操作
@@ -35,11 +36,11 @@ func InitNodeShell(shell *ishell.Shell) {
 			}
 			_, isDesc := argMap["desc"]
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"索引", "协议", "别名", "地址", "端口", "测试结果"})
+			table.SetHeader([]string{"索引", "协议", "别名", "地址", "端口", "测试结果", "实际延迟"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
 			center := tablewriter.ALIGN_CENTER
 			left := tablewriter.ALIGN_LEFT
-			table.SetColumnAlignment([]int{center, center, left, center, center, center})
+			table.SetColumnAlignment([]int{center, center, left, center, center, center, center})
 			table.SetColWidth(70)
 			indexList := core.IndexList(key, manage.Manager.NodeLen())
 			if isDesc {
@@ -55,6 +56,7 @@ func InitNodeShell(shell *ishell.Shell) {
 						n.GetAddr(),
 						strconv.Itoa(n.GetPort()),
 						n.TestResultStr(),
+						n.ConnDelayStr(),
 					})
 				}
 			}
@@ -88,6 +90,14 @@ func InitNodeShell(shell *ishell.Shell) {
 		Name: "tcping",
 		Func: func(c *ishell.Context) {
 			manage.Manager.Tcping()
+			_ = shell.Process("node", "-d")
+		},
+	})
+	// test
+	nodeCmd.AddCmd(&ishell.Cmd{
+		Name: "test",
+		Func: func(c *ishell.Context) {
+			xray.TestNodes()
 			_ = shell.Process("node", "-d")
 		},
 	})
@@ -138,6 +148,8 @@ func InitNodeShell(shell *ishell.Shell) {
 					mode = 4
 				case "5":
 					mode = 5
+				case "6":
+					mode = 6
 				default:
 					return
 				}
@@ -181,11 +193,11 @@ func InitNodeShell(shell *ishell.Shell) {
 				return
 			}
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"索引", "协议", "别名", "地址", "端口", "测试结果"})
+			table.SetHeader([]string{"索引", "协议", "别名", "地址", "端口", "测试结果", "实际延迟"})
 			table.SetAlignment(tablewriter.ALIGN_CENTER)
 			center := tablewriter.ALIGN_CENTER
 			left := tablewriter.ALIGN_LEFT
-			table.SetColumnAlignment([]int{center, center, left, center, center, center})
+			table.SetColumnAlignment([]int{center, center, left, center, center, center, center})
 			table.SetColWidth(70)
 			manage.Manager.NodeForEach(func(i int, n *node.Node) {
 				if n != nil && strings.Contains(n.GetName(), c.Args[0]) {
@@ -196,6 +208,7 @@ func InitNodeShell(shell *ishell.Shell) {
 						n.GetAddr(),
 						strconv.Itoa(n.GetPort()),
 						n.TestResultStr(),
+						n.ConnDelayStr(),
 					})
 				}
 			})
@@ -315,6 +328,12 @@ func InitNodeShell(shell *ishell.Shell) {
 					if network != "tcp" {
 						data["type"] = network
 					}
+					c.Print("Finalmask,可留空（fm）: ")
+					fm := c.ReadLine()
+					if fm != "" {
+						data["fm"] = fm
+					}
+
 					switch network {
 					case "kcp":
 						typeList := []string{
@@ -463,6 +482,16 @@ func InitNodeShell(shell *ishell.Shell) {
 						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
 						if echForceQueryList[index] != "" {
 							data["echForceQuery"] = echForceQueryList[index]
+						}
+						c.Print("pinnedPeerCertSha256,可留空（pcs）?")
+						pinnedPeerCertSha256 := c.ReadLine()
+						if pinnedPeerCertSha256 != "" {
+							data["pcs"] = pinnedPeerCertSha256
+						}
+						c.Print("verifyPeerCertByName,可留空（vcn）?")
+						verifyPeerCertByName := c.ReadLine()
+						if verifyPeerCertByName != "" {
+							data["vcn"] = verifyPeerCertByName
 						}
 					case "reality":
 						data["security"] = security
@@ -739,6 +768,16 @@ func InitNodeShell(shell *ishell.Shell) {
 						if echForceQueryList[index] != "" {
 							data["echForceQuery"] = echForceQueryList[index]
 						}
+						c.Print("pinnedPeerCertSha256,可留空（pcs）?")
+						pinnedPeerCertSha256 := c.ReadLine()
+						if pinnedPeerCertSha256 != "" {
+							data["pcs"] = pinnedPeerCertSha256
+						}
+						c.Print("verifyPeerCertByName,可留空（vcn）?")
+						verifyPeerCertByName := c.ReadLine()
+						if verifyPeerCertByName != "" {
+							data["vcn"] = verifyPeerCertByName
+						}
 					case "xtls":
 						data["security"] = security
 						c.Print("SNI（sni）: ")
@@ -770,6 +809,16 @@ func InitNodeShell(shell *ishell.Shell) {
 						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
 						if echForceQueryList[index] != "" {
 							data["echForceQuery"] = echForceQueryList[index]
+						}
+						c.Print("pinnedPeerCertSha256,可留空（pcs）?")
+						pinnedPeerCertSha256 := c.ReadLine()
+						if pinnedPeerCertSha256 != "" {
+							data["pcs"] = pinnedPeerCertSha256
+						}
+						c.Print("verifyPeerCertByName,可留空（vcn）?")
+						verifyPeerCertByName := c.ReadLine()
+						if verifyPeerCertByName != "" {
+							data["vcn"] = verifyPeerCertByName
 						}
 					case "reality":
 						data["security"] = security
@@ -936,16 +985,20 @@ func InitNodeShell(shell *ishell.Shell) {
 						index := c.MultiChoice(alpnList, "Alpn ?")
 						vmess.Alpn = alpnList[index]
 						c.Print("EchConfigList(默认为空)：")
-						vmess.EchConfigList = c.ReadLine()
+						vmess.Ech = c.ReadLine()
 						echForceQueryList := []string{
 							"",
 							"full",
 							"half",
 							"none",
-						}						
+						}
 						index = c.MultiChoice(echForceQueryList, "ECH强制查询，可留空（echForceQuery）?")
 						vmess.EchForceQuery = echForceQueryList[index]
 					}
+					c.Print("pinnedPeerCertSha256可留空（pcs）?")
+					vmess.Pcs = c.ReadLine()
+					c.Print("verifyPeerCertByName可留空（vcn）?")
+					vmess.Vcn = c.ReadLine()
 					c.Println("========================")
 					if manage.Manager.AddNode(node.NewNodeByData(vmess)) {
 						c.Println("添加成功")
@@ -1016,6 +1069,10 @@ func InitNodeShell(shell *ishell.Shell) {
 					}
 					index := c.MultiChoice(echForceQueryList, "ECH强制查询（echForceQuery）?")
 					echForceQuery := echForceQueryList[index]
+					c.Print("pinnedPeerCertSha256可留空（pcs）?")
+					pinnedPeerCertSha256 := c.ReadLine()
+					c.Print("verifyPeerCertByName可留空（vcn）?")
+					verifyPeerCertByName := c.ReadLine()
 					c.Println("========================")
 					trojan := &protocols.Trojan{
 						Remarks:  remarks,
@@ -1032,6 +1089,12 @@ func InitNodeShell(shell *ishell.Shell) {
 					}
 					if echForceQuery != "" {
 						values["echForceQuery"] = []string{echForceQuery}
+					}
+					if pinnedPeerCertSha256 != "" {
+						values["pinnedPeerCertSha256"] = []string{pinnedPeerCertSha256}
+					}
+					if verifyPeerCertByName != "" {
+						values["verifyPeerCertByName"] = []string{verifyPeerCertByName}
 					}
 					if len(values) > 0 {
 						trojan.Values = values

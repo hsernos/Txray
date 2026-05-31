@@ -55,6 +55,12 @@ func (v *VLess) GetInfo() string {
 		if v.GetValue(field.Seed) != "" {
 			buf.WriteString(fmt.Sprintf("%7s: %s\n", "KCP种子", v.GetValue(field.Seed)))
 		}
+		if v.Has(field.MkcpMtu.Key) {
+			buf.WriteString(fmt.Sprintf("%7s: %s\n", "MTU", v.GetValue(field.MkcpMtu)))
+		}
+		if v.Has(field.MkcpTti.Key) {
+			buf.WriteString(fmt.Sprintf("%7s: %s\n", "TTI", v.GetValue(field.MkcpTti)))
+		}
 	case "ws":
 		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Path", v.GetValue(field.WsPath)))
 		buf.WriteString(fmt.Sprintf("%9s: %s\n", "Host", v.GetValue(field.WsHost)))

@@ -24,9 +24,10 @@ type VMess struct {
 	Tls           string `json:"tls"`
 	Sni           string `json:"sni"`
 	Alpn          string `json:"alpn"`
-	EchConfigList string `json:"echConfigList"`
+	Ech           string `json:"ech"`
 	EchForceQuery string `json:"echForceQuery"`
-	PCS           string `json:"pinnedPeerCertSha256"`
+	Pcs           string `json:"pcs"`
+	Vcn           string `json:"vcn"`
 }
 
 // GetProtocolMode 返回协议模式
@@ -66,9 +67,10 @@ func (v *VMess) GetInfo() string {
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "配置版本", v.V))
 	buf.WriteString(fmt.Sprintf("%9s: %s\n", "SNI", v.Sni))
 	buf.WriteString(fmt.Sprintf("%9s: %s\n", "Alpn", v.Alpn))
-	buf.WriteString(fmt.Sprintf("%9s: %s\n", "Ech配置列表", v.EchConfigList))
+	buf.WriteString(fmt.Sprintf("%9s: %s\n", "Ech配置列表", v.Ech))
 	buf.WriteString(fmt.Sprintf("%9s: %s\n", "ECH强制查询", v.EchForceQuery))
-	buf.WriteString(fmt.Sprintf("%16s: %s\n", "PinnedPeerCertSha256", v.PCS))
+	buf.WriteString(fmt.Sprintf("%16s: %s\n", "CA/leaf证书SHA-256指纹", v.Pcs))
+	buf.WriteString(fmt.Sprintf("%16s: %s\n", "验证leaf证书的name", v.Vcn))
 	buf.WriteString(fmt.Sprintf("%7s: %s", "协议", v.GetProtocolMode()))
 	return buf.String()
 }
@@ -90,9 +92,10 @@ func (v *VMess) GetLink() string {
 		"tls":           v.Tls,
 		"sni":           v.Sni,
 		"alpn":          v.Alpn,
-		"echConfigList": v.EchConfigList,
+		"ech":           v.Ech,
 		"echForceQuery": v.EchForceQuery,
-		"pinnedPeerCertSha256": v.PCS,
+		"pcs":           v.Pcs,
+		"vcn":           v.Vcn,
 	}
 	jsonData, _ := json.Marshal(data)
 	return "vmess://" + base64EncodeWithEq(string(jsonData))

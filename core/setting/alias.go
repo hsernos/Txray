@@ -3,6 +3,7 @@ package setting
 
 import (
 	"Txray/core"
+	"Txray/log"
 	"github.com/spf13/viper"
 	"regexp"
 	"strings"
@@ -64,16 +65,10 @@ func AliasList() []*Alias {
 func AddAlias(key, cmd string) {
 	// 检查别名是否合法
 	if ok, _ := regexp.MatchString("^[^ ]*$", key); ok {
-		v := viper.Get("alias")
-		// 如果别名不存在，则设置默认值
-		if v == nil {
-			viper.SetDefault("alias."+key, cmd)
-		} else {
-			// 否则更新现有别名
-			v.(map[string]interface{})[key] = cmd
+		viper.Set("alias."+key, cmd)
+		if err := viper.WriteConfig(); err != nil {
+			log.Error(err)
 		}
-		// 写入配置文件
-		viper.WriteConfig()
 	}
 }
 
@@ -99,6 +94,12 @@ func DelAlias(key string) []string {
 
 // delAlias 实际执行别名删除操作
 func delAlias(key string) {
-	delete(viper.Get("alias").(map[string]interface{}), key)
-	viper.WriteConfig()
+	aliases, ok := viper.Get("alias").(map[string]interface{})
+	if !ok {
+		return
+	}
+	delete(aliases, key)
+	if err := viper.WriteConfig(); err != nil {
+		log.Error(err)
+	}
 }

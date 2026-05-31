@@ -133,7 +133,7 @@ func ParseSocksLink(link string) *Socks {
 // ParseVMessLink 解析 vmess 链接，返回 VMess 对象
 func ParseVMessLink(link string) *VMess {
 	vmess := new(VMess)
-	if strings.ToLower(link[:8]) == "vmess://" {
+	if len(link) >= 8 && strings.ToLower(link[:8]) == "vmess://" {
 		link = link[8:]
 	} else {
 		return nil
@@ -225,7 +225,7 @@ func ParseVMessLink(link string) *VMess {
 		vmess.Alpn = fmt.Sprintf("%v", alpn)
 	}
 	if echConfigList, ok := mapResult["echConfigList"]; ok {
-		vmess.EchConfigList = fmt.Sprintf("%v", echConfigList)
+		vmess.Ech = fmt.Sprintf("%v", echConfigList)
 	}
 	if echForceQuery, ok := mapResult["echForceQuery"]; ok {
 		vmess.EchForceQuery = fmt.Sprintf("%v", echForceQuery)
@@ -263,7 +263,7 @@ func ParseTrojanLink(link string) *Trojan {
 // ParseSSRLink 解析 ssr 链接，返回 ShadowSocksR 对象
 func ParseSSRLink(link string) *ShadowSocksR {
 	ssr := new(ShadowSocksR)
-	if strings.ToLower(link[:6]) == "ssr://" {
+	if len(link) >= 6 && strings.ToLower(link[:6]) == "ssr://" {
 		link = link[6:]
 	} else {
 		return nil
@@ -323,6 +323,9 @@ func ParseSSLink(link string) *ShadowSocks {
 		if err != nil {
 			return nil
 		}
+		if u.User == nil {
+			return nil
+		}
 		ss.Address = u.Hostname()
 		ss.Port, _ = strconv.Atoi(u.Port())
 		ss.Method = u.User.Username()
@@ -340,6 +343,9 @@ func ParseSSLink(link string) *ShadowSocks {
 			ss.Remarks = u.Host
 		}
 		result := strings.SplitN(base64Decode(u.User.Username()), ":", 2)
+		if len(result) != 2 {
+			return nil
+		}
 		ss.Method = result[0]
 		ss.Password = result[1]
 		ss.Values = u.Query()

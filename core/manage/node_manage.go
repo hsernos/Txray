@@ -104,6 +104,7 @@ func (m *Manage) NodeSort(less func(*node.Node, *node.Node) bool) {
 // 3 - 按照节点地址排序
 // 4 - 按照节点端口排序
 // 5 - 按照测试结果排序
+// 6 - 按照实际延迟排序
 func (m *Manage) Sort(mode int) {
 	selectedNode := m.SelectedNode()
 	switch mode {
@@ -137,6 +138,11 @@ func (m *Manage) Sort(mode int) {
 		// 按照测试结果排序
 		m.NodeSort(func(n1 *node.Node, n2 *node.Node) bool {
 			return n1.TestResult < n2.TestResult
+		})
+	case 6:
+		// 按照实际延迟排序
+		m.NodeSort(func(n1 *node.Node, n2 *node.Node) bool {
+			return n1.ConnDelay < n2.ConnDelay
 		})
 	default:
 		return

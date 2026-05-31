@@ -21,7 +21,7 @@ func GenTestConfig(node protocols.Protocol) string {
 	err := core.WriteJSON(conf, path)
 	if err != nil {
 		log.Error(err)
-		panic(err)
+		return ""
 	}
 	return path
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -14,20 +15,35 @@ import (
 //   - url: 目标网址
 //   - port: 代理端口
 //   - timeout: 超时时间（秒）
+//
 // 返回值:
 //   - int: 延迟时间（毫秒），出错时返回-1
 //   - string: HTTP响应状态，出错时返回"Error"
 func TestNode(url string, port int, timeout int) (int, string) {
-	start := time.Now()
-	res, e := GetBySocks5Proxy(url, "127.0.0.1", port, time.Duration(timeout)*time.Second)
-	elapsed := time.Since(start)
-	if e != nil {
-		log.Warn(e)
-		return -1, "Error"
+	var lastErr error
+	for i := 0; i < 3; i++ {
+		start := time.Now()
+		res, e := GetBySocks5Proxy(url, "127.0.0.1", port, time.Duration(timeout)*time.Second)
+		elapsed := time.Since(start)
+		if e == nil {
+			result, status := int(float32(elapsed.Nanoseconds())/1e6), res.Status
+			defer res.Body.Close()
+			return result, status
+		}
+		lastErr = e
+		if i == 2 || !isStartupProxyError(e) {
+			break
+		}
+		time.Sleep(time.Duration(i+1) * 300 * time.Millisecond)
 	}
-	result, status := int(float32(elapsed.Nanoseconds())/1e6), res.Status
-	defer res.Body.Close()
-	return result, status
+	log.Warn(lastErr)
+	return -1, "Error"
+}
+
+func isStartupProxyError(err error) bool {
+	msg := err.Error()
+	return strings.Contains(msg, "connection refused") ||
+		strings.Contains(msg, "connection reset by peer")
 }
 
 // 通过Socks5代理访问网站
@@ -36,6 +52,7 @@ func TestNode(url string, port int, timeout int) (int, string) {
 //   - proxyAddress: 代理地址
 //   - proxyPort: 代理端口
 //   - timeOut: 超时时间
+//
 // 返回值:
 //   - *http.Response: HTTP响应
 //   - error: 错误信息

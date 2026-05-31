@@ -46,6 +46,8 @@ func (t *Trojan) GetInfo() string {
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "SNI", t.Sni()))
 	buf.WriteString(fmt.Sprintf("%5s: %s\n", "ECH配置列表", t.EchConfigList()))
 	buf.WriteString(fmt.Sprintf("%9s: %s\n", "ECH强制查询", t.EchForceQuery()))
+	buf.WriteString(fmt.Sprintf("%5s: %s\n", "pinnedPeerCertSha256", t.PinnedPeerCertSha256()))
+	buf.WriteString(fmt.Sprintf("%5s: %s\n", "verifyPeerCertByName", t.VerifyPeerCertByName()))
 	buf.WriteString(fmt.Sprintf("%3s: %s", "协议", t.GetProtocolMode()))
 	return buf.String()
 }
@@ -82,6 +84,22 @@ func (t *Trojan) EchConfigList() string {
 func (t *Trojan) EchForceQuery() string {
 	if t.Has("echForceQuery") {
 		return t.Get("echForceQuery")
+	}
+	return ""
+}
+
+// PinnedPeerCertSha256 返回 pinnedPeerCertSha256信息
+func (t *Trojan) PinnedPeerCertSha256() string {
+	if t.Has("pinnedPeerCertSha256") {
+		return t.Get("pinnedPeerCertSha256")
+	}
+	return ""
+}
+
+// VerifyPeerCertByName 返回 verifyPeerCertByName信息
+func (t *Trojan) VerifyPeerCertByName() string {
+	if t.Has("verifyPeerCertByName") {
+		return t.Get("verifyPeerCertByName")
 	}
 	return ""
 }

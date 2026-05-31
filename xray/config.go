@@ -9,6 +9,7 @@ import (
 	"Txray/core/setting"         // 设置项
 	"Txray/log"                  // 日志
 	"path/filepath"              // 路径处理
+	"strconv"                    // 字符串转数值
 	"strings"                    // 字符串处理
 )
 
@@ -28,7 +29,7 @@ func GenConfig(node protocols.Protocol) string {
 	err := core.WriteJSON(conf, path) // 写入 JSON 文件
 	if err != nil {
 		log.Error(err)
-		panic(err)
+		return ""
 	}
 	return path
 }
@@ -385,6 +386,9 @@ func trojanOutbound(trojan *protocols.Trojan) interface{} {
 		if trojan.Has("pinnedPeerCertSha256") && trojan.Get("pinnedPeerCertSha256") != "" {
 			tlsSettings["pinnedPeerCertSha256"] = trojan.Get("pinnedPeerCertSha256")
 		}
+		if trojan.Has("echForceQuery") && trojan.Get("echForceQuery") != "" {
+			tlsSettings["echForceQuery"] = trojan.Get("echForceQuery")
+		}
 		streamSettings["tlsSettings"] = tlsSettings
 	}
 	return map[string]interface{}{
@@ -421,14 +425,17 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 		if vmess.Alpn != "" {
 			tlsSettings["alpn"] = strings.Split(vmess.Alpn, ",")
 		}
-		if vmess.EchConfigList != "" {
-			tlsSettings["echConfigList"] = vmess.EchConfigList
+		if vmess.Ech != "" {
+			tlsSettings["echConfigList"] = vmess.Ech
 		}
 		if vmess.EchForceQuery != "" {
 			tlsSettings["echForceQuery"] = vmess.EchForceQuery
 		}
-		if vmess.PCS != "" {
-			tlsSettings["pinnedPeerCertSha256"] = vmess.PCS
+		if vmess.Pcs != "" {
+			tlsSettings["pinnedPeerCertSha256"] = vmess.Pcs
+		}
+		if vmess.Vcn != "" {
+			tlsSettings["encodeURIComponent"] = vmess.Vcn
 		}
 		streamSettings["tlsSettings"] = tlsSettings
 	}
@@ -596,9 +603,11 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		}
 		sni := vless.GetHostValue(field.SNI)
 		alpn := vless.GetValue(field.Alpn)
-		echConfigList := vless.GetValue(field.EchConfigList)
+		echConfigList := vless.GetValue(field.Ech)
 		echForceQuery := vless.GetValue(field.EchForceQuery)
-		pcs := vless.GetValue(field.PCS)
+		pcs := vless.GetValue(field.Pcs)
+		vcn := vless.GetValue(field.Vcn)
+
 		if sni != "" {
 			tlsSettings["serverName"] = sni
 		}
@@ -614,6 +623,9 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		if pcs != "" {
 			tlsSettings["pinnedPeerCertSha256"] = pcs
 		}
+		if vcn != "" {
+			tlsSettings["verifyPeerCertByName"] = vcn
+		}
 		streamSettings["tlsSettings"] = tlsSettings
 	case "xtls":
 		xtlsSettings := map[string]interface{}{
@@ -621,9 +633,10 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		}
 		sni := vless.GetHostValue(field.SNI)
 		alpn := vless.GetValue(field.Alpn)
-		echConfigList := vless.GetValue(field.EchConfigList)
+		echConfigList := vless.GetValue(field.Ech)
 		echForceQuery := vless.GetValue(field.EchForceQuery)
-		pcs := vless.GetValue(field.PCS)
+		pinnedPeerCertSha256 := vless.GetValue(field.Pcs)
+		verifyPeerCertByName := vless.GetValue(field.Vcn)
 		if sni != "" {
 			xtlsSettings["serverName"] = sni
 		}
@@ -636,8 +649,11 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		if echForceQuery != "" {
 			xtlsSettings["echForceQuery"] = echForceQuery
 		}
-		if pcs != "" {
-			xtlsSettings["pinnedPeerCertSha256"] = pcs
+		if pinnedPeerCertSha256 != "" {
+			xtlsSettings["pinnedPeerCertSha256"] = pinnedPeerCertSha256
+		}
+		if verifyPeerCertByName != "" {
+			xtlsSettings["verifyPeerCertByName"] = verifyPeerCertByName
 		}
 		streamSettings["xtlsSettings"] = xtlsSettings
 		mux = false
@@ -663,9 +679,17 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 			},
 		}
 	case "kcp":
+		mtu, _ := strconv.Atoi(vless.GetValue(field.MkcpMtu))
+		tti, _ := strconv.Atoi(vless.GetValue(field.MkcpTti))
+		if mtu <= 0 {
+			mtu = 1350
+		}
+		if tti <= 0 {
+			tti = 50
+		}
 		kcpSettings := map[string]interface{}{
-			"mtu":              1350,
-			"tti":              50,
+			"mtu":              mtu,
+			"tti":              tti,
 			"uplinkCapacity":   12,
 			"downlinkCapacity": 100,
 			"congestion":       false,
@@ -772,9 +796,9 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 		}
 		sni := vmess.GetHostValue(field.SNI)
 		alpn := vmess.GetValue(field.Alpn)
-		echConfigList := vmess.GetValue(field.EchConfigList)
+		echConfigList := vmess.GetValue(field.Ech)
 		echForceQuery := vmess.GetValue(field.EchForceQuery)
-		pcs := vmess.GetValue(field.PCS)
+		pcs := vmess.GetValue(field.Pcs)
 		if sni != "" {
 			tlsSettings["serverName"] = sni
 		}
@@ -812,9 +836,17 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 			},
 		}
 	case "kcp":
+		mtu, _ := strconv.Atoi(vmess.GetValue(field.MkcpMtu))
+		tti, _ := strconv.Atoi(vmess.GetValue(field.MkcpTti))
+		if mtu <= 0 {
+			mtu = 1350
+		}
+		if tti <= 0 {
+			tti = 50
+		}
 		kcpSettings := map[string]interface{}{
-			"mtu":              1350,
-			"tti":              50,
+			"mtu":              mtu,
+			"tti":              tti,
 			"uplinkCapacity":   12,
 			"downlinkCapacity": 100,
 			"congestion":       false,

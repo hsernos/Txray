@@ -2,22 +2,42 @@
 package xray
 
 import (
-	"Txray/log"           // 日志输出
-	"fmt"                 // 格式化输出
-	"os"                  // 系统操作
-	"path/filepath"       // 路径处理
-	"runtime"             // 运行时信息
-	"strings"             // 字符串处理
+	"Txray/log"     // 日志输出
+	"fmt"           // 格式化输出
+	"os"            // 系统操作
+	"path/filepath" // 路径处理
+	"runtime"       // 运行时信息
+	"strings"       // 字符串处理
 )
 
 const CoreName string = "xray" // xray 核心程序名
 
-var XrayPath = "" // xray 程序绝对路径
+var (
+	XrayPath      = "" // xray 程序绝对路径
+	xrayCheckErr  error
+	xrayResources = false
+)
 
 // init 自动执行，检测 xray 程序和资源文件
 func init() {
-	checkXrayFile()   // 检查 xray 可执行文件
-	checkResource()   // 检查 geoip/geosite 数据文件
+	checkXrayFile() // 检查 xray 可执行文件
+	checkResource() // 检查 geoip/geosite 数据文件
+}
+
+func checkXrayReady() bool {
+	if xrayCheckErr != nil {
+		log.Error(xrayCheckErr)
+		return false
+	}
+	if XrayPath == "" {
+		log.Error("未找到xray程序")
+		return false
+	}
+	if !xrayResources {
+		log.Error("未找到资源文件 geoip.dat 和 geosite.dat")
+		return false
+	}
+	return true
 }
 
 // checkXrayFile 检查 xray 核心程序是否存在，依次检测环境变量、当前目录、PATH 路径
@@ -43,10 +63,8 @@ func checkXrayFile() {
 		return
 	}
 	// 未找到则输出错误提示并退出
-	log.Error("在 ", filepath.Dir(path), " 下没有找到xray程序")
-	log.Error("请在 https://github.com/XTLS/Xray-core/releases 下载最新版本")
-	log.Error("并将解压后的文件夹或所有文件移动到 ", filepath.Dir(path), " 下")
-	os.Exit(0)
+	xrayCheckErr = fmt.Errorf("在 %s 下没有找到xray程序，请下载 xray-core 并将解压后的文件夹或所有文件移动到该目录下", filepath.Dir(path))
+	log.Error(xrayCheckErr)
 }
 
 // checkResource 检查 xray 程序所需的 geoip.dat/geosite.dat 资源文件
@@ -54,17 +72,21 @@ func checkResource() {
 	var baseDir []string = make([]string, 0)
 	baseDir = append(baseDir, os.Getenv("XRAY_LOCATION_ASSET"))
 	baseDir = append(baseDir, os.Getenv("xray.location.asset"))
-	baseDir = append(baseDir, filepath.Dir(XrayPath))
+	if XrayPath != "" {
+		baseDir = append(baseDir, filepath.Dir(XrayPath))
+	}
 	for _, dir := range baseDir {
 		if dir != "" {
 			if IsExistFile(filepath.Join(dir, "geoip.dat")) && IsExistFile(filepath.Join(dir, "geosite.dat")) {
+				xrayResources = true
 				return
 			}
 		}
 	}
-	log.Error(fmt.Sprintf("在 %s 目录下没有找到资源文件 geoip.dat 和 geosite.dat", filepath.Dir(XrayPath)))
-	log.Error("或者配置资源文件的环境变量 XRAY_LOCATION_ASSET")
-	os.Exit(0)
+	if XrayPath != "" {
+		xrayCheckErr = fmt.Errorf("在 %s 目录下没有找到资源文件 geoip.dat 和 geosite.dat，或者配置资源文件的环境变量 XRAY_LOCATION_ASSET", filepath.Dir(XrayPath))
+		log.Error(xrayCheckErr)
+	}
 }
 
 func IsExistFile(file string) bool {
@@ -97,7 +119,7 @@ func FindFileByName(root, name, ext string) ([]string, error) {
 		if p.IsDir() {
 			o, err := FindFileByName(absPath, name, ext)
 			if err != nil {
-				return nil, err
+				continue
 			}
 			objList = append(objList, o...)
 		} else {

@@ -13,8 +13,12 @@ import (
 func init() {
 	// 配置文件不存在则创建
 	if _, err := os.Stat(core.SettingFile); os.IsNotExist(err) {
-		file, _ := os.Create(core.SettingFile)
-		_ = file.Close()
+		file, err := os.Create(core.SettingFile)
+		if err != nil {
+			log.Error(err)
+		} else {
+			_ = file.Close()
+		}
 	}
 	viper.SetConfigName("setting")
 	viper.SetConfigType("toml")

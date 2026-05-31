@@ -46,10 +46,11 @@ func GetExtraValue(key string) ExtraField {
 
 var (
 	//协议层相关
-	NetworkType     Field = NewField("type", "tcp")        // 协议的传输方式, 可选值 tcp/kcp/ws/http/quic/grpc
-	VLessEncryption       = NoneField("encryption")        // 加密, VLESS可选值 none
-	VMessEncryption       = NewField("encryption", "auto") // 加密,  VMess可选值 auto/aes-128-gcm/chacha20-poly1305/none
-	TlsSecurity           = NoneField("security")          // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls/reality
+	NetworkType     = NewField("type", "raw")        // 协议的传输方式, 可选值 raw(tcp)/kcp/ws/http/quic/grpc
+	VLessEncryption = NoneField("encryption")        // 加密, VLESS可选值 none/mlkem768x25519(开头)...
+	VMessEncryption = NewField("encryption", "auto") // 加密,  VMess可选值 auto/aes-128-gcm/chacha20-poly1305/none
+	TlsSecurity     = NoneField("security")          // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls/reality
+	Finalmask       = NilStrField("finalmask")       // 最终mask, 可选值 raw(tcp)/kcp/ws/http/quic/grpc
 
 	// TCP
 	TCPHeaderType = NoneField("headerType")
@@ -65,6 +66,8 @@ var (
 	// mKCP
 	MkcpHeaderType = NoneField("headerType") // mKCP 的伪装头部类型, 可选值 none/srtp/utp/wechat-video/dtls/wireguard
 	Seed           = NilStrField("seed")     // mKCP 种子
+	MkcpMtu        = NewField("mtu", "1350")  // mKCP Maximum Transmission Unit
+	MkcpTti        = NewField("tti", "50")    // mKCP Transmission Time Interval
 
 	// QUIC
 	QuicSecurity   = NoneField("quicSecurity") // QUIC 的加密方式, 可选值 none/aes-128-gcm/chacha20-poly1305
@@ -102,12 +105,13 @@ var (
 	// https://github.com/XTLS/Xray-core/pull/4915
 
 	// TLS相关
-	TLSFingerPrint = NewField("fp", "chrome")     // TLS Client Hello 指纹，若使用 REALITY，此项不可省略。
-	Security       = NoneField("security")        // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls/
-	SNI            = NilStrField("sni")           // TLS SNI
-	Alpn           = NilStrField("alpn")          // alpn 多选 h2,http/1.1
-	Flow           = NilStrField("flow")          // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
-	EchConfigList  = NilStrField("echConfigList") // ECH 配置列表，默认为 ""
-	EchForceQuery  = NilStrField("echForceQuery") // ECH强制查询，可选值 full/half/none (default)
-	PCS            = NilStrField("pinnedPeerCertSha256")    // TLS CA/leaf 证书 SHA-256 指纹,此项可能为空字符串
+	TLSFingerPrint = NewField("fp", "chrome")            // TLS Client Hello 指纹，若使用 REALITY，此项不可省略。
+	Security       = NoneField("security")               // 设定底层传输所使用的 TLS 类型, 可选值有 none/tls/xtls/
+	SNI            = NilStrField("sni")                  // TLS SNI
+	Alpn           = NilStrField("alpn")                 // alpn 多选 h2,http/1.1
+	Flow           = NilStrField("flow")                 // XTLS 的流控方式，可选值xtls-rprx-direct/xtls-rprx-splice
+	Ech            = NilStrField("echConfigList")        // ECH 配置列表，默认为 ""
+	EchForceQuery  = NilStrField("echForceQuery")        // ECH强制查询，可选值 full/half/none (full)
+	Pcs            = NilStrField("pinnedPeerCertSha256") // TLS CA/leaf 证书 SHA-256 指纹,此项可能为空字符串
+	Vcn            = NilStrField("verifyPeerCertByName") // 用于验证 leaf 证书的 name，此项可能为空字符串
 )

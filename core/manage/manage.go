@@ -12,11 +12,11 @@ import (
 
 // Manage 结构体用于管理核心数据，包括订阅、节点、过滤器等
 type Manage struct {
-	Subs            []*sub.Subscirbe   `json:"subs"`            // 订阅列表
-	Index           int                `json:"index"`           // 当前索引
-	NodeList        []*node.Node       `json:"nodes"`           // 节点列表
-	Filter          []*node.NodeFilter `json:"filter"`          // 过滤器列表
-	RecycleNodeList []*node.Node       `json:"-"`               // 回收站节点列表
+	Subs            []*sub.Subscirbe   `json:"subs"`   // 订阅列表
+	Index           int                `json:"index"`  // 当前索引
+	NodeList        []*node.Node       `json:"nodes"`  // 节点列表
+	Filter          []*node.NodeFilter `json:"filter"` // 过滤器列表
+	RecycleNodeList []*node.Node       `json:"-"`      // 回收站节点列表
 }
 
 var Manager *Manage
@@ -27,15 +27,29 @@ func init() {
 	if _, err := os.Stat(core.DataFile); os.IsNotExist(err) {
 		Manager.Save()
 	} else {
-		file, _ := os.Open(core.DataFile)
+		file, err := os.Open(core.DataFile)
+		if err != nil {
+			log.Error(err)
+			return
+		}
 		defer file.Close()
-		err := json.NewDecoder(file).Decode(Manager)
+		err = json.NewDecoder(file).Decode(Manager)
 		if err != nil {
 			log.Error(err)
 		}
-		Manager.NodeForEach(func(i int, n *node.Node) {
+		validNodes := make([]*node.Node, 0, len(Manager.NodeList))
+		for _, n := range Manager.NodeList {
+			if n == nil {
+				continue
+			}
 			n.ParseData()
-		})
+			if n.Protocol == nil {
+				log.Warn("忽略无法解析的节点数据: ", n.Data)
+				continue
+			}
+			validNodes = append(validNodes, n)
+		}
+		Manager.NodeList = validNodes
 	}
 }
 

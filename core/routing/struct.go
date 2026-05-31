@@ -37,9 +37,13 @@ func init() {
 	if _, err := os.Stat(core.RoutingFile); os.IsNotExist(err) {
 		route.save() // 如果配置文件不存在，则创建一个新的
 	} else {
-		file, _ := os.Open(core.RoutingFile)
+		file, err := os.Open(core.RoutingFile)
+		if err != nil {
+			log.Error(err)
+			return
+		}
 		defer file.Close()
-		err := json.NewDecoder(file).Decode(route) // 解析配置文件
+		err = json.NewDecoder(file).Decode(route) // 解析配置文件
 		if err != nil {
 			log.Error(err)
 		}

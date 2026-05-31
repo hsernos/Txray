@@ -16,6 +16,7 @@ type Node struct {
 	SubID              string  `json:"sub_id"`
 	Data               string  `json:"data"`
 	TestResult         float64 `json:"-"`
+	ConnDelay          float64 `json:"-"`
 }
 
 // TestResultStr 返回格式化的测试结果字符串
@@ -26,6 +27,17 @@ func (n *Node) TestResultStr() string {
 		return "-1ms"
 	} else {
 		return fmt.Sprintf("%.4vms", n.TestResult)
+	}
+}
+
+// ConnDelayStr 返回格式化的真实连接延迟字符串
+func (n *Node) ConnDelayStr() string {
+	if n.ConnDelay == 0 {
+		return ""
+	} else if n.ConnDelay >= 99998 {
+		return "-1ms"
+	} else {
+		return fmt.Sprintf("%.4vms", n.ConnDelay)
 	}
 }
 

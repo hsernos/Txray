@@ -14,8 +14,10 @@ Commands:
     stop                     关闭节点
     log                      查看运行时xray日志   
 
-Usage: run [索引式]
-    run [索引式]      默认为上一次运行节点，如果选中多个节点，则选择访问 'setting' 中测试国外URL延迟最小的
+Usage: run [索引式] | run -c {配置文件} | run -d {配置目录}
+    run [索引式]          默认为上一次运行节点，如果选中多个节点，则选择访问 'setting' 中测试国外URL延迟最小的
+    run -c {配置文件}     使用指定配置文件启动 xray-core
+    run -d {配置目录}     使用指定配置目录启动 xray-core（多文件合并）
 
 
 说明：
