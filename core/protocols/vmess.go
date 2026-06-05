@@ -28,6 +28,8 @@ type VMess struct {
 	EchForceQuery string `json:"echForceQuery"`
 	Pcs           string `json:"pcs"`
 	Vcn           string `json:"vcn"`
+	AllowInsecure    string `json:"allowInsecure"`
+	HasAllowInsecure bool `json:"-"`
 }
 
 // GetProtocolMode 返回协议模式
@@ -96,6 +98,9 @@ func (v *VMess) GetLink() string {
 		"echForceQuery": v.EchForceQuery,
 		"pcs":           v.Pcs,
 		"vcn":           v.Vcn,
+	}
+	if v.HasAllowInsecure {
+		data["allowInsecure"] = v.AllowInsecure
 	}
 	jsonData, _ := json.Marshal(data)
 	return "vmess://" + base64EncodeWithEq(string(jsonData))

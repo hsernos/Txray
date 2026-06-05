@@ -486,12 +486,12 @@ func InitNodeShell(shell *ishell.Shell) {
 						c.Print("pinnedPeerCertSha256,可留空（pcs）?")
 						pinnedPeerCertSha256 := c.ReadLine()
 						if pinnedPeerCertSha256 != "" {
-							data["pcs"] = pinnedPeerCertSha256
+							data["pinnedPeerCertSha256"] = pinnedPeerCertSha256
 						}
 						c.Print("verifyPeerCertByName,可留空（vcn）?")
 						verifyPeerCertByName := c.ReadLine()
 						if verifyPeerCertByName != "" {
-							data["vcn"] = verifyPeerCertByName
+							data["verifyPeerCertByName"] = verifyPeerCertByName
 						}
 					case "reality":
 						data["security"] = security
@@ -771,12 +771,12 @@ func InitNodeShell(shell *ishell.Shell) {
 						c.Print("pinnedPeerCertSha256,可留空（pcs）?")
 						pinnedPeerCertSha256 := c.ReadLine()
 						if pinnedPeerCertSha256 != "" {
-							data["pcs"] = pinnedPeerCertSha256
+							data["pinnedPeerCertSha256"] = pinnedPeerCertSha256
 						}
 						c.Print("verifyPeerCertByName,可留空（vcn）?")
 						verifyPeerCertByName := c.ReadLine()
 						if verifyPeerCertByName != "" {
-							data["vcn"] = verifyPeerCertByName
+							data["verifyPeerCertByName"] = verifyPeerCertByName
 						}
 					case "xtls":
 						data["security"] = security
@@ -813,12 +813,12 @@ func InitNodeShell(shell *ishell.Shell) {
 						c.Print("pinnedPeerCertSha256,可留空（pcs）?")
 						pinnedPeerCertSha256 := c.ReadLine()
 						if pinnedPeerCertSha256 != "" {
-							data["pcs"] = pinnedPeerCertSha256
+							data["pinnedPeerCertSha256"] = pinnedPeerCertSha256
 						}
 						c.Print("verifyPeerCertByName,可留空（vcn）?")
 						verifyPeerCertByName := c.ReadLine()
 						if verifyPeerCertByName != "" {
-							data["vcn"] = verifyPeerCertByName
+							data["verifyPeerCertByName"] = verifyPeerCertByName
 						}
 					case "reality":
 						data["security"] = security

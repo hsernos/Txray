@@ -226,9 +226,25 @@ func ParseVMessLink(link string) *VMess {
 	}
 	if echConfigList, ok := mapResult["echConfigList"]; ok {
 		vmess.Ech = fmt.Sprintf("%v", echConfigList)
+	} else if echConfigList, ok := mapResult["ech"]; ok {
+		vmess.Ech = fmt.Sprintf("%v", echConfigList)
 	}
 	if echForceQuery, ok := mapResult["echForceQuery"]; ok {
 		vmess.EchForceQuery = fmt.Sprintf("%v", echForceQuery)
+	}
+	if pcs, ok := mapResult["pcs"]; ok {
+		vmess.Pcs = fmt.Sprintf("%v", pcs)
+	} else if pcs, ok := mapResult["pinnedPeerCertSha256"]; ok {
+		vmess.Pcs = fmt.Sprintf("%v", pcs)
+	}
+	if vcn, ok := mapResult["vcn"]; ok {
+		vmess.Vcn = fmt.Sprintf("%v", vcn)
+	} else if vcn, ok := mapResult["verifyPeerCertByName"]; ok {
+		vmess.Vcn = fmt.Sprintf("%v", vcn)
+	}
+	if allowInsecure, ok := mapResult["allowInsecure"]; ok {
+		vmess.AllowInsecure = fmt.Sprintf("%v", allowInsecure)
+		vmess.HasAllowInsecure = true
 	}
 	return vmess.Check()
 }

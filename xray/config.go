@@ -344,6 +344,16 @@ func outboundConfig(n protocols.Protocol) interface{} {
 	return out
 }
 
+func setAllowInsecure(tlsSettings map[string]interface{}, value string) {
+	if value == "" {
+		tlsSettings["allowInsecure"] = false
+		return
+	}
+	if allowInsecure, err := strconv.ParseBool(value); err == nil {
+		tlsSettings["allowInsecure"] = allowInsecure
+	}
+}
+
 // Shadowsocks
 func shadowsocksOutbound(ss *protocols.ShadowSocks) interface{} {
 	return map[string]interface{}{
@@ -372,23 +382,26 @@ func trojanOutbound(trojan *protocols.Trojan) interface{} {
 		"network":  "tcp",
 		"security": "tls",
 	}
+	tlsSettings := map[string]interface{}{}
 	if trojan.Sni() != "" {
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-			"serverName":    trojan.Sni(),
-		}
-		if trojan.EchConfigList() != "" {
-			tlsSettings["echConfigList"] = trojan.EchConfigList()
-		}
-		if trojan.EchForceQuery() != "" {
-			tlsSettings["echForceQuery"] = trojan.EchForceQuery()
-		}
-		if trojan.Has("pinnedPeerCertSha256") && trojan.Get("pinnedPeerCertSha256") != "" {
-			tlsSettings["pinnedPeerCertSha256"] = trojan.Get("pinnedPeerCertSha256")
-		}
-		if trojan.Has("echForceQuery") && trojan.Get("echForceQuery") != "" {
-			tlsSettings["echForceQuery"] = trojan.Get("echForceQuery")
-		}
+		tlsSettings["serverName"] = trojan.Sni()
+	}
+	if trojan.EchConfigList() != "" {
+		tlsSettings["echConfigList"] = trojan.EchConfigList()
+	}
+	if trojan.EchForceQuery() != "" {
+		tlsSettings["echForceQuery"] = trojan.EchForceQuery()
+	}
+	if trojan.PinnedPeerCertSha256() != "" {
+		tlsSettings["pinnedPeerCertSha256"] = trojan.PinnedPeerCertSha256()
+	}
+	if trojan.VerifyPeerCertByName() != "" {
+		tlsSettings["verifyPeerCertByName"] = trojan.VerifyPeerCertByName()
+	}
+	if trojan.Has("allowInsecure") {
+		setAllowInsecure(tlsSettings, trojan.Get("allowInsecure"))
+	}
+	if len(tlsSettings) > 0 {
 		streamSettings["tlsSettings"] = tlsSettings
 	}
 	return map[string]interface{}{
@@ -416,9 +429,7 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 		"security": vmess.Tls,
 	}
 	if vmess.Tls == "tls" {
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
+		tlsSettings := map[string]interface{}{}
 		if vmess.Sni != "" {
 			tlsSettings["serverName"] = vmess.Sni
 		}
@@ -435,7 +446,10 @@ func vMessOutbound(vmess *protocols.VMess) interface{} {
 			tlsSettings["pinnedPeerCertSha256"] = vmess.Pcs
 		}
 		if vmess.Vcn != "" {
-			tlsSettings["encodeURIComponent"] = vmess.Vcn
+			tlsSettings["verifyPeerCertByName"] = vmess.Vcn
+		}
+		if vmess.HasAllowInsecure {
+			setAllowInsecure(tlsSettings, vmess.AllowInsecure)
 		}
 		streamSettings["tlsSettings"] = tlsSettings
 	}
@@ -598,9 +612,7 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 	}
 	switch security {
 	case "tls":
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
+		tlsSettings := map[string]interface{}{}
 		sni := vless.GetHostValue(field.SNI)
 		alpn := vless.GetValue(field.Alpn)
 		echConfigList := vless.GetValue(field.Ech)
@@ -626,11 +638,12 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		if vcn != "" {
 			tlsSettings["verifyPeerCertByName"] = vcn
 		}
+		if vless.Has("allowInsecure") {
+			setAllowInsecure(tlsSettings, vless.Get("allowInsecure"))
+		}
 		streamSettings["tlsSettings"] = tlsSettings
 	case "xtls":
-		xtlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
+		xtlsSettings := map[string]interface{}{}
 		sni := vless.GetHostValue(field.SNI)
 		alpn := vless.GetValue(field.Alpn)
 		echConfigList := vless.GetValue(field.Ech)
@@ -654,6 +667,9 @@ func vLessOutbound(vless *protocols.VLess) interface{} {
 		}
 		if verifyPeerCertByName != "" {
 			xtlsSettings["verifyPeerCertByName"] = verifyPeerCertByName
+		}
+		if vless.Has("allowInsecure") {
+			setAllowInsecure(xtlsSettings, vless.Get("allowInsecure"))
 		}
 		streamSettings["xtlsSettings"] = xtlsSettings
 		mux = false
@@ -791,9 +807,7 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 	}
 	switch security {
 	case "tls":
-		tlsSettings := map[string]interface{}{
-			"allowInsecure": setting.AllowInsecure(),
-		}
+		tlsSettings := map[string]interface{}{}
 		sni := vmess.GetHostValue(field.SNI)
 		alpn := vmess.GetValue(field.Alpn)
 		echConfigList := vmess.GetValue(field.Ech)
@@ -813,6 +827,9 @@ func vMessAEADOutbound(vmess *protocols.VMessAEAD) interface{} {
 		}
 		if pcs != "" {
 			tlsSettings["pinnedPeerCertSha256"] = pcs
+		}
+		if vmess.Has("allowInsecure") {
+			setAllowInsecure(tlsSettings, vmess.Get("allowInsecure"))
 		}
 		streamSettings["tlsSettings"] = tlsSettings
 	case "reality":
