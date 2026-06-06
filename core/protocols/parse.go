@@ -1,4 +1,4 @@
-// core/protocols/parse.go 负责协议字符串的解析与转换
+// core/protocols/parse.go 负责协议字符串的解析与转换(映射)
 // 参考：https://github.com/XTLS/Xray-core/discussions/716
 package protocols
 
@@ -70,6 +70,14 @@ func ParseVMessAEADLink(link string) *VMessAEAD {
 	vless.ID = u.User.Username()
 	vless.Remarks = u.Fragment
 	vless.Values = u.Query()
+	// 将 ech 参数映射到 echConfigList（订阅链接中使用 ech 参数名）
+	if vless.Get("echConfigList") == "" && vless.Get("ech") != "" {
+		vless.Set("echConfigList", vless.Get("ech"))
+	}
+	// 如果有 echConfigList，echForceQuery 默认设置为 full
+	if vless.Get("echConfigList") != "" && vless.Get("echForceQuery") == "" {
+		vless.Set("echForceQuery", "full")
+	}
 	if vless.Remarks == "" {
 		vless.Remarks = u.Host
 	}
@@ -97,6 +105,14 @@ func ParseVLessLink(link string) *VLess {
 	vless.ID = u.User.Username()
 	vless.Remarks = u.Fragment
 	vless.Values = u.Query()
+	// 将 ech 参数映射到 echConfigList（订阅链接中使用 ech 参数名）
+	if vless.Get("echConfigList") == "" && vless.Get("ech") != "" {
+		vless.Set("echConfigList", vless.Get("ech"))
+	}
+	// 如果有 echConfigList，echForceQuery 默认设置为 full
+	if vless.Get("echConfigList") != "" && vless.Get("echForceQuery") == "" {
+		vless.Set("echForceQuery", "full")
+	}
 	if vless.Remarks == "" {
 		vless.Remarks = u.Host
 	}
@@ -273,6 +289,14 @@ func ParseTrojanLink(link string) *Trojan {
 		trojan.Remarks = u.Host
 	}
 	trojan.Values = u.Query()
+	// 将 ech 参数映射到 echConfigList（订阅链接中使用 ech 参数名）
+	if trojan.Get("echConfigList") == "" && trojan.Get("ech") != "" {
+		trojan.Set("echConfigList", trojan.Get("ech"))
+	}
+	// 如果有 echConfigList，echForceQuery 默认设置为 full
+	if trojan.Get("echConfigList") != "" && trojan.Get("echForceQuery") == "" {
+		trojan.Set("echForceQuery", "full")
+	}
 	return trojan.Check()
 }
 
